@@ -1,0 +1,25 @@
+<apex:component controller="DisputeWithProductsController" access="global">
+<apex:attribute name="disIdValue" type="Id" description="This is the Id of the DisputeObject" assignTo="{!disId}" access="global"/>
+
+    
+     <table width="581" border="1">
+        <thead>    
+            <tr>
+                <th width="61" scope="col">SKU #</th> 
+                <th width="61" scope="col">Product Description</th>
+                <th width="61" scope="col">Quantity Returned</th>
+            </tr>
+        </thead> 
+         <tbody>
+        <apex:repeat value="{!caseProds}" var="prod">
+                <tr>
+                        <td>{!prod.SAP_Material__c}  {!prod.No_Cat_Number__c}</td>
+                        <td>{!prod.Material_Description__c}</td>
+                        <td>{!prod.Discrepancy_Qty__c}</td>                                               
+                </tr>           
+        </apex:repeat>
+        </tbody>        
+       
+    </table>
+
+</apex:component>

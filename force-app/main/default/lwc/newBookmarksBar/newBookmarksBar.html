@@ -1,0 +1,175 @@
+<template>
+    
+    <div class="c-container grid">
+        <div class="slds-col slds-size_1-of-1 slds-size_4-of-4 tableheader">
+            <p>QuickLinks</p>
+        </div>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-small-size_1-of-1 slds-large-size_2-of-4">
+            <lightning-layout multiple-rows="true" >
+                <lightning-layout-item class="row" flexibility="auto" padding="horizontal-medium">
+                        <a onclick={quickStockLink} target="_self">
+                            <p><img class="image" src={quickStock}></img>&nbsp;<b>Quick</b>Stock Products</p></a>  
+                </lightning-layout-item>
+                <lightning-layout-item class="row" flexibility="auto" padding="horizontal-medium">
+                    <!--<a onclick={quickConfigLink} target="_self">
+                        <p><img class="image" src={quickConfig}></img>&nbsp;<b>Quick</b>Configure Products</p></a>-->  
+
+                        <a  onclick={leadTimesLink} target="_blank">
+                            <p><img class="image" src={leadTimes}></img>&nbsp;Lead Times by Family</p></a>  
+                </lightning-layout-item>
+                <lightning-layout-item class="row" flexibility="auto" padding="horizontal-medium">
+                    <a onclick={prolineLink} target="_self">
+                        <p><img class="image" src={proline}></img>&nbsp; ProLine Products</p></a>
+                </lightning-layout-item>
+                <lightning-layout-item class="row" flexibility="auto" padding="horizontal-medium">
+                    <a href="https://www.gecurrent.com/marketplace" target="_self">
+                        <p><img class="image" src={marketplace}></img>&nbsp; Clearance Marketplace</p></a>
+                </lightning-layout-item>
+                <lightning-layout-item class="row" flexibility="auto" padding="horizontal-medium">
+                    <a href="https://current.brandmuscle.net/login/login.aspx" target="_blank">
+                        <p><img class="image" src={amp}></img>&nbsp; AMP</p></a>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+        <div class="slds-col slds-small-size_1-of-1 slds-large-size_2-of-4">
+            <lightning-layout multiple-rows="true">
+                <lightning-layout-item if:true={isAgent} class="row" flexibility="auto" padding="horizontal-medium">
+                    <a href="/s/customer-list" target="_self">
+                        <p><img class="image" src={customers}></img>&nbsp; My Customers</p></a>
+                </lightning-layout-item>
+                <lightning-layout-item if:true={showPricing} class="row" flexibility="auto" padding="horizontal-medium">
+                    <a onclick={priceAgreementLink} target="_self">
+                        <p><img class="image" src={priceAgreement}></img>&nbsp; My Price Agreements</p></a>
+                </lightning-layout-item>
+                                
+                <lightning-layout-item if:true={showPricing} class="row" flexibility="auto" padding="horizontal-medium">
+                    <a onclick={saveCartLink} target="_self">
+                        <p><img class="image" src={savedCarts}></img>&nbsp; My Saved Carts</p></a>
+                </lightning-layout-item>
+                <lightning-layout-item class="row" flexibility="auto" padding="horizontal-medium">
+                    <a onclick={openContactUs}>
+                        <p><img class="image" src={contactUs}></img>&nbsp; Contact Us</p></a>
+                </lightning-layout-item>
+                <lightning-layout-item class="row" flexibility="auto" padding="horizontal-medium">
+                    <a href="/s/release-notes">
+                        <p><img class="image" src={releaseNotes}></img>&nbsp; Release Notes</p></a>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+    </div>
+    </div>
+
+
+
+
+
+    <!--<table class="tablecls">
+        <thead>
+            <tr class="slds-line-height_reset">
+                <th class="" scope="col">
+                    <div title="Status">BOOKMARKS</div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+       
+        
+
+            <tr class="slds-hint-parent">    
+                <td><a href="https://cmtydev-gecurrent.cs14.force.com/Agents/s/underconstruction" target="_blank">
+                    <p><img class="image" src={quickStock}></img>&nbsp;<b>Quick</b>Stock Products</p></a></td>    
+            </tr>
+            <tr>    
+                <td><a href="https://cmtydev-gecurrent.cs14.force.com/Agents/s/underconstruction" target="_blank">
+                    <p><img class="image" src={quickConfig}></img>&nbsp;<b>Quick</b>Configure Products</p></a></td>    
+            </tr>
+            <tr>    
+                <td><a href="https://cmtydev-gecurrent.cs14.force.com/Agents/s/underconstruction" target="_blank">
+                    <p><img class="image" src={proline}></img>&nbsp; ProLine Products</p></a></td>    
+            </tr>
+            <tr>    
+                <td><a href="https://cmtydev-gecurrent.cs14.force.com/Agents/s/underconstruction" target="_blank">
+                    <p><img class="image" src={marketplace}></img>&nbsp; Marketplace Clearance</p></a></td> 
+            </tr>
+        
+       
+            
+            <tr>    
+                <td><a href="https://cmtydev-gecurrent.cs14.force.com/Agents/s/underconstruction" target="_blank">
+                    <p><img class="image" src={customers}></img>&nbsp; My Customers</p></a></td>  
+            </tr>
+            <tr>    
+                <td><a href="https://cmtydev-gecurrent.cs14.force.com/Agents/s/underconstruction" target="_blank">
+                    <p><img class="image" src={priceAgreement}></img>&nbsp; My Price Agreements</p></a></td>    
+            </tr>
+            <tr>    
+                <td><a href="https://cmtydev-gecurrent.cs14.force.com/Agents/s/underconstruction" target="_blank">
+                    <p><img class="image" src={savedCarts}></img>&nbsp; My Saved Carts</p></a></td>   
+            </tr>
+        
+      
+        </tbody>
+        </table>-->
+
+        <template if:true={contactUsModal}>
+            <section role="dialog" tabindex="-1"
+                    aria-labelledby="modal-heading-01"
+                    aria-modal="true"
+                    aria-describedby="modal-content-id-1"
+                    class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- modal header -->
+                <header class="slds-modal__header">
+                    <!--<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal1}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button> -->
+                    
+                    
+                    <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate" >Contact Us</h2>
+                  
+                    
+                </header>
+                <!-- modal body -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <text class="heading slds-align_absolute-center">Digital Customer Solutions</text> <br><br>
+                    <div class='slds-grid slds-gutters'>
+                        <div class="slds-col slds-size_4-of-8">
+                            <div class="slds-box" style="height: 240px">
+                                <h3>Phone</h3>
+                                <lightning-card>
+                                    <img class="support slds-align_absolute-center" src={phone}><br>
+                                    <text class="info slds-align_absolute-center"><b>US Toll Free: +1-844-327-4400</b></text>
+                                    <text class="info slds-align_absolute-center">Monday through Friday</text>
+                                    <text class="info slds-align_absolute-center">8 AM to 6 PM EST</text>
+                                </lightning-card>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_4-of-8">
+                            <div class="slds-box" style="height: 240px">
+                                <h3>Email</h3>
+                                <lightning-card>
+                                    <img class="support slds-align_absolute-center" src={email}><br>
+                                    <lightning-formatted-text linkify class="info slds-align_absolute-center" value="dcshelp@gecurrent.com"></lightning-formatted-text>
+                                </lightning-card>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+               
+
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer" if:false={isEditForm}>
+                    <lightning-button variant="brand"
+                                      label="Close"
+                                      title="Close"
+                                      onclick={closeContactUs}></lightning-button>
+                </footer>
+            </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+           
+        </template>
+</template>

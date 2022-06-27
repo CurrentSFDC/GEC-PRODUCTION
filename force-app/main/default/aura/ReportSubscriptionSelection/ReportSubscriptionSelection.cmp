@@ -1,0 +1,118 @@
+<!--> CommunityPortalSelfRegister component
+//  Component for self registering as a new Contact in GE community
+// 
+//  Author                    Date         Description 
+//  Nate Kanyok	              1-26-2021    Created
+//-->
+<aura:component implements="forceCommunity:availableForAllPageTypes" description="ReportSubscriptionController"
+                access="global" controller="ReportSubscriptionController">
+
+    <aura:attribute name="userData"         type="Map"      default="{contact: {}}"    description="The register user form data" />
+    <aura:attribute name="inProgress"       type="Boolean"  default="false"     description="The registration in progress" />
+    <aura:attribute name="pageMessages"     type="List"     default="[]"        description="Page messages" />
+    <aura:attribute name="checkReport"      type="Boolean" default="false"/>    
+    <aura:attribute name="checkCutOrderReport" type="Boolean" default="false"/>
+    <aura:attribute name="checkDailyCommissionReport" type="Boolean" default="false"/>
+    <aura:attribute name="checkDueDTCGEReport" type="Boolean" default="false"/>
+    <aura:attribute name="checkInvoiceByBill" type="Boolean" default="false"/>
+    <aura:attribute name="checkPriceMismatch" type="Boolean" default="false"/>
+    <aura:attribute name="checkMonthlyCommissionReport" type="Boolean" default="false"/>
+    <aura:attribute name="checkOpenOrderReport" type="Boolean" default="false"/>
+    <aura:attribute name="checkOrderLineReport" type="Boolean" default="false"/>
+    <aura:attribute name="checkOrderShipReport" type="Boolean" default="false"/>
+    <aura:attribute name="mandatory" type="Boolean" default="false"/>
+
+    
+
+    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+   
+
+    <div>
+        <!-- PAGE MESSAGES -->
+        <aura:if isTrue="{!not(empty(v.pageMessages))}">
+            <div class="{!'slds-align_absolute-center slds-wrap '}">
+                <aura:iteration items="{!v.pageMessages}" var="item">
+                    <ui:message severity="{!item.severity}" title="{!if(and(v.showIcon, not(empty(item.severity))), '', item.title)}"
+                                closable="{!item.closable ne false}" class="{!'slds-size_1-of-1 ' + if(v.showIcon, 'pg-msg ', '') + v.severity}">
+                        <lightning:layout verticalAlign="center">
+                            <lightning:layoutItem flexibility="no-grow" class="{!if(and(v.showIcon, not(empty(item.severity))), 'slds-p-right_small', 'slds-hide')}">
+                                <lightning:icon size="medium" iconName="{!if(item.severity eq 'confirm', 'utility:success', if(item.severity eq 'error', 'utility:clear',
+                                                if(item.severity eq 'warning', 'utility:warning', if(item.severity eq 'info', 'utility:info', ''))))}" class="pg-msg-icon" />
+                            </lightning:layoutItem>
+                            <lightning:layoutItem flexibility="auto">
+                                <ul>
+                                    <aura:iteration items="{!item.messages}" var="message">
+                                        <li>{!message}</li>
+                                    </aura:iteration>
+                                </ul>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                    </ui:message>
+                </aura:iteration>
+            </div>
+        </aura:if>
+
+        <div class="slds-p-around_medium slds-m-bottom_medium">
+            <lightning:card variant="Base">
+                <aura:set attribute="title">
+                    <h2>Report Subscriptions</h2>
+                </aura:set>
+                <aura:set attribute="body">
+                    <div class="slds-grid slds-wrap">
+                        <!--<div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckCutOrderReport" name="ckCutOrderReport" checked="{!v.checkCutOrderReport}" value="{!v.checkCutOrderReport}"  ></input>
+                            <label for="ck1">&nbsp;&nbsp;{!$Label.c.ReportSub_CutOrderReport}</label>
+                        </div>-->
+                        <!--<div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckDailyCommissionReport" name="ckDailyCommissionReport" checked="{!v.checkDailyCommissionReport}" value="{!v.checkDailyCommissionReport}"  ></input>
+                            <label for="ck2">&nbsp;&nbsp;{!$Label.c.ReportSub_DailyCommisionReport}</label>
+                        </div>-->
+                        
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckDueDTCGEReport" name="ckDueDTCGEReport" checked="{!v.checkDueDTCGEReport}" value="{!v.checkDueDTCGEReport}"  ></input>
+                            <label for="ck3">&nbsp;&nbsp;{!$Label.c.ReportSub_DueDtCGEReport}</label>
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input title="Approval Needed; Submit a Web Assistance Request for Access" type="checkbox"  id="ckMonthlyCommissionReport" name="ckMonthlyCommissionReport" checked="{!v.checkMonthlyCommissionReport}" value="{!v.checkMonthlyCommissionReport}" disabled="true" ></input>
+                            <label title="Approval Needed; Submit a Web Assistance Request for Access" for="ck4">&nbsp;&nbsp;{!$Label.c.ReportSub_MonthlyCommissionReport}</label>
+                        </div>
+                        
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckOpenOrderReport" name="ckOpenOrderReport" checked="{!v.checkOpenOrderReport}" value="{!v.checkOpenOrderReport}"  ></input>
+                            <label for="ck5">&nbsp;&nbsp;{!$Label.c.ReportSub_OpenOrderReport}</label>
+                        </div>
+                        
+                        <!--<div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckInvoiceByBill" name="ckInvoiceByBill" checked="{!v.checkInvoiceByBill}" value="{!v.checkInvoiceByBill}"  ></input>
+                            <label for="ck6">&nbsp;&nbsp;{!$Label.c.ReportSub_InvoiceByBill}</label>
+                        </div>-->
+
+                        <!--<div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckCheckPriceMismatch" name="ckCheckPriceMismatch" checked="{!v.checkPriceMismatch}" value="{!v.checkPriceMismatch}"  ></input>
+                            <label for="ck7">&nbsp;&nbsp;{!$Label.c.ReportSub_PriceMismatch}</label>
+                        </div>-->
+                        
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckOrderLineReport" name="ckOrderLineReport" checked="{!v.checkOrderLineReport}" value="{!v.checkOrderLineReport}"  ></input>
+                            <label for="ck8">&nbsp;&nbsp;{!$Label.c.ReportSub_OrderLineReport}</label>
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <input type="checkbox" id="ckOrderShipReport" name="ckOrderShipReport" checked="{!v.checkOrderShipReport}" value="{!v.checkOrderShipReport}"  ></input>
+                            <label for="ck9">&nbsp;&nbsp;{!$Label.c.ReportSub_OrderShipReport}</label>
+                        </div>
+                    </div>
+                        
+                
+                    <div class="slds-m-top_large">
+                        <lightning:button label="Save" variant="brand" onclick="{!c.saveReportSubscriptions}" disabled="{!or(v.disable, v.inProgress)}"
+                                          class="slds-align_absolute-center primary-button"/>
+                    </div>
+                </aura:set>
+            </lightning:card>
+        </div>
+
+        <aura:if isTrue="{!v.inProgress}">
+            <lightning:spinner variant="brand" size="medium" class="slds-is-fixed" />
+        </aura:if>
+    </div>
+</aura:component>

@@ -1,0 +1,21 @@
+<template>
+    <div class="slds-grid" >
+       
+        <div  class="slds-size_3-of-3 slds-p-bottom_medium " >
+            <lightning-carousel>
+                <template for:each={communityContentRecords} for:item="rec">
+                    <lightning-carousel-image
+                        key = {rec.key}
+                        id = {rec.Id}
+                        src = {rec.IMG_URL__c}
+                        header = {rec.Title__c}
+                        description = {rec.Description__c}
+                        alternative-text = {rec.Image_Alternate_Text__c}
+                        onclick = {onClickHandle}
+                        >
+                    </lightning-carousel-image>
+                </template>
+            </lightning-carousel>    
+        </div>
+    </div>
+</template>

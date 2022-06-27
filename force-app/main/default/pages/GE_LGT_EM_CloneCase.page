@@ -1,0 +1,109 @@
+<apex:page showHeader="false" Controller="GE_LGT_EM_CloneCase" sidebar="false">
+<apex:form >
+
+<apex:includeScript value="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" />
+<apex:includeScript value="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.17.8/js/jquery.tablesorter.min.js" />
+<apex:stylesheet value="//cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.17.8/css/theme.blue.css" />
+
+<html>
+<head>
+<style>
+
+       body {font-family:'Arial Unicode MS';}
+      .pageTitle {font-size:20px;}      
+      .fieldLabel {font-size:14px;}    
+      .button {
+          padding:5px;
+          background-color: #dcdcdc;
+          border: 1px solid #666;
+          color:#000;
+          text-decoration:none;
+        }  
+       .customPopup{
+            background-color: white;
+            border-style: solid;
+            border-width: 2px;
+            left: 50%;
+            padding:10px;
+            position: absolute;
+            z-index: 9999;
+            /* These are the 3 css properties you will need to tweak so the pop 
+            up displays in the center of the screen. First set the width. Then set 
+            margin-left to negative half of what the width is. You can also add 
+            the height property for a fixed size pop up.*/
+            width: 800px;
+            margin-left: -400px;
+            top:100px;           
+        } 
+</style>
+</head>
+</html>
+    <apex:outputPanel styleClass="customPopup">
+    <apex:pageBlock >
+     <apex:pageMessages ></apex:pageMessages>
+    <apex:pageBlockSection >
+    <apex:pageBlockSectionItem >
+    <apex:commandButton styleClass="button" value="Clone" action="{!cloneCase}"/>
+    <apex:commandButton styleClass="button" value="Close" action="{!close}"/>
+    </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>
+    <apex:pageBlockSection id="EmailPageblock" columns="1"> 
+        <apex:pageBlockSectionItem >
+        <apex:outputText styleClass="pageTitle" value="Email Messages" />
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+        <apex:outputText styleClass="fieldLabel" value="{!Error}" />
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+    <apex:datatable id="EmailTable" value="{!EmailMsgWrapper}" var="Email" styleclass="tablesorter">
+    <apex:column title="Select">
+    <apex:inputCheckbox value="{!Email.isSelected}"/>
+    </apex:column>     
+    <apex:column headerValue="CASE">
+    <apex:outputField value="{!Email.cEmailMsg.PARENTId}">    
+    </apex:outputField>
+    </apex:column>
+    <apex:column headerValue="STATUS">
+    <apex:outputField value="{!Email.cEmailMsg.STATUS}">    
+    </apex:outputField>
+    </apex:column>
+    <apex:column headerValue="Has Attachment">
+    <apex:outputField value="{!Email.cEmailMsg.hasAttachment}">    
+    </apex:outputField>
+    </apex:column>
+    <apex:column headerValue="SUBJECT">
+    <apex:outputField value="{!Email.cEmailMsg.SUBJECT}">    
+    </apex:outputField>
+    </apex:column>
+    <apex:column headerValue="FROMNAME">
+    <apex:outputField value="{!Email.cEmailMsg.FROMNAME}">    
+    </apex:outputField>
+    </apex:column>
+    <apex:column headerValue="FROMADDRESS">
+    <apex:outputField value="{!Email.cEmailMsg.FROMADDRESS}">    
+    </apex:outputField>
+    </apex:column>
+    <apex:column headerValue="MESSAGE DATE">
+    <apex:outputText value="{0, date, dd/MM/yyyy}">
+    <apex:param value="{!Email.cEmailMsg.MessageDate}" />
+    </apex:outputText>
+    </apex:column>  
+    </apex:datatable>        
+    </apex:pageBlockSectionItem>
+    </apex:pageBlockSection>   
+    </apex:pageBlock> 
+    </apex:outputPanel> 
+</apex:form>      
+<script>
+function closeandrefresh() {
+
+    this.close();
+}
+</script>    
+<script>
+  $(document).ready(function()
+  {
+    $("[id$='EmailTable']").tablesorter({theme: 'blue', dateFormat : "dd/mm/yyyy"});
+  });
+</script>
+</apex:page>

@@ -1,0 +1,3 @@
+button[title*="Clear Selection"] {
+    display:none;
+}

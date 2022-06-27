@@ -1,0 +1,27 @@
+.border{
+    border-color: #070707;
+}
+
+h4{
+    font-style: italic;
+    font-size: 12px;
+}
+
+h3{
+    background: #6082B6;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+}
+
+h2{
+    font-family: "Segoe UI";
+}
+
+.confirmation{
+    font-family: "Segoe UI";
+    text-align: center;
+}
+.slds-readonly-path{
+    pointer-events: none;
+}

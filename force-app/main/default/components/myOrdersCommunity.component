@@ -1,0 +1,41 @@
+<apex:component layout="none">
+    <script id="myOrdersCommunity" type="text/template">
+        <h2 class="title">{{pageLabelMap 'MyAccount_MyOrdersCommunity'}}</h2>
+        <div class="alert alert-error messagingSection-orderhistory-Error" style="display: none"></div>
+        <div class="alert alert-info messagingSection-orderhistory-Info" style="display: none"></div>
+        <div class="main_content_large_right_container">
+            <h3>testing</h3>
+        </div>
+    </script>
+            <script>
+                CCRZ.MyAccount = _.extend(CCRZ.MyAccount || {}, {
+                    SubscMyOrdersCommunity: {
+                        register: function (registrar) {
+                            registrar.registerNewView('myOrdersCommunity', CCRZ.
+                                processPageLabelMap('MyAccount_MyOrdersCommunity'), new CCRZ.views.
+                                    SubscMyOrdersCommunityView());
+                        }
+                    }
+                });
+                jQuery(function ($) {
+                    CCRZ.views.SubscMyOrdersCommunityView = CCRZ.CloudCrazeView.extend({
+                        templatePhone: CCRZ.util.template('myOrdersCommunity'),
+
+                        templateDesktop: CCRZ.util.template('myOrdersCommunity'), managedSubView : true,
+                            viewName : "myOrdersCommunity",
+                            initSetup : function (callback) {
+                                var urlSplit = (window.location.href).split('.com');
+                                var url = urlSplit[0]+'.com/Agents/s/recordlist/Order';
+                                window.location.replace(url);
+                                //callback();
+                            },
+                            renderPhone : function () {
+                                this.$el.html(this.templatePhone(this));
+                            },
+                            renderDesktop : function () {
+                                this.$el.html(this.templateDesktop(this));
+                            }
+        });
+                });
+    </script>
+</apex:component>

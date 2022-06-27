@@ -1,0 +1,2230 @@
+<apex:page id="ProductListBIE" docType="html-5.0" sidebar="false" showHeader="false" standardStylesheets="false"
+           applyHtmlTag="false" controller="ProductListActions">
+    <!--rendered="{!isFirst}"-->
+    <apex:stylesheet value="{!$Resource.CCProductListPageStyle}"/>
+    <apex:outputpanel >
+        <c:CSVUpload />
+    </apex:outputpanel>
+    <c:MenuBIE />
+    <c:ProductList />
+    <c:B2B_WarehouseModal />
+    <div id="productAvailabilityModalParent"></div>
+    <c:B2B_CommissionWidgetModal2 />
+    <div id="commissionWidgetModalParent2"></div>
+
+    <script>
+        const numberFormat = new Intl.NumberFormat();
+        let customSorting = false;
+        let customOffset = 0;
+        let orderDirection;
+        let orderCriteria;
+        let filtered = false;
+        let clonedModel;
+        let globalInventory = null;
+        let globalSoldToAccounts = null;
+        let userInfoAvailable = false;
+        let invCatNum;
+        let invCatNumQty;
+        let invCatNumPrice;
+        let invCatNumCartID;
+        let invCatNumFound = false;
+        let isUserAgent;
+    	var detailEffectiveAccount;
+    	var detailAgentAccount;
+        CCRZ.uiProperties.productListPageView.header.tmpl = 'Product-List-Header-Override';
+        CCRZ.uiProperties.productListPageView.productItem.list.tmpl = 'Product-Item-Row-Override';
+        CCRZ.uiProperties.productListPageView.productItem.grid.tmpl = 'Product-Item-Grid-Override';
+        let userAgent;
+        let productItemsViewGlobal;
+        let workingEffAccount;
+        // stikcy table header
+        function handleScroll(){
+            if(CCRZ.productListPageModel.attributes.layout ==='spreadsheet'){
+                let spreadSheet = document.querySelector('.spreadsheet');
+                let tableRow = document.querySelector('.table-header-row');
+                let headerHeight = document.querySelector('header').getBoundingClientRect().height;
+                let rect = spreadSheet.getBoundingClientRect();
+                if(rect.bottom < headerHeight + 50){
+                    tableRow.style.visibility = 'hidden';
+                }
+                else{
+                    tableRow.style.visibility = 'visible';
+                }
+                if(rect.top > headerHeight){
+                    tableRow.style.position = 'relative';
+                    tableRow.style.top = 'auto';
+                    tableRow.style.width = rect.width + 'px';
+                    spreadSheet.style.paddingTop = '0';
+                }
+                else{
+                    tableRow.style.position = 'relative';
+                    tableRow.style.top = (headerHeight - 80) - rect.top + 'px';
+                    spreadSheet.style.paddingTop = tableRow.getBoundingClientRect().height + 'px'
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            document.addEventListener('scroll', handleScroll);
+        });
+
+        Backbone.on('all', function () {
+            console.log(`Backbone.on all`,arguments[0], arguments[1]);
+        });
+
+        function showCommissionWidget() {
+            //console.log('hide cw');
+            try {
+                var permissionSets = [];
+                var profileName = "";
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                    var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                    userData = JSON.parse(userData);
+                    var userType = localStorage.getItem(userData['User Type']);
+                    var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+
+                    if (permissionData !== null) {
+                        var permissionSets = permissionData['permissionSet'];
+                        var profileName = permissionData['profileName'];
+                    }
+                }
+                if ($('.showcommissionWidgetModalButton').length > 0) {
+					if (userType == 'Agent' &&
+                        (CCRZ.effSelectorView.dataSet.workingEffAccount.Customer_Segmentation__c == 'FD' ||
+                        CCRZ.effSelectorView.dataSet.workingEffAccount.Customer_Segmentation__c == 'Fixture') &&
+                        ((profileName == "Agent Read Only B2B Storefront Registered Users" &&
+                        permissionSets.includes("View_Commissions_Set_Price") == true) ||
+                        profileName == "Agent B2B Storefront Registered Users")) {
+							$('.showcommissionWidgetModalButton').show();
+					}
+				}
+            }
+			catch (e) {
+			    setTimeout(function () {
+					   showCommissionWidget();
+					}, 5000);
+   			}
+        }
+
+        function sleep(ms) {
+		  return new Promise(
+			resolve => setTimeout(resolve, ms)
+		  );
+		}
+
+        function addInvalidSkuToCartFromMultiProductSearch(status, index, catalogNum, invCatNumPrice ) {
+                        
+            let cartId = CCRZ.pagevars.currentCartID;
+            var externalSKU = status;
+            var typeMarkValue = $("#typemark_"+index).val();
+            var qty =  $("#qty_"+index).val();
+            price = invCatNumPrice;
+            //price = price.substring(1, price.length);
+            price = price.substring(((price.indexOf("$"))+1), price.length);
+            price = price.replace(/,/g, "");
+            //console.log("type mark: ", typeMark);
+            var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                className: 'ProductListActions'
+            });
+            console.log('addInvalidSkuToCartFromMultiProductSearch');
+            console.log(catalogNum, price, qty,typeMarkValue,cartId,externalSKU);
+            $("header").before("<div id='overlay' class='modal-backdrop fade in'><div class='customLoader'></div></div>");
+            remoteCall.invokeCtx('addInvalidSku', catalogNum, price, qty,typeMarkValue,cartId,externalSKU,
+                function (res, err) {
+                    if (res.success) {
+                        // //console.log("added to cart");
+                        //CCRZ.pubSub.trigger('cartChange', invCatNumCartID);
+                     var cartId = CCRZ.pagevars.currentCartID;
+                    CCRZ.pubSub.trigger('cartChange', cartId);
+                    //window.location = CCRZ.pagevars.sitePrefix;
+                    setTimeout(function () {
+                        $("#overlay").remove();
+                        $(".modal-backdrop").remove();
+                    }, 4000);
+                    } else {
+                        console.error('failed');
+                    }
+                }, {
+                    nmsp: false,
+                    escape: false
+                });
+            
+        }
+
+        CCRZ.pubSub.on('effectiveAccountLoaded', function(effectiveAccount) {
+        	showCommissionWidget();
+        });
+
+        Backbone.on('view:productListHeader:created', function (viewPrototype) {
+            viewPrototype.events ['click .standard-order-by'] = 'standardOrderBy';
+
+            viewPrototype.standardOrderBy = function (event) {
+                //console.log('standard sorting header');
+                customSorting = false;
+                customOffset = 0;
+            }
+        });
+
+        Backbone.on('view:productListFooter:created', function (viewPrototype) {
+            viewPrototype.events = {
+                "click .cc_show_more": "customShowMoreAction"
+            };
+
+            viewPrototype.customShowMoreAction = function (event) {
+                //console.log('footer show more');
+            }
+        });
+
+        CCRZ.pubSub.on('view:productItemsView:showMore', function(customShowMore) {
+            //console.log('customShowMore ',CCRZ.productListPageView.productItemsView.collection.models);
+
+         });
+
+        Backbone.on('view:productListPageView:created', function (viewPrototype) {
+
+            viewPrototype.events = {
+                "click .addInvalidButton": "addInvalidSKU",
+                "click .custom-order-by": "customOrderBy",
+                "click .cc_show_more": "customShowMoreAction",
+                "click .cc_sort_option": "standardOrderBy",
+                "click .spreadsheetView": "spreadsheetView",
+                "click .addInvalidSkuToCart": "addInvalidSkuToCart",
+                "click .showinventoryModalButton": "showinventoryModal",
+                "click .showcommissionWidgetModalButton": "showcommissionWidgetModal2",
+                "keypress .qty": "checkQtyKeyPress",
+                "input .qty": "handleAddToCart",
+                "input .qtyMTO": "handleMTOToCart",
+                "click .search-section #theImage12": "focusOnSearchField",
+                "input .typeMarkMTO": "remaingCharCountMtoTypeMark",
+                "click .goToMultiSearch": "goToMultipleProductView",
+                "click .clear-product-fields": "clearMultiProductFields",
+                "click .validate-prdcts": "submitMultiProductsSkus",
+                "input input[name='product-skus[]']": "validateMultiProductForm"
+            };
+
+            viewPrototype.customOrderBy = function (event) {
+                console.log('custom order by');
+                orderDirection = event.target.getAttribute('data-order');
+                orderCriteria = event.target.getAttribute('data-id');
+                let filterMap = {};
+                $('.cc_filter_checkbox[checked]').each(function() {
+                    $.extend(filterMap, {[$(this).attr('data-specid')] : ($(this).attr('data-value')).replace("''", "\\'") });
+                });
+                console.log('filter map', filterMap);
+                console.log('order criteria', orderCriteria);
+                const renderCount = CCRZ.productListPageView.model.attributes.renderedCount;
+                const searchString = CCRZ.productListPageView.model.attributes.searchString;
+                const prodCategoryId = CCRZ.productListPageView.model.attributes.prodCategoryIds;
+                customSorting = true;
+                CCRZ.productListPageModel.set('sortBy', orderCriteria);
+                customOffset = 0;
+
+                const remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'ProductListActions'
+                });
+
+                remoteCall.invokeContainerLoadingCtx($('.deskLayout'),'customOrderBy', orderDirection,
+                        orderCriteria, filterMap, renderCount, searchString, prodCategoryId, customOffset,
+                    function (res, err) {
+                        if (res.success) {
+                            //console.log(res.data);
+                            let models = CCRZ.productListPageView.productItemsView.collection.models;
+                            let productList = [];
+
+                            let itemsToRender = CCRZ.productListBuffer.reset(res.data.productList, {sort: false});
+                            CCRZ.productListPageView.productItemsView.collection.reset(itemsToRender, {sort: false, remove: false, merge: false});
+
+                            let v = CCRZ.productListPageView.productItemsView;
+
+                            _.each(v.itemViews, function (itemView) {
+                                itemView.disposeView();
+                            });
+                            v.itemViews = [];
+                            v.collection.each(function (product, index) {
+                                product.set('index', index);
+                                v.addProductView(product);
+                            });
+                            v.render();
+
+                        }
+                    }, {
+                        nmsp: false,
+                        escape: false
+                    }
+                );
+            },
+            viewPrototype.customShowMoreAction = function (event) {
+
+                const renderCount = CCRZ.productListPageView.model.attributes.renderedCount;
+                const pageSize = CCRZ.productListPageView.model.attributes.pageSize;
+                const searchString = CCRZ.productListPageView.model.attributes.searchString;
+                const prodCategoryId = CCRZ.productListPageView.model.attributes.prodCategoryIds;
+
+                if (customSorting) {
+
+                    if (CCRZ.productListPageView.model.attributes.prodCount >= customOffset + pageSize) {
+                        customOffset += pageSize;
+                    } else {
+                        customOffset = CCRZ.productListPageView.model.attributes.prodCount;
+                    }
+
+                    let actualRenderedCount;
+
+                    if (CCRZ.productListPageView.model.attributes.prodCount >= renderCount+CCRZ.productListPageView.productItemsView.model.attributes.pageSize) {
+                        actualRenderedCount = renderCount+CCRZ.productListPageView.productItemsView.model.attributes.pageSize;
+                    } else {
+                        actualRenderedCount = CCRZ.productListPageView.model.attributes.prodCount;
+                        $(".cc_show_more").css("display", "none");
+                    }
+
+                    CCRZ.productListPageModel.set('renderedCount', actualRenderedCount);
+
+                    let filters = CCRZ.productListPageView.productItemsView.options.model.attributes.prodFilters;
+                    let filterMap = {};
+                    $(filters).each(function() {
+                        $.extend(filterMap, {[$(this).attr('sfid')] : ($(this).attr('specValues')[0].value).replace("''", "\\'") });
+                    });
+
+                    //console.log('Custom show more');
+                    const remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                        className: 'ProductListActions'
+                    });
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'),'customOrderBy', orderDirection,
+                            orderCriteria, filterMap, pageSize, searchString, prodCategoryId, customOffset,
+                    function (res, err) {
+                        if (res.success) {
+
+                            let models = CCRZ.productListPageView.productItemsView.collection.models;
+                            let productList = [];
+
+                            let itemsToRender = CCRZ.productListPageView.productItemsView.collection.set(res.data.productList, {remove: false, merge: false});
+                            for (let i = 0; i < itemsToRender.length; i++) {
+                                CCRZ.productListPageView.productItemsView.addProductView(itemsToRender[i]);
+                            }
+
+
+
+                            CCRZ.productListPageView.productItemsView.render();
+                        }
+                    }, {
+                        nmsp: false,
+                        escape: false
+                    }
+                );
+
+                } else {
+                    //console.log('standard show more');
+                    CCRZ.pubSub.trigger("view:productItemsView:showMore");
+                }
+            },
+
+            viewPrototype.standardOrderBy = function (event) {
+                console.log('standard sorting');
+                customSorting = false;
+                //viewPrototype.sortAction(event);
+            },
+            viewPrototype.addInvalidSKU = function () {
+                $("#invalidSkuPrice").text(CCRZ.pagevars.pageLabels['ProductList_Loading']);
+                var displayStatus = document.querySelectorAll(".hiddenStatus");//added
+                var displayCatNumb = document.querySelectorAll(".hiddenCatNumb");//added
+                var displayUOM = document.querySelectorAll(".hiddenUOM");//added
+                var displayYourPrice = document.querySelectorAll(".hiddenYourPrice");//added
+                var displayAddToCart = document.querySelectorAll(".hiddenButton");
+                var displayPrice = document.querySelectorAll(".hiddenPrice");
+                var resultsFound = document.querySelectorAll(".resultsFound");
+                var resultsNotFound = document.querySelectorAll(".resultsNotFound");
+                var noResultsBody = document.querySelectorAll(".hideNoResultsBody");
+                var resultsFoundHeader = document.querySelectorAll(".resultsFoundHeader");
+                var resultsNotFoundHeader = document.querySelectorAll(".resultsNotFoundHeader");
+                var commissionCalc = document.querySelectorAll(".extended-commission-calc");
+                displayAddToCart.forEach(element => element.style.display = "block");
+                displayPrice.forEach(element => element.classList.remove("hiddenPrice"));
+                displayPrice.forEach(element => element.classList.add("invCatNumPrice"));
+                displayStatus.forEach(element => element.classList.add("hiddenStatus"));//added
+                //var sku = $('#invalidSkuSearchValue').val();
+                //var qty = $('#invalidSkuSearchQty').val();
+
+
+                $(".showOnValidate").css("display", "none");
+                $(".PermissionMessage").css("display", "none");
+                var sku = $.trim($('#invalidSkuSearchValue').val());
+                var qty = $('#invalidSkuSearchQty').val();
+				//console.log("invalidSkuSearchValue",sku);
+				var agentID='';
+                var CustID='';
+                var userType='';
+                var AgentSegment='';
+                var permissionSets = [];
+                var profileName = "";
+                var currentUrl =  new URL(window.location.href);
+
+                if (currentUrl.host.includes('stage')) {
+                    this.model.set("stageENV", true);
+                } else {
+                    this.model.set("stageENV", false);
+                }
+
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+						var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+						userData = JSON.parse(userData);
+                    	agentID = localStorage.getItem(userData['AgentID']);
+                    	console.log('agentID ',agentID);
+                        CustID=localStorage.getItem(userData['DistributorID']);
+                    	console.log('DistributorID ',CustID);
+                        userType = localStorage.getItem(userData['User Type']);
+                    	console.log('userType ',userType);
+                    	AgentSegment = localStorage.getItem(userData['AgentSegment']);
+                    	console.log('AgentSegment ',AgentSegment);
+
+                        var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+
+                        if (permissionData !== null) {
+                            var permissionSets = permissionData['permissionSet'];
+                            var profileName = permissionData['profileName'];
+                        }
+                	}
+
+                /*if(CCRZ.effSelectorView.dataSet.agent!== undefined){
+			 			agentID=CCRZ.effSelectorView.dataSet.agent.sfid;
+					}
+
+			    var CustID=CCRZ.effSelectorView.dataSet.workingEffAccount.Id;*/
+
+				var callType1 = 'O';
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'PriceAgreementController'
+                });
+                $(".showinventoryModalButton").attr("data-id", "");
+                $(".showinventoryModalButton").attr("data-name", "");
+                $(".showinventoryModalButton").attr("href", "#");
+                $("header").before("<div id='overlay' class ='deskLayout'><div class='customLoader'></div></div>");//line added
+                //console.log('custom loader added');
+                // remoteCall.invokeCtx('getRealTimePricingForInvalidCatalogNo', sku,agentID,CustID,
+                remoteCall.invokeContainerLoadingCtx($('.deskLayout'),'getRealTimePricingForInvalidCatalogNo', sku,agentID,CustID,callType1,
+                    function (res, err) {
+                        $("#overlay").remove();//line added
+                        console.log('Response from SAP', res);
+
+
+                        if (res.success) {
+                            $(".showOnValidate").css("display", "block");
+                            $(".showinventoryModalButton").css("display", "none");
+                            $("#invalidSkuSearchStatus").removeClass("green");
+                            $("#invalidSkuSearchStatus").removeClass("red");
+                            $("#invalidSkuSearchStatus").removeClass("darkOrange");
+                            $(".cc_add_MTO_btn").attr("disabled", false);
+                            $("#invalidSkuSearchQty").attr("readonly", false);
+                            commissionCalc.forEach(element => element.style.display = "none");
+                            var pr = res.data;
+                            var prArr = pr.priceAgreementItemList;
+                            invCatNumPrice = "$0.01";
+							console.log("prArr",pr);
+                            prArr[0].material = prArr[0].material.replace(/^0+/, '');
+                            document.getElementById("invalidSkuSearchStatus").value = prArr[0].material;
+                            document.getElementById("invalidSkuSearchCat").value = prArr[0].description;
+							document.getElementById("invalidSkuSearchUOM").value = "Piece";
+                            //if (prArr[0].bookPrice > 0.00 && !null) {
+                            if (prArr[0].material != "INVALIDCAT" && prArr[0].material != "VALIDCAT"){
+                             	$(".showinventoryModalButton").css("display", "block");
+                                $(".showinventoryModalButton").attr("data-id", prArr[0].material +"~materialdescription");
+                                $(".showinventoryModalButton").attr("data-name", prArr[0].description);
+                                $(".showinventoryModalButton").attr("href", "#" + prArr[0].material +"~materialdescription");
+                            }
+                            if(prArr[0].message=="Delisted" || prArr[0].substitueReason=="Delisted"){
+                                $(".showinventoryModalButton").css("display", "none");
+                                $("#invalidSkuSearchStatus").addClass("red");
+                                document.getElementById("invalidSkuSearchStatus").value = "DELISTED";
+                                 console.log("Salesorg1",res.data.salesOrg);
+                                    if(res.data.salesOrg == "1CA1"){
+                                    	var notFoundPrice = "CA$0.01";
+                                    }
+                                    else	{
+                                    var notFoundPrice = "$0.01";
+                                    }
+                                //var notFoundPrice = "$0.01";
+                                //$("#invalidSkuPrice").text(notFoundPrice);
+                                $(".invalidMessage").show();
+                                document.getElementById("invalidSkuSearchPrice").value = notFoundPrice;
+                                //displayAddToCart.forEach(element => element.style.display = "none");
+                                noResultsBody.forEach(element => element.classList.add("hidenNoResultsBody"));
+                                resultsFound.forEach(element => element.style.display = "none");
+                                resultsFoundHeader.forEach(element => element.style.display = "none");
+                                resultsNotFound.forEach(element => element.style.display = "block");
+                                resultsNotFoundHeader.forEach(element => element.style.display = "block");
+                                $(".cc_add_MTO_btn").attr("disabled", true);
+                                $("#invalidSkuSearchQty").attr("readonly", true);
+                            }
+                            else{
+                                // Show commission calculator only when rep = FD and sold-to = FD and valid product
+                                if (prArr[0].material !== undefined &&
+                                    prArr[0].material !== "INVALIDCAT" &&
+                                    prArr[0].material !== "VALIDCAT" &&
+                                    userType == 'Agent' &&
+                                    (AgentSegment == 'FD' || AgentSegment == 'Fixture') &&
+                                    ((profileName == "Agent Read Only B2B Storefront Registered Users" &&
+                                    permissionSets.includes("View_Commissions_Set_Price") == true) ||
+                                    profileName == "Agent B2B Storefront Registered Users")
+                                    ) {
+                                        let dataId = "";
+                                        dataId += prArr[0].material + "~";
+                                        dataId += "sfid~";
+                                        dataId += prArr[0].description + "~";
+                                        dataId += prArr[0].UOM + "~";
+                                        dataId += prArr[0].quantity + "~";
+                                        dataId += prArr[0].currencyISOCode;
+                                    //dataId += prArr[0].salesOrg;
+                                        $(".extended-commission-calc").attr('data-id', dataId);
+                                        $(".extended-commission-calc").css('display', 'inline');
+                                }
+                                console.log('prArr', prArr[0]);
+                            	if (prArr[0].material !== undefined && prArr[0].material !== "INVALIDCAT") {
+                                $("#invalidSkuSearchStatus").addClass("green");
+
+
+                                if (prArr[0].currencyISOCode != '') {
+                                        if (userType == 'Agent') {
+                                            if (AgentSegment == 'FD' || AgentSegment == 'Fixture') {
+                                                if (CustID != '' && CustID != null) {
+                                                    if (prArr[0].priceAgreementValue != '0') {
+                                                        var yourPrice1 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].priceAgreementValue.toFixed(2));
+                                                        invCatNumPrice = yourPrice1;
+                                                        console.log("FD Agent and Distributor");
+                                                    }
+                                                    else {
+                                                        //var yourPrice2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].adpPrice.toFixed(2));
+                                                        var price = parseFloat(prArr[0].adpPrice);
+                                                        var roundedQty = parseInt(prArr[0].roundedQty);
+                                                        console.log("prArr[0].roundedQty: "+roundedQty);
+                                                        if(price > 0 && null != roundedQty && roundedQty > 0){
+                                                            console.log("yourPrice2 before rounding: "+ price);
+                                                            price = price / roundedQty;
+                                                            console.log("yourPrice2 after rounding: "+ price);
+                                                        }
+                                                        var yourPrice2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(price.toFixed(2));
+                                                        invCatNumPrice = yourPrice2;
+                                                        console.log("FD Agent and Distributor");
+                                                    }
+                                                }
+                                                else {
+                                                    //var yourPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].adpPrice.toFixed(2));
+                                                    var price = parseFloat(prArr[0].adpPrice);
+                                                    var roundedQty = parseInt(prArr[0].roundedQty);
+                                                    console.log("prArr[0].roundedQty: "+roundedQty);
+                                                    if(price > 0 && null != roundedQty && roundedQty > 0){
+                                                        console.log("yourPrice before rounding: "+ price);
+                                                        price = price / roundedQty;
+                                                        console.log("yourPrice after rounding: "+ price);
+                                                    }
+                                                    var yourPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(price.toFixed(2));
+                                                    invCatNumPrice = yourPrice;
+                                                    console.log('FD Agent Only');
+                                                }
+
+                                            }
+
+                                            else if (AgentSegment == 'LB' || AgentSegment == 'Lamp') {
+                                                if (prArr[0].priceAgreementValue != '0') {
+                                                    var yourPrice4 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].priceAgreementValue.toFixed(2));
+                                                    invCatNumPrice = yourPrice4;
+                                                    console.log("LB Agent and Distributor");
+
+                                                }
+                                                else {
+                                                    var yourPrice5 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].bookPrice.toFixed(2));
+                                                    invCatNumPrice = yourPrice5;
+                                                    console.log("LB Agent and Distributor");
+                                                }
+
+                                            }
+
+                                        }
+                                        else if (userType == 'Distributor') {
+                                            if (prArr[0].priceAgreementValue != '0') {
+                                                var yourPrice6 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].priceAgreementValue.toFixed(2));
+                                                invCatNumPrice = yourPrice6;
+                                                console.log("Distributor");
+                                            }
+                                            else {
+
+                                                var yourPrice7 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].bookPrice.toFixed(2));
+                                                invCatNumPrice = yourPrice7;
+                                                console.log("Distributor");
+                                            }
+
+                                        }
+                                    }
+
+                                // if(prArr[0].material !== "VALIDCAT"){
+
+                                /*if(detailEffectiveAccount.Account_Group__c=='ZEAG' && detailEffectiveAccount.Customer_Segmentation__c=='FD' && prArr[0].currencyISOCode!=''){
+                                        var yourPrice = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].adpPrice.toFixed(2));
+                                        invCatNumPrice=yourPrice;
+                                        let dataId = "";
+                                        dataId += prArr[0].material + "~";
+                                        dataId += "sfid~";
+                                        dataId +=  prArr[0].description + "~";
+                                        dataId += prArr[0].UOM + "~";
+                                        dataId += prArr[0].quantity + "~";
+                                        dataId += prArr[0].currencyISOCode;
+                    					$(".extended-commission-calc").attr('data-id', dataId);
+										$(".extended-commission-calc").css('display', 'inline');
+                                }
+
+                				//FD Agent and Distributor
+                				if(detailAgentAccount.agent!==undefined && detailEffectiveAccount.Account_Group__c=='Z001'){
+                                    if(detailAgentAccount.agent.Customer_Segmentation__c=='FD'){
+                                        if (prArr[0].priceAgreementValue != '0' && prArr[0].currencyISOCode!='') {
+                                        	var yourPrice1 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].priceAgreementValue.toFixed(2));
+                                            invCatNumPrice=yourPrice1;
+                                            //console.log("FD Agent and Distributor");
+
+
+
+                                    	}
+                                        else{
+                                            if(prArr[0].currencyISOCode!=''){
+											 var yourPrice2 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].adpPrice.toFixed(2));
+                             				  invCatNumPrice=yourPrice2;
+                                                //console.log("FD Agent and Distributor");
+											}
+
+                                        }
+
+                                    }
+
+                                }
+
+
+                               //LB Agent Only
+                				if(detailEffectiveAccount.Account_Group__c=='ZEAG' && detailEffectiveAccount.Customer_Segmentation__c=='LB' && prArr[0].currencyISOCode!=''){
+                                        var yourPrice3 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].adpPrice.toFixed(2));
+                                        invCatNumPrice=yourPrice3;
+
+                                }
+
+                				//LB Agent and Distributor
+                				if(detailAgentAccount.agent!==undefined && detailEffectiveAccount.Account_Group__c=='Z001' && prArr[0].currencyISOCode!=''){
+                                    if(detailAgentAccount.agent.Customer_Segmentation__c=='LB'){
+                                        if (prArr[0].priceAgreementValue != '0') {
+                                        	var yourPrice4 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].priceAgreementValue.toFixed(2));
+                                        	invCatNumPrice=yourPrice4;
+                                            //console.log("if LB Agent and Distributor");
+
+                                    	}
+                                        else{
+                                            if(prArr[0].currencyISOCode!=''){
+											 var yourPrice5 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].bookPrice.toFixed(2));
+                                			 invCatNumPrice=yourPrice5;
+                                             //console.log("else LB Agent and Distributor");
+											}
+                                        }
+
+
+                                    }
+
+                                }
+
+
+                				//Distributor only
+                				if(detailAgentAccount.agent==undefined && detailEffectiveAccount.Account_Group__c=='Z001'){
+                                        if (prArr[0].priceAgreementValue != '0') {
+                                        	var yourPrice6 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].priceAgreementValue.toFixed(2));
+                                        	invCatNumPrice=yourPrice6;
+                                            //console.log("if Distributor");
+                                    	}
+                                        else{
+
+                                            var yourPrice7 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].bookPrice.toFixed(2));
+                                            invCatNumPrice=yourPrice7;
+                                            //console.log("else Distributor");
+                                        }
+
+
+
+
+                                }*/
+
+
+                                // }
+                                // Check invCatNumPrice is 0 By Sameer Mahadik On (8-31-2021)
+                                var addToCartPrice = invCatNumPrice.split("$").pop();
+                                addToCartPrice = addToCartPrice.replace(/,/g, "");
+                                if($.isNumeric(addToCartPrice) && addToCartPrice <= 0) {
+                                    invCatNumPrice = prArr[0].currencyISOCode == "CAD" ? "CA" : "";
+                                    invCatNumPrice += "$0.01";
+                                }
+                                // update fields to add to cart
+                                document.getElementById("invalidSkuSearchPrice").value = invCatNumPrice;
+                                invCatNum = prArr[0].description;
+                                invCatNumQty = qty;
+                                $(".invalidMessage").hide();
+                                //invCatNumPrice = prArr[0].bookPrice;
+                                invCatNumCartID = res.inputContext.currentCartID;
+                                prArr[0].bookPrice = prArr[0].bookPrice * qty;
+                                //var bkPrice = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[0].currencyISOCode}).format(prArr[0].bookPrice.toFixed(2));
+                                //$("#invalidSkuPrice").text(bkPrice);
+                                displayAddToCart.forEach(element => element.style.display = "block");
+                                noResultsBody.forEach(element => element.classList.add("hidenNoResultsBody"));
+                                resultsNotFound.forEach(element => element.style.display = "none");
+                                resultsNotFoundHeader.forEach(element => element.style.display = "none");
+                                resultsFound.forEach(element => element.style.display = "block");
+                                resultsFoundHeader.forEach(element => element.style.display = "block");
+                                invCatNumFound = true;
+
+                            }
+                            	else {
+                                $("#invalidSkuSearchStatus").addClass("darkOrange");
+                                    console.log("Salesorg3",res.data.salesOrg);
+                                    if(res.data.salesOrg == "1CA1"){
+                                    	var notFoundPrice = "CA$0.01";
+                                    }
+                                    else	{
+                                    var notFoundPrice = "$0.01";
+                                    }
+                                    //var notFoundPrice = "$0.01";
+                                //$("#invalidSkuPrice").text(notFoundPrice);
+                                $(".invalidMessage").show();
+                                document.getElementById("invalidSkuSearchPrice").value = notFoundPrice;
+                                //displayAddToCart.forEach(element => element.style.display = "none");
+                                noResultsBody.forEach(element => element.classList.add("hidenNoResultsBody"));
+                                resultsFound.forEach(element => element.style.display = "none");
+                                resultsFoundHeader.forEach(element => element.style.display = "none");
+                                resultsNotFound.forEach(element => element.style.display = "block");
+                                resultsNotFoundHeader.forEach(element => element.style.display = "block");
+                                invCatNumFound = true;
+                                invCatNum = prArr[0].description;
+                                invCatNumQty = qty;
+                                invCatNumPrice = notFoundPrice;
+                                invCatNumCartID = res.inputContext.currentCartID;
+                            }
+                             }
+                        }
+                        else {
+
+                            $(".showOnValidate").css("display", "none");//added to display fields on Validate
+                            $(".PermissionMessage").css("display", "block");
+
+                        }
+
+                    }, {
+                        nmsp: false,
+                        escape: false
+                    });
+            }
+
+           viewPrototype.addInvalidSkuToCart = function () {
+                if (invCatNumFound) {
+                    catalogNum = invCatNum;
+                    //qty = invCatNumQty;
+                    qty =$('#invalidSkuSearchQty').val();
+                    var typeMark = $("#invalidSkuSearchTypeMark").val();
+                    let cartId = CCRZ.pagevars.currentCartID;
+                    var externalSKU = $("#invalidSkuSearchStatus").val();
+                    price = invCatNumPrice;
+                    //price = price.substring(1, price.length);
+                    price = price.substring(((price.indexOf("$"))+1), price.length);
+                    price = price.replace(/,/g, "");
+                    //console.log("type mark: ", typeMark);
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                        className: 'ProductListActions'
+                    });
+
+                    remoteCall.invokeContainerLoadingCtx($(".deskLayout"), 'addInvalidSku', catalogNum, price, qty,typeMark,cartId,externalSKU,
+                        function (res, err) {
+                            if (res.success) {
+                                // //console.log("added to cart");
+                                //CCRZ.pubSub.trigger('cartChange', invCatNumCartID);
+                             var cartId = CCRZ.pagevars.currentCartID;
+                            CCRZ.pubSub.trigger('cartChange', cartId);
+                            window.location = CCRZ.pagevars.sitePrefix;
+                            } else {
+                                console.error('failed');
+                            }
+                        }, {
+                            nmsp: false,
+                            escape: false
+                        });
+                }
+            }
+
+			viewPrototype.handleMTOToCart = function() {
+                var value = $('#invalidSkuSearchQty').val();
+
+                $(".cc_add_MTO_btn").attr("disabled", false);
+                if (!value || value <= 0) {
+                    $(".cc_add_MTO_btn").attr("disabled", true);
+                }
+            }
+
+            viewPrototype.showinventoryModal = function (event) {
+                console.log("Event Name: ", event.target.getAttribute("data-name"));
+                //var objLink = $(event.currentTarget);
+                //var dataId = objLink.data("id");
+                var dataId = event.target.getAttribute("data-id");
+                var fields = dataId.split('~');
+                var productSKU = fields[0];
+                var productId = fields[1];
+                var ids = JSON.stringify([productId]);
+                //var skus = JSON.stringify(['12377']);
+                var skus = JSON.stringify([productSKU]);
+
+                // Get product Name From "data-name" attribute & Get system current time By Sameer Mahadik On(6-9-2021)
+                //var productTitle = objLink.data("name");
+                var productTitle = event.target.getAttribute("data-name");
+                //var ECommItemName = objLink.data("item-name");
+                var ECommItemName = event.target.getAttribute("data-item-name");
+                console.log("productSKU: ", productSKU);
+                console.log("productTitle: ", productTitle);
+                console.log("ECommItemName1",ECommItemName);
+                var systemDate = new Intl.DateTimeFormat('en-us',{
+                    day: 'numeric',
+                    month: 'short',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                }).format(new Date());
+
+                var agentID = '';
+                var custID = CCRZ.effSelectorView.dataSet.workingEffAccount.sfid;
+
+                if(CCRZ.effSelectorView.dataSet.agent!== undefined){
+                    agentID = CCRZ.effSelectorView.dataSet.agent.sfid;
+                }
+
+                let modalTemplate = CCRZ.util.template('InventoryDetail-Desktop');
+                var _self = this;
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'InventoryController'
+                });
+
+                // Show Loader
+                $("header").before('<div class="customLoader"></div>');
+
+                if (globalInventory == null) {
+                    //remoteCall.invokeCtx('getInventoryAvailability', skus, ids, function (res, err) {
+                    // Comment Above Line & Call Function Using "invokeContainerLoadingCtx" To Show Black Overlay When Get Inventory Data By Sameer Mahadik On(6-9-2021)
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'getInventoryAvailability', skus, ids, agentID, custID, function (res, err) {
+                        // Remove Loader
+                        $(".customLoader").remove();
+
+                        if (res != null && res.data != null) {
+                            _self.data = {
+                                productSKU: productSKU,
+                                inv: res.data,
+                                productTitle: productTitle,
+                                sysDate: systemDate,
+                                ECommItemName: ECommItemName
+                            };
+                        }
+                        $('#productAvailabilityModalParent').html(modalTemplate(_self.data));
+                        $('#productAvailabilityModal').modal({
+                            backdrop: true,
+                            show: true
+                        }); //show modal
+                    }, {
+                        nmsp: false,
+                        escape: false,
+                        timeout: 120000
+                    });
+                } else {
+                    // Remove Loader
+                    $(".customLoader").remove();
+
+                    _self.data = {
+                        productSKU: productSKU,
+                        inv: globalInventory,
+                        productTitle: productTitle,
+                        sysDate: systemDate,
+                        ECommItemName: ECommItemName
+                    };
+                    $('#productAvailabilityModalParent').html(modalTemplate(_self.data));
+                    $('#productAvailabilityModal').modal({
+                        backdrop: true,
+                        show: true
+                    }); //show modal
+                }
+            }
+
+			viewPrototype.showcommissionWidgetModal2 = function (event) {
+                
+                let itemId = $(event.currentTarget).attr("data-id");
+                let fields = itemId.split('~');
+                let contactId = CCRZ.currentUser.ContactId;
+                let modalTemplate = CCRZ.util.template('CommissionWidget-Desktop');
+                let sku = fields[0];
+                let sfid = fields[1];
+                let catalogNo = fields[2];
+                let uom = fields[3];
+                let piecesPerUnit = fields[4];
+                let currencyISOCode = fields[5];
+                let uomLabel = getUomLabelByUomCode(uom);
+                let qty = 1;
+                let typeMark = '';
+                let status_ = '';
+                
+                if (window.location.href.indexOf("mutliSearch=true") > -1) {
+                    //alert("your url contains the mutliSearch=true");
+                    if(null != fields[6] && undefined != fields[6]){
+                        qty = $('#qty_' + fields[6]).val();
+                        typeMark = $('#typemark_' + fields[6]).val();
+                    } 
+                    if(null != fields[7] && undefined != fields[7]){
+                        status_ = fields[7];
+                    } 
+                    if (qty == null) {
+                        qty = 1;
+                    }
+                    if (typeMark == null) {
+                        typeMark = '';
+                    }
+
+                } else {
+                    qty = $('#' + sfid + '_qtyEntry').val();
+                    if (qty == null) {
+                        qty = $('#invalidSkuSearchQty').val();
+                    }
+                    typeMark = $('#typeMarkTextarea_' + sfid).val();
+                    if ($("#invalidSkuSearchTypeMark").val() != null) {
+                        typeMark = $("#invalidSkuSearchTypeMark").val();
+                    }
+                }
+
+                let isAgent = CCRZ.effSelectorView.dataSet.workingEffAccount.Account_Group__c == 'ZEAG';
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'PriceAgreementController' });
+                remoteCall.invokeCtx('initSearchSoldTo', contactId,
+                    function (soldToAccounts, err) {
+                        var _self = this;
+                        _self.data = {
+                            productSKU         : sku,
+                            sfid               : sfid,
+                            catalogNo          : catalogNo,
+                            unitOfMeasureLabel : uomLabel,
+                            unitOfMeasureCode  : uom,
+                            qty                : qty,
+                            piecesPerUnit      : piecesPerUnit,
+                            isAgent            : isAgent,
+                            typeMark           : typeMark,
+                            status_            : status_
+                        };
+                        $('#commissionWidgetModalParent2').html(modalTemplate(_self.data));
+                        $('#commissionWidgetModal2').modal({
+                            backdrop: 'static',
+                            show: true
+                        }); //show modal
+                        $("#range_price").attr({
+                            "min": 0,
+                            "max": 100
+                        });
+                        $("#range_price_disp").text(0);
+                        // Don't fill Sold To field for Agent accounts
+                        if (!isAgent) {
+                            $(".soldToSearchTextCommissionWidget").val(CCRZ.effSelectorView.dataSet.workingEffAccount.Name);
+                        }
+                        getPriceAndCommission('getprice','',sku, uom, qty, currencyISOCode);
+                    }, {
+                    nmsp: false, escape: false
+                });
+            },
+
+            viewPrototype.checkQtyKeyPress = function(event) {
+                return CCRZ.util.isValidNumericInput(event);
+            },
+
+            viewPrototype.handleAddToCart = function(event) {
+                var id  = event.currentTarget.id;
+                var value = parseInt(event.currentTarget.value);
+                var splitIdData = id.split("_");
+                var sfid = splitIdData[0];
+
+                $(".cc_add_to_btn_" + sfid).attr("disabled", false);
+                if (!value || value <= 0) {
+                    $(".cc_add_to_btn_" + sfid).attr("disabled", true);
+                }
+            },
+
+            viewPrototype.focusOnSearchField = function() {
+                $(".search_input").focus();
+            },
+
+            viewPrototype.remaingCharCountMtoTypeMark = function(event) {
+                var typeMarkValue = event.target.value;
+                var dataId = $(event.currentTarget).data("id");
+                var charLimit = 8;
+
+                var remainingChar = charLimit - typeMarkValue.length;
+                if (dataId !== undefined && dataId !== "") {
+                    $("span[data-id='"+dataId+"'] > abbr").text(remainingChar);
+                } else {
+                    $(".typemark-char-count > abbr").text(remainingChar);
+                }
+            },
+
+            viewPrototype.goToMultipleProductView = function() {
+                var currentUrl = new URL(window.location.href);
+                window.location.href = currentUrl.origin + '/DefaultStore?mutliSearch=true';
+            },
+
+            viewPrototype.clearMultiProductFields = function(event) {
+                var type = $(event.currentTarget).data('type');
+
+                $("input[name='product-skus[]']").val('');
+                $(".validate-prdcts").attr("disabled", true);
+                if (type == "tbl-clear") {
+                    $(".multi-add-to-cart-prdcts").html('').hide();
+                    $(".validate-product-inputs").show();
+                }
+
+                $('.deskLayout')[0].scrollIntoView();
+            },
+
+            viewPrototype.submitMultiProductsSkus = function(event) {
+                var type = $(event.currentTarget).data('type');
+                var inputName = type == "tbl-validate" ? "product-tbl-skus[]" : "product-skus[]"
+                var productInputs = $("input[name='"+inputName+"']");
+                var productSkus = [];
+                for(var i = 0; i < 10; i++) {
+                    var inputValue = $.trim($(productInputs[i]).val());
+                    productSkus.push(inputValue);
+                }
+                console.log("SKUs: ", productSkus);
+
+                var multiProductTableViewString=''
+                +'<table class="table multi-prdcts-tbl">'
+                    +'<thead>'
+                        +'<tr>'
+                            +'<th class="text-center">Search Product</th>'
+                            +'<th class="text-center">Status</th>'
+                            +'<th class="text-center">Catalog No.</th>'
+                            +'<th class="text-center">Unit Of Measure</th>'
+                            +'<th class="text-center">Your Price</th>'
+                            +'<th class="text-center">Quantity</th>'
+                            +'<th class="text-center">Type Mark</th>'
+                            +'<th>&nbsp;</th>'
+                        +'</tr>'
+                    +'</thead>'
+                +'<tbody>';
+
+				var agentID='';
+                var CustID='';
+                var userType='';
+                var AgentSegment='';
+                var permissionSets = [];
+                var profileName = "";
+
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+					var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+					userData = JSON.parse(userData);
+                    agentID = localStorage.getItem(userData['AgentID']);
+                    console.log('agentID ',agentID);
+                    CustID=localStorage.getItem(userData['DistributorID']);
+                    console.log('DistributorID ',CustID);
+                    userType = localStorage.getItem(userData['User Type']);
+                    console.log('userType ',userType);
+                    AgentSegment = localStorage.getItem(userData['AgentSegment']);
+                    console.log('AgentSegment ',AgentSegment);
+
+                    // Get permission set of loggedin user
+                    var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+
+                    if (permissionData !== null) {
+                        permissionSets = permissionData['permissionSet'];
+                        profileName = permissionData['profileName'];
+                    }
+                }
+
+				var callType1 = 'O';
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'PriceAgreementController'
+                });
+
+                remoteCall.invokeContainerLoadingCtx($('.deskLayout'),'getRealTimePricingForMultipleInvalidCatalogNo', productSkus, agentID, CustID, callType1, function (res, err) {
+                    $("#overlay").remove();
+                    console.log('Response from SAP: ', res);
+                    if (res.success) {
+                        console.log("===================IF=================");
+                        console.log("res.data.length: ", res.data.length);
+
+                        for (let i=0; i<res.data.length; i++) {
+                
+                            var status_ = '';
+                            var statusColor_ = '';
+                            var viewInventoryLink_ = '';
+                            var catalogNo_ = '';
+                            var uom_ = '';
+                            var yourPrice_ = '';
+                            var quantity_ = '';
+                            var typeMark_ = '';
+                            var addToCartButton_ = '';
+                            var commissionCalculatorButton_ = '';
+                            let dataId = "";
+
+                            var invalidSkuSearchCat_='';
+
+                            if(!res.data[i].empty && !res.data[i].objectError){
+                                invCatNumQty =  1;
+                                var pr = res.data[i];
+                                var prArr = pr.priceAgreementItemList;
+                                invCatNumPrice = "$0.01";
+                                prArr[0].material = prArr[0].material.replace(/^0+/, '');
+                                
+                                status_ = prArr[0].material;
+                                console.log('status_: '+ status_);
+                                catalogNo_ = prArr[0].description;
+						        uom_ = "Piece";
+
+                                if(prArr[0].message=="Delisted" || prArr[0].substitueReason=="Delisted"){
+                                    statusColor_="red";
+                                    status_ = "DELISTED";
+                                    console.log("Salesorg1",res.data[i].salesOrg);
+                                    if(res.data[i].salesOrg == "1CA1"){
+                                    	var notFoundPrice = "CA$0.01";
+                                    }
+                                    else {
+                                        var notFoundPrice = "$0.01";
+                                    }
+                                    $(".invalidMessage").show();
+                                    yourPrice_ = notFoundPrice;
+                                }
+                                else{
+                                // Show commission calculator only when rep = FD and sold-to = FD and valid product
+                                    if (prArr[0].material !== undefined &&
+                                        prArr[0].material !== "INVALIDCAT" &&
+                                        prArr[0].material !== "VALIDCAT" &&
+                                        userType == 'Agent' &&
+                                        (AgentSegment == 'FD' || AgentSegment == 'Fixture')
+                                        ) {
+                                        dataId += prArr[0].material + "~";
+                                        dataId += "sfid~";
+                                        dataId += prArr[0].description + '~';
+                                        dataId += prArr[0].UOM + "~";
+                                        dataId += prArr[0].quantity + "~";
+                                        dataId += prArr[0].currencyISOCode;
+                                        dataId += "~" + i;
+                                    }
+                                    if (prArr[0].material !== undefined && prArr[0].material !== "INVALIDCAT") {
+                                        statusColor_ = "green";
+                                        if (prArr[0].currencyISOCode != '') {
+                                            if (userType == 'Agent') {
+                                                if (AgentSegment == 'FD' || AgentSegment == 'Fixture') {
+                                                    if (CustID != '' && CustID != null) {
+                                                        if (prArr[0].priceAgreementValue != '0') {
+                                                            var yourPrice1 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].priceAgreementValue.toFixed(2));
+                                                            invCatNumPrice = yourPrice1;
+                                                            console.log("FD Agent and Distributor");
+                                                        }
+                                                        else {
+                                                            var price = parseFloat(prArr[0].adpPrice);
+                                                            var roundedQty = parseInt(prArr[0].roundedQty);
+                                                            if(price > 0 && null != roundedQty && roundedQty > 0){
+                                                                price = price / roundedQty;
+                                                            }
+                                                            var yourPrice2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(price.toFixed(2));
+                                                            invCatNumPrice = yourPrice2;
+                                                            console.log("FD Agent and Distributor");
+                                                        }
+                                                    }
+                                                    else {
+                                                        var price = parseFloat(prArr[0].adpPrice);
+                                                        var roundedQty = parseInt(prArr[0].roundedQty);
+                                                        if(price > 0 && null != roundedQty && roundedQty > 0){
+                                                            price = price / roundedQty;
+                                                        }
+                                                        var yourPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(price.toFixed(2));
+                                                        invCatNumPrice = yourPrice;
+                                                        console.log('FD Agent Only');
+                                                    }
+                                                } else if (AgentSegment == 'LB' || AgentSegment == 'Lamp') {
+                                                    if (prArr[0].priceAgreementValue != '0') {
+                                                        var yourPrice4 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].priceAgreementValue.toFixed(2));
+                                                        invCatNumPrice = yourPrice4;
+                                                        console.log("LB Agent and Distributor");
+                                                    }
+                                                    else {
+                                                        var yourPrice5 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].bookPrice.toFixed(2));
+                                                        invCatNumPrice = yourPrice5;
+                                                        console.log("LB Agent and Distributor");
+                                                    }
+                                                }
+                                            } else if (userType == 'Distributor') {
+                                                if (prArr[0].priceAgreementValue != '0') {
+                                                    var yourPrice6 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].priceAgreementValue.toFixed(2));
+                                                    invCatNumPrice = yourPrice6;
+                                                    console.log("Distributor");
+                                                }
+                                                else {
+                                                    var yourPrice7 = new Intl.NumberFormat('en-US', { style: 'currency', currency: prArr[0].currencyISOCode }).format(prArr[0].bookPrice.toFixed(2));
+                                                    invCatNumPrice = yourPrice7;
+                                                    console.log("Distributor");
+                                                }
+                                            }
+                                        }
+                                        var addToCartPrice = invCatNumPrice.split("$").pop();
+                                        addToCartPrice = addToCartPrice.replace(/,/g, "");
+                                        if($.isNumeric(addToCartPrice) && addToCartPrice <= 0) {
+                                            invCatNumPrice = prArr[0].currencyISOCode == "CAD" ? "CA" : "";
+                                            invCatNumPrice += "$0.01";
+                                        }
+                                        yourPrice_ = invCatNumPrice;
+                                        invCatNum = prArr[0].description;
+                                        invCatNumQty =  1;//qty;
+                                        $(".invalidMessage").hide();
+                                        invCatNumCartID = res.inputContext.currentCartID;
+                                        prArr[0].bookPrice = prArr[0].bookPrice * 1;//qty;
+                                        invCatNumFound = true;
+                                    }
+                                    else {
+                                        statusColor_="darkOrange";
+                                        console.log("Salesorg3",res.data[i].salesOrg);
+                                        if(res.data[i].salesOrg == "1CA1"){
+                                        	var notFoundPrice = "CA$0.01";
+                                        }
+                                        else {
+                                            var notFoundPrice = "$0.01";
+                                        }
+                                        $(".invalidMessage").show();
+                                        yourPrice_ = notFoundPrice;
+                                        invCatNumFound = true;
+                                        invCatNum = prArr[0].description;
+                                        invCatNumQty = 1;//qty;
+                                        invCatNumPrice = notFoundPrice;
+                                        invCatNumCartID = res.inputContext.currentCartID;
+                                    }
+                                }
+                               
+                                multiProductTableViewString+= ''
+                                +'<tr>'
+                                +'<td><input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-tbl-skus[]" value="'+productSkus[i]+'" /></td>'
+                                +'<td>'
+                                +'<div class="inventory-section">'
+                                +'<input type="text" class="form-control text-center '+statusColor_+'" value="'+status_+'" disabled />';
+                                
+                                if(status_.trim().toUpperCase()!='DELISTED' && status_.trim().toUpperCase()!='VALIDCAT' && status_.trim().toUpperCase()!='INVALIDCAT'){
+                                    multiProductTableViewString+= ""
+                                    +"<a class='showinventoryModalButton' data-id='"+ prArr[0].material +"~materialdescription' data-name='"+prArr[0].description+"' data-item-name='N/A' href='#"+ prArr[0].material +"~materialdescription'>View Inventory</a>";
+                                }
+
+                                multiProductTableViewString+= ''
+                                +'</div>'
+                                +'</td>'
+                                +"<td><input type='text' class='form-control text-center' placeholder='Catalog Number' value='"+catalogNo_+"' disabled /></td>"
+                                +'<td><input id="uom_'+i+'" type="text" class="form-control text-center" value="'+uom_+'" disabled /></td>'
+                                +'<td><input id="price_'+i+'" type="text" class="form-control text-center" value="'+yourPrice_+'" disabled /></td>'
+                                +'<td><input id="qty_'+i+'" type="text" class="form-control text-center" value="'+invCatNumQty+'" /></td>'
+                                +'<td>'
+                                    +'<div class="type-mark-section">'
+                                        +'<input id="typemark_'+i+'" type="text" class="form-control text-center typeMarkMTO" placeholder="Type Mark" maxlength="8" data-id="'+i+'" />'
+                                        +'<span class="typemark-char-count" data-id="'+i+'">Remaining: <abbr>8</abbr></span>'
+                                    +'</div>'
+                                +'</td>';
+
+                                if(status_.trim().toUpperCase()=='DELISTED'){
+                                    multiProductTableViewString+= ''
+                                    +'<td>'
+                                    +'<span>'
+                                        +'<button class="btn btn-default btn-sm" title="Add To Cart" disabled>'
+                                            +'<i class="fa fa-shopping-cart"></i>'
+                                        +'</button>'
+                                    +'</span>'
+                                    +'</td>';
+                                } else {
+                                    console.log('prArr[0].description: '+prArr[0].description);
+                                    if(prArr[0].description.includes('\"')){
+                                        prArr[0].description = prArr[0].description.replace('\"','\\"');
+                                        console.log('post replace prArr[0].description: '+prArr[0].description);
+                                    }
+                                    multiProductTableViewString+= ''
+                                    +'<td>'
+                                    +'<span>'
+                                        +"<button class='btn btn-default btn-sm' role='button' onclick='addInvalidSkuToCartFromMultiProductSearch(\""+status_+"\", \""+i+"\",\""+ prArr[0].description +"\",\""+yourPrice_+"\")' title='Add To Cart'>"
+                                            +'<i class="fa fa-shopping-cart"></i>'
+                                        +'</button>';
+
+                                        dataId +=  "~" + status_;
+                                        //"\''+status_+'\'~{{this.sfid}}~\''+catalogNo_+'\'~\''+uom_+'\'~\''+invCatNumQty+'\'~{{this.sfdcCurrencyISOCode}}"
+                                        if(status_.trim().toUpperCase()!='DELISTED' &&
+                                            status_.trim().toUpperCase()!='VALIDCAT' &&
+                                            status_.trim().toUpperCase()!='INVALIDCAT' &&
+                                            userType == 'Agent' &&
+                                            (AgentSegment == 'FD' || AgentSegment == 'Fixture') &&
+                                            ((profileName == "Agent Read Only B2B Storefront Registered Users" &&
+                                             permissionSets.includes("View_Commissions_Set_Price") == true) ||
+                                             profileName == "Agent B2B Storefront Registered Users")) {
+                                            multiProductTableViewString += ''
+                                            +"<a class='mutli-prdcts-comm showcommissionWidgetModalButton' title='Commission Calculator' data-id= '"+dataId+"' >"
+                                                +'<i class="fa fa-calculator"></i>'
+                                            +'</a>'
+                                        }
+                                    multiProductTableViewString+= ''
+                                    +'</span>'
+                                    +'</td>';
+                                }
+                                multiProductTableViewString+= '</tr>';
+                            } else {
+                                if(res.data[i].objectError){
+                                    multiProductTableViewString+= ''
+                                    +'<tr>'
+                                    +'<td><input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-tbl-skus[]" value="'+productSkus[i]+'" /></td>'
+                                    +'<td class="unauth-prdct" colspan="8">'
+                                    +'The selected account is not authorized to purchase this product.'
+                                    +'</td>'
+                                    +'</tr>';
+                                } else {
+                                    multiProductTableViewString+= ''
+                                    +'<tr>'
+                                    +'<td><input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-tbl-skus[]" value="'+productSkus[i]+'" /></td>'
+                                    +'<td colspan="8" />'
+                                    +'</tr>';
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        console.log("===================ELSE=================");
+                        //todo complete resoinse failure senario
+                        console.log('Response Faliure');
+                    }
+
+                    multiProductTableViewString += ''
+                    +'<tr>'
+                    +'<td class="validation-btns" colspan="8">'
+                        +'<button class="btn btn-default btn-sm clear-product-fields" data-type="tbl-clear">Clear</button>'
+                        +'<button class="btn btn-default btn-sm validate-prdcts" data-type="tbl-validate">Validate</button>'
+                    +'</td>'
+                    +'</tr>';
+
+                    multiProductTableViewString += ''
+                    +'</tbody>'
+                    +'</table>';
+
+                    $(".validate-product-inputs").hide();
+                    $(".multi-add-to-cart-prdcts").html(multiProductTableViewString).show();
+                }, {
+                    nmsp: false,
+                    escape: false
+                });
+
+                $('.deskLayout')[0].scrollIntoView();
+            },
+
+            viewPrototype.validateMultiProductForm = function() {
+                var hasValue = $('input[name="product-skus[]"]').filter((index, input) => input.value.length > 0).length;
+                $('.validate-prdcts').attr('disabled', hasValue ? false : true);
+            }
+
+        });
+
+        Backbone.on('view:productItemsView:created',function (viewPrototype) {
+
+            localStorage.setItem("Current page URL",window.location.href);
+
+            //console.log('view:productItemsView:created viewPrototype', viewPrototype);
+            viewPrototype.renderDesktop = function () {
+                var v = this;
+                v.$el.empty();
+                v.delegateEvents();
+                v.$el.toggleClass('cc_grid_container', v.model.get('layout') === 'grid');
+                v.$el.toggleClass('table-container', v.model.get('layout') === 'spreadsheet');
+                let container;
+                //console.log('table draw prodCount',v.model.get('prodCount'));
+                //console.log('table draw searchString',v.model.get('searchString'));
+                //console.log('table draw noResult',v.model.get('noResults'));
+                //console.log('table draw ',v.model.get('layout'));
+                const urlParams = new URLSearchParams(window.location.search);
+                var categoryId = urlParams.get('categoryId');
+                var searchText = urlParams.get('searchText');
+
+                if (v.model.get('layout') === 'spreadsheet' && (!v.model.get('noResults'))) {
+                    container = document.createElement('span');
+                    container.classList.add('spreadsheet');
+                    let tableHeaderRow = document.createElement('span');
+                    tableHeaderRow.classList.add('table-header-row');
+                    tableHeaderRow.innerHTML = '<span class="table-header-cell">Catalog No.</span>' +
+                        '<span class="table-header-cell">Family Name</span>' +
+                        '<span class="table-header-cell col-uom">Unit of Measure</span>' +
+                        '<span class="table-header-cell">Pieces per Unit</span>' +
+                        '<span class="table-header-cell">QuickStock (in&nbsp;Pieces)</span>' +
+                        '<span class="table-header-cell">Total Inventory (in&nbsp;Pieces)</span>' +
+						'<span class="table-header-cell">Minimum order quantity (in&nbsp;Pieces)</span>' +
+                        `<span class="table-header-cell">Your Price</span>` +
+                        '<span class="table-header-cell"></span>' +
+						'<span class="table-header-cell">Quantity</span>' +
+                        '<span class="table-header-cell"></span>' +
+                        '<span class="table-header-cell"></span>' +
+                        '<span class="table-header-cell"></span>';
+                    container.appendChild(tableHeaderRow);
+                } else {
+                    container = document.createDocumentFragment();
+                }
+                _.each(v.itemViews, function (item) {
+                    container.appendChild(item.render().el);
+                    if (v.model.get('layout') === 'grid' && (item.model.get('index') + 1) % 3 === 0) {
+                        var clear = document.createElement("div");
+                        clear.className = 'clearfix'
+                        container.appendChild(clear);
+                    }
+                });
+                v.$el.append(container);
+
+                if (this.pickerView) {
+                    this.pickerView.render();
+                }
+                return this;
+            }
+
+            viewPrototype.refreshView = function(refetch){
+
+                if (CCRZ.productListPageView) {
+                    if (customSorting && (CCRZ.productListPageView.model.attributes.sortBy == 'sfdcName' || CCRZ.productListPageView.model.attributes.sortBy == 'price')) {
+                        customSorting = false;
+                    }
+                    console.log('sortBy ',CCRZ.productListPageView.model.attributes.sortBy);
+                }
+                if (customSorting) {
+                    console.log('custom sorting refresh');
+
+                    let filters = CCRZ.productListPageView.productItemsView.options.model.attributes.prodFilters;
+
+                    let filterMap = {};
+                    $(filters).each(function() {
+                        $.extend(filterMap, {[$(this).attr('sfid')] : ($(this).attr('specValues')[0].value).replace("''", "\\'") });
+                    });
+                    console.log('filtered! ',filterMap);
+
+                    const renderCount = CCRZ.productListPageView.productItemsView.model.attributes.pageSize;//CCRZ.productListPageView.model.attributes.renderedCount;
+                    const searchString = CCRZ.productListPageView.model.attributes.searchString;
+                    const prodCategoryId = CCRZ.productListPageView.model.attributes.prodCategoryIds;
+                    customSorting = true;
+                    customOffset = 0;
+
+                    const remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                        className: 'ProductListActions'
+                    });
+
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'),'customOrderBy', orderDirection,
+                            orderCriteria, filterMap, renderCount, searchString, prodCategoryId, customOffset,
+                        function (res, err) {
+                            if (res.success) {
+                                //console.log(res.data);
+                                let models = CCRZ.productListPageView.productItemsView.collection.models;
+                                let productList = [];
+
+                                let itemsToRender = CCRZ.productListBuffer.reset(res.data.productList, {sort: false});
+                                CCRZ.productListPageView.productItemsView.collection.reset(itemsToRender, {sort: false, remove: false, merge: false});
+
+                                let v = CCRZ.productListPageView.productItemsView;
+
+                                _.each(v.itemViews, function (itemView) {
+                                    itemView.disposeView();
+                                });
+                                v.itemViews = [];
+                                v.collection.each(function (product, index) {
+                                    product.set('index', index);
+                                    v.addProductView(product);
+                                });
+                                v.render();
+
+                            }
+                        }, {
+                            nmsp: false,
+                            escape: false
+                        }
+                    );
+                } else {
+                    var shouldRefetch = !_.isUndefined(refetch) ? refetch : true;
+                    var v = this;
+
+                    // Set multi search product view By Sameer Mahadik on(3-4-2022)
+                    var lssIndexData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                    lssIndexData = JSON.parse(lssIndexData);
+                    var permissionData = JSON.parse(localStorage.getItem(lssIndexData['UserPermission']));
+
+                    var currentUrl = new URL(window.location.href);
+
+                    if (currentUrl.searchParams.has("mutliSearch")) {
+                        this.model.set("multiProductEntryView", true);
+                    } else {
+                        this.model.set("multiProductEntryView", false);
+                    }
+
+                    if (permissionData !== null) {
+                        var permissionSets = permissionData['permissionSet'];
+                        var profileName = permissionData['profileName'];
+
+                        if ((profileName == "Agent Read Only B2B Storefront Registered Users" ||
+                            profileName == "Distributor Read Only B2B Storefront Registered Users") &&
+                            permissionSets.includes("View_PLP_and_PDP_Prices") == false) {
+                                this.model.set("multiProductPricePermission", false);
+                            } else {
+                                this.model.set("multiProductPricePermission", true);
+                            }
+                    } else {
+                        this.model.set("multiProductPricePermission", true);
+                    }
+
+                    if(shouldRefetch){
+                        this.model.set('noResults', false);
+
+                        this.collection.fetch(function () {
+                            // If we need to refretch data, dispose the views, and retrieve the product records
+                            _.each(v.itemViews, function(itemView){
+                                itemView.disposeView();
+                            });
+                            v.itemViews = [];
+                            v.collection.each(function(product, index){
+                                product.set('index', index);
+                                v.addProductView(product);
+                            });
+                            v.render();
+                        })
+                    }else{
+                        v.render();
+                    }
+                }
+            }
+        });
+
+        Backbone.on('view:productItemView:created', async function (viewPrototype) {
+            console.log("productItemView execute");
+            const urlParams = new URLSearchParams(window.location.search);
+
+            /*if (urlParams.get('portalUser') != null) {
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') === null) {
+                    //console.log('local storage needs to be set');
+                    localStorage.setItem('AgentName', "TEST");
+                }
+            }*/
+            //console.log('view:productItemView:created viewPrototype', viewPrototype);
+            viewPrototype.templateTable = CCRZ.util.template('ProductItem-Table-Row');
+            //param.tagName = this.model.get('layout') === 'speadsheet' ? 'tr' : 'span';
+            viewPrototype.renderDesktop = function () {
+
+                var v = this;
+//                //console.log('test prodCount',v.model);
+//                //console.log('test prodCount',v.model.get('prodCount'));
+
+
+                this.delegateEvents();
+                this.model.set('compareTrayFull', CCRZ.productCompareItems.length >= 4);
+                this.model.set('layout', CCRZ.productListPageModel.get('layout'));
+                let product = this.model.attributes;
+                if (product.productPricingData) product.price = product.productPricingData.productPrice.price * product.piecesPerUnit;
+                if (isNaN(product.price)) {
+                    product.price = null;
+                }
+                this.$el.toggleClass(this.gridClass, this.model.get('layout') === 'grid');
+                if (this.model.get('layout') === 'grid') {
+                    this.$el.html(this.templateGrid(this.model.toJSON()));
+                } else if (this.model.get('layout') === 'list') {
+                    this.$el.html(this.templateList(this.model.toJSON()));
+                } else {
+                    this.$el.html(this.templateTable(this.model.toJSON()));
+                }
+                return this;
+            };
+            viewPrototype.events['change .uom-select'] = 'handleUOMSelect';
+            viewPrototype.handleUOMSelect = function (event) {
+				let selectedUOM = event.currentTarget.value;
+				let product = this.model.attributes;
+				let index = product.pricingUOMS.findIndex(e => e.UOM === selectedUOM);
+                // Set UOM value in localstorage By Sameer On(5-7-2021)
+                localStorage.setItem(product.sfid, selectedUOM);
+
+				if (index !== -1) {
+					product.piecesPerUnit = product.pricingUOMS[index].multiplier;
+					product.unitOfMeasure = selectedUOM;
+				}
+                     // Permission Set As Per Loggedin User
+        if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+            var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+            userData = JSON.parse(userData);
+            var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+            var permissionSets = (permissionData? permissionData['permissionSet'] : '');
+            var profileName = (permissionData? permissionData['profileName'] : '');
+
+            if (profileName == "Agent Read Only B2B Storefront Registered Users" || profileName == "Distributor Read Only B2B Storefront Registered Users" ) {
+                if (permissionSets.includes("View_PLP_and_PDP_Prices") == false) {
+                    $(".minicart").hide();
+                    $(".quick-order").hide();
+                    Backbone.on('view:Menu:created', function (viewProto) {
+                        $("#cartHeader").hide();
+                    });
+                    // Backbone.on('view:productListPageView:created', function (viewPrototype) {
+                    //     $("div.price").hide();
+                    // });
+                    // Update Pices Per Unit As Per UOM By Sameer Mahadik On(8-19-2021)
+                    $(".picesPerUnit_" + product.sfid).text(product.piecesPerUnit);
+                }
+                else{
+                  if (isUserAgent === true) {
+                    	loadAdpPricesFromSAP([this]);
+                	} else {
+                    	product.price = product.productPricingData.productPrice.price * product.piecesPerUnit;
+                    	this.render();
+                         $(".skuADPDiv").css('display', 'none');
+                    	 $(".skuADP2").css('display', 'none');
+                    	 $(".yourPrice").css('display', 'none');
+                	}
+                }
+            }
+            else{
+                if (isUserAgent === true) {
+                    	loadAdpPricesFromSAP([this]);
+                	} else {
+                    	product.price = product.productPricingData.productPrice.price * product.piecesPerUnit;
+                    	this.render();
+                         $(".skuADPDiv").css('display', 'none');
+                    	 $(".skuADP2").css('display', 'none');
+                    	 $(".yourPrice").css('display', 'none');
+                	}
+
+            }
+
+        }
+				showCommissionWidget();
+            };
+
+            viewPrototype.addToCart = function () {
+                //console.log('Add to cart this', this);
+                var typeMark = $('#typeMarkTextarea_' + this.model.attributes.sfid).val();
+                $('#typeMarkTextarea_' + this.model.attributes.sfid).val(null);
+                $('#typeMarkTextarea_' + this.model.attributes.sfid).keyup();
+                let cartId = CCRZ.pagevars.currentCartID;
+                let sku = this.model.attributes.SKU;
+                let qty = parseFloat($('#' + this.model.attributes.sfid + '_qtyEntry').val());
+                let price = this.model.attributes.price;
+                let sfid = this.model.attributes.sfid;
+                let priceUpdate = this.model.attributes.priceUpdate;
+                let uom = this.model.attributes.unitOfMeasure;
+                let priceAgreement = this.model.attributes.priceAgreement;
+
+                // Add To cart Your price By Sameer on(5-7-2021)
+                let yourPrice = $("#yourPrice_"+sfid).text().trim();
+
+                if(yourPrice !== "Contact Your Agent") {
+                    // yourPrice = yourPrice.substring(1, yourPrice.length);
+                    yourPrice = yourPrice.split("$").pop();
+                    yourPrice = yourPrice.replace(/,/g, "");
+                    if($.isNumeric(yourPrice)) {
+                        price = yourPrice
+                    }
+                }
+				if (Number.isNaN(price)) {
+					price = 0;
+				}
+                //console.log("Fianl Add To Cart Price : ", price);
+
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'ProductListActions'
+                });
+                //$("header").before("<div class='customLoader'></div>");//custom
+                $("header").before("<div id='overlay' class='deskLayout'><div class='customLoader'></div></div>");//line added for custom loader
+                remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'addExtPricedItem',
+                    cartId, sku, sfid, qty, price, typeMark, uom,
+                    function (res, err) {
+                        //console.log(res, err);
+                        if (res.success) {
+                            // //console.log('success');
+                            var cartId = CCRZ.pagevars.currentCartID;
+                            CCRZ.pubSub.trigger('cartChange', cartId);
+                            setTimeout(function () {
+                            $("#overlay").remove();
+                            $(".modal-backdrop").remove();
+                            }, 4000);
+                        } else {
+                            console.error('failed', err);
+                            $("#overlay").remove();
+                        }
+                    }, {
+                        nmsp: false,
+                        escape: false,
+                        timeout: 120000
+                    });
+            };
+        });
+
+
+
+		// When currentUser loads, reload product items, so the right pricing is applied
+		// TODO: itt kezdodik
+        Backbone.on('currentUser:updated', function(currentUser){
+            //console.log('currentUser:updated');
+            //console.log('loadSAPPriceDataCollector currentUser');
+            userAgent = CCRZ.currentUser;
+            loadSAPPriceDataCollector();
+            CCRZ.pubSub.trigger('view:productItemsView:refresh', this);
+
+        });
+
+		CCRZ.pubSub.on('effectiveAccountLoaded', function(effectiveAccount){
+		    //console.log(`eeffectiveAccountLoaded`,effectiveAccount);
+			//console.log('Dataset',CCRZ.effSelectorView.dataSet);
+	     	detailEffectiveAccount = effectiveAccount;;
+    	 	detailAgentAccount = CCRZ.effSelectorView.dataSet;
+
+    	 	//console.log('loadSAPPriceDataCollector effectiveAccount');
+    	 	workingEffAccount = effectiveAccount;
+            loadSAPPriceDataCollector();
+
+			if (detailAgentAccount.agents == undefined) {
+			   //console.log('detailAgentAccount.agents',detailAgentAccount.agents);
+				$(".skuADPDiv").css('display', 'none');
+				$(".skuADP2").css('display', 'none');
+				$(".yourPrice").css('display', 'none');
+		   }
+
+		   if (effectiveAccount.Account_Group__c==='Z001') {
+		       if (CCRZ.effSelectorView.dataSet.agent!== undefined){
+		           if(CCRZ.effSelectorView.dataSet.agent.Customer_Segmentation__c !=='FD' &&
+		           CCRZ.effSelectorView.dataSet.agent.Customer_Segmentation__c !=='Fixture'){
+		               $(".skuADPDiv").css('display', 'none');
+				   }
+			   } else if(effectiveAccount.Account_Group__c==='Z001' &&
+			   (effectiveAccount.Customer_Segmentation__c==='LB' || effectiveAccount.Customer_Segmentation__c ==='Lamp')){
+			       $(".skuADPDiv").css('display', 'none');
+			   }
+		   } else if(effectiveAccount.Account_Group__c==='ZEAG' &&
+		   (effectiveAccount.Customer_Segmentation__c==='LB' || effectiveAccount.Customer_Segmentation__c==='Lamp')){
+		       $(".skuADPDiv").css('display', 'none');
+		   }
+            CCRZ.pubSub.trigger('view:productItemsView:refresh', this);
+		});
+
+        CCRZ.pubSub.on('view:productItemsView:refresh', function (productItemsView) {
+            if (productItemsView && productItemsView.model && productItemsView.itemViews) {
+                //console.log('loadSAPPriceDataCollector productItemsView');
+                productItemsViewGlobal = productItemsView;
+                loadSAPPriceDataCollector();
+            }
+        });
+
+        function loadSAPView(productItemsView) {
+
+            //console.log('product item view at SAP call', productItemsView);
+
+            showCommissionWidget();
+
+            try {
+                //console.log('CCRZ.currentUser ',CCRZ.currentUser);
+                isUserAgent = (CCRZ.currentUser.GEAccountGroup === "ZEAG");
+                //console.log('isUserAgent ZEAG',isUserAgent);
+            } catch(e) {
+                //console.log('isUserAgent error');
+            }
+
+            if (productItemsView && productItemsView.model && productItemsView.itemViews) {
+                let productViews = [];
+                for (let i = 0; i < productItemsView.itemViews.length; i++) {
+                    let product = productItemsView.itemViews[i].model.attributes;
+                    /*if (isUserAgent == null) {
+                        //console.log('Product isUserAgent', product.isUserAgent);
+                        isUserAgent = product.isUserAgent;
+                    }*/
+                    if (product.unitOfMeasure == null && product.pricingUOMS?.length > 0) {
+                        product.piecesPerUnit = product.pricingUOMS[0].multiplier;
+                        product.unitOfMeasure = product.pricingUOMS[0].UOM;
+                    }
+                    if (product.SAP == null) {
+                        product.SAP = {
+                            adpPrice: null,
+                            yourPrice: null,
+                            bookPrice: null
+                        };
+                        productViews.push(productItemsView.itemViews[i]);
+                    }
+                }
+			   	// Permission Set As Per Loggedin User
+        		//console.log('SS ',localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}'));
+				if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+					var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+					//console.log('userData ',userData);
+					userData = JSON.parse(userData);
+					var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+					var permissionSets = (permissionData? permissionData['permissionSet'] : '');
+					var profileName = (permissionData? permissionData['profileName'] : '');
+
+					if (profileName == "Agent Read Only B2B Storefront Registered Users" || profileName == "Distributor Read Only B2B Storefront Registered Users" ) {
+						if (permissionSets.includes("View_PLP_and_PDP_Prices") == false) {
+							//console.log('View_PLP_and_PDP_Prices');
+							$(".minicart").hide();
+							$(".quick-order").hide();
+							Backbone.on('view:Menu:created', function (viewProto) {
+								$("#cartHeader").hide();
+							});
+							// Backbone.on('view:productListPageView:created', function (viewPrototype) {
+							//     $("div.price").hide();
+							// });
+						} else {
+							if (productViews.length > 0 && isUserAgent) {
+								//console.log('loadAdpPricesFromSAP ',productViews);
+								if (CCRZ.effSelectorView.dataSet.workingEffAccount) {
+									loadAdpPricesFromSAP(productViews);
+								} else {
+									setDelayForLoadSAPPrices(productViews);
+								}
+							//getRealTimeInventory(productViews);
+							}
+						}
+					} else {
+						if (productViews.length > 0 && isUserAgent) {
+							//console.log('loadAdpPricesFromSAP# ',productViews);
+							if (CCRZ.effSelectorView.dataSet.workingEffAccount) {
+								loadAdpPricesFromSAP(productViews);
+							} else {
+								setDelayForLoadSAPPrices(productViews);
+							}
+						}
+					}
+				}
+			}
+            if(detailEffectiveAccount!== undefined && detailAgentAccount!==undefined){
+				if (detailAgentAccount.agents == undefined) {
+					//console.log('detailAgentAccount.agents',detailAgentAccount.agents);
+					$(".skuADPDiv").css('display', 'none');
+					$(".skuADP2").css('display', 'none');
+					$(".yourPrice").css('display', 'none');
+				}
+			}
+			if(detailEffectiveAccount!== undefined && detailAgentAccount!==undefined) {
+				if(detailEffectiveAccount.Account_Group__c==='Z001') {
+					if(detailAgentAccount.agent!== undefined){
+					   if(detailAgentAccount.agent.Customer_Segmentation__c !=='FD'
+					   && detailAgentAccount.agent.Customer_Segmentation__c !=='Fixture') {
+						   $(".skuADPDiv").css('display', 'none');
+						   $(".skuADP2").css('display', 'none');
+					   }
+					}
+					else if(detailEffectiveAccount.Account_Group__c==='Z001' &&
+					(detailEffectiveAccount.Customer_Segmentation__c==='LB' || detailEffectiveAccount.Customer_Segmentation__c==='Lamp')) {
+						 $(".skuADPDiv").css('display', 'none');
+						 $(".skuADP2").css('display', 'none');
+					}
+				} else if (detailEffectiveAccount.Account_Group__c==='ZEAG' &&
+				(detailEffectiveAccount.Customer_Segmentation__c==='LB' || detailEffectiveAccount.Customer_Segmentation__c==='Lamp')) {
+						$(".skuADPDiv").css('display', 'none');
+						$(".skuADP2").css('display', 'none');
+				}
+            }
+            // Set MTO Search Hot Link After Poroduct Search By Sameer Mahadik On(7-28-2021)
+            if (productItemsView.model?.attributes.isSearch) {
+                if ($(".cc_no_results").length == 0) {
+                    var currentUrl = new URL(window.location.href);
+                    var search_params = currentUrl.searchParams;
+                    search_params.set('searchText', 'Enter_Product');
+                    currentUrl.search = search_params.toString();
+                    var search_url = currentUrl.toString();
+                    $(".search-more-products").remove();
+                    $(".cc_list_footer").append("<p class='search-more-products text-center'>If you still do not see the product you are looking for, please use the <a href='" + search_url + "'>Extended Catalog Search</a>.</p>");
+                }
+            }
+        };
+
+        function setDelayForLoadSAPPrices(productViews){
+            setTimeout(function () {
+				//console.log('setDelayForLoadSApPrices loadAdpPricesFromSAP');
+				if (CCRZ.effSelectorView.dataSet.workingEffAccount) {
+				    loadAdpPricesFromSAP(productViews);
+    			} else {
+    			    setDelayForLoadSAPPrices(productViews);
+       			}
+			}, 1000);
+        }
+
+        function setDelayForCurrentUser(){
+            setTimeout(function () {
+				//console.log('setDelayForCurrentUser');
+				if (CCRZ.currentUser && CCRZ.currentUser.GEAccountGroup === "ZEAG") {
+				    //console.log('found');
+				    return (CCRZ.currentUser.GEAccountGroup === "ZEAG");
+    			} else {
+    			    setDelayForCurrentUser();
+       			}
+			}, 1000);
+        }
+
+        function loadSAPPriceDataCollector() {
+
+            //console.log('Collector userAgent ',userAgent);
+            //console.log('Collector productItemsView ',productItemsViewGlobal);
+            //console.log('Collector workingEffAccount ',workingEffAccount);
+
+            if (userAgent && productItemsViewGlobal && workingEffAccount) {
+                //console.log('Collector true');
+                loadSAPView(productItemsViewGlobal);
+            }
+        }
+
+        function loadAdpPricesFromSAP(productViews) {
+            try {
+                var agentID='';
+                var callType = 'L';
+                //console.log('eff selector at SAP call',CCRZ.effSelectorView.dataSet)
+            setTimeout(function () {
+
+			//console.log('delay over');
+            if(CCRZ.effSelectorView.dataSet.agent!== undefined){
+                //console.log('agent found');
+			 	agentID=CCRZ.effSelectorView.dataSet.agent.sfid;
+			}
+			//console.log('loadAdpPricesFromSAP eff acc ',CCRZ.effSelectorView.dataSet.workingEffAccount);
+			var CustID=CCRZ.effSelectorView.dataSet.workingEffAccount.sfid;
+
+            //console.log('CCRZ.effSelectorView.dataSet.workingEffAccount in getRealTimePricing', CustID);
+            //console.log('CCRZ.effSelectorView.dataSet.agent in getRealTimePricing', agentID);
+            //console.log('productViews ',productViews);
+                let realTimePricingInputs = [];
+                for (const productView of productViews) {
+                    realTimePricingInputs.push({sfid: productView.model.attributes.sfid, UOM: productView.model.attributes.unitOfMeasure, material: productView.model.attributes.SKU});
+                    productView.model.attributes.SAP.adpPrice = null;
+                    productView.model.attributes.SAP.yourPrice=null;
+                    productView.model.attributes.SAP.bookPrice=null;
+
+                    productView.render();
+
+                           // Permission Set As Per Loggedin User
+                    if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                        var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                        userData = JSON.parse(userData);
+                        var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+                        var permissionSets = (permissionData? permissionData['permissionSet'] : '');
+                        var profileName = (permissionData? permissionData['profileName'] : '');
+
+                        if (profileName == "Agent Read Only B2B Storefront Registered Users" || profileName == "Distributor Read Only B2B Storefront Registered Users" ) {
+                            if (permissionSets.includes("View_Commissions_Set_Price") == false) {
+                                $(".showcommissionWidgetModalButton").hide();
+                            }
+
+                        }
+                    }
+                    if(detailEffectiveAccount!== undefined && detailAgentAccount!==undefined){
+                    if(detailEffectiveAccount.Account_Group__c==='Z001') {
+                        if(detailAgentAccount.agent!== undefined){
+                           if(detailAgentAccount.agent.Customer_Segmentation__c !=='FD' &&
+                           detailAgentAccount.agent.Customer_Segmentation__c !=='Fixture'){
+
+                             $(".skuADPDiv").css('display', 'none');
+                             $(".skuADP2").css('display', 'none');
+
+
+                            }
+                        }
+                        else if(detailEffectiveAccount.Account_Group__c==='Z001' &&
+                        (detailEffectiveAccount.Customer_Segmentation__c==='LB' || detailEffectiveAccount.Customer_Segmentation__c==='Lamp')){
+                             $(".skuADPDiv").css('display', 'none');
+                             $(".skuADP2").css('display', 'none');
+
+                         }
+                    }
+                    else if(detailEffectiveAccount.Account_Group__c==='ZEAG' &&
+                    (detailEffectiveAccount.Customer_Segmentation__c==='LB' || detailEffectiveAccount.Customer_Segmentation__c ==='Lamp')){
+                             $(".skuADPDiv").css('display', 'none');
+                             $(".skuADP2").css('display', 'none');
+
+                    }
+                    }
+                }
+                //console.log(`loadAdpPricesFromSAP realTimePricingInputs`, realTimePricingInputs);
+                let remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'PriceAgreementController'
+                });
+                showCommissionWidget();
+                //console.log('input for real time pricing request', JSON.stringify(realTimePricingInputs));
+
+                var distributorType='';
+                var sampleOrder = false;
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                    var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                    userData = JSON.parse(userData);
+                    distributorType = localStorage.getItem(userData['DistributorType']);
+                }
+                if(distributorType != null && distributorType != undefined && distributorType == 'Z1'){
+                    //alert('Z1 Sample');
+                    sampleOrder=true;
+                }
+                console.log('sampleOrder: ',sampleOrder);
+
+                remoteCall.invokeCtx('getRealTimePricing', JSON.stringify(realTimePricingInputs),agentID,CustID,callType, sampleOrder, function (res, evt) {
+                    console.log('realTimePricingInputs ',JSON.stringify(realTimePricingInputs));
+                    console.log('getRealTimePricing', res, evt);
+                    console.log('callType', callType);
+                    if (res?.data?.priceAgreementItemList != null && res.data.priceAgreementItemList.length > 0) {
+                        for (const productView of productViews) {
+                            console.log("Product View: ", productView);
+                            productView.model.attributes.SAP.adpPrice = '';
+
+                            if (sampleOrder) {
+                                productView.model.attributes.price = 0;
+                            }
+
+                            for (const priceAgreementItem of res.data.priceAgreementItemList) {
+                                
+                                // Remove leading zero's from request & response material By Sameer Mahadik On (2-14-2022)
+                                var productViewSku = productView.model.attributes.SKU;
+                                productViewSku = productViewSku.replace(/^0+/, '');
+
+                                var priceAgreementItemMaterial = priceAgreementItem.material;
+                                priceAgreementItemMaterial = priceAgreementItemMaterial.replace(/^0+/, '');
+
+                                if (priceAgreementItemMaterial === productViewSku) {
+                                    productView.model.attributes.SAP.adpPrice = numberFormat.format(priceAgreementItem.adpPrice);
+
+                                if(priceAgreementItem.currencyISOCode!=''){
+
+                                    var bookprice = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.bookPrice.toFixed(2));
+                                    productView.model.attributes.SAP.bookPrice = bookprice;
+                                }
+
+                        		//FD Agent only
+                 				if(detailEffectiveAccount.Account_Group__c=='ZEAG' && (detailEffectiveAccount.Customer_Segmentation__c=='FD' || detailEffectiveAccount.Customer_Segmentation__c=='Fixture')
+                 				&& priceAgreementItem.currencyISOCode!=''){
+                                        var yourPrice = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.adpPrice.toFixed(2));
+                                        productView.model.attributes.SAP.yourPrice=yourPrice;
+                    					productView.model.attributes.SAP.adpPrice=yourPrice;
+                                }
+                				//FD Agent and Distributor
+                				if(detailAgentAccount.agent!==undefined && detailEffectiveAccount.Account_Group__c=='Z001'){
+                                    if(detailAgentAccount.agent.Customer_Segmentation__c=='FD' || detailAgentAccount.agent.Customer_Segmentation__c=='Fixture'){
+                                        if (priceAgreementItem.priceAgreementValue != '0' && priceAgreementItem.currencyISOCode!='') {
+                                        	var yourPrice1 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+											var yourPrice11 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.adpPrice.toFixed(2));
+                                            productView.model.attributes.SAP.yourPrice=yourPrice11;
+                                            productView.model.attributes.SAP.adpPrice=yourPrice1;
+                                    	}
+                                        else{
+                                            if(priceAgreementItem.currencyISOCode!=''){
+                                                var yourPrice2 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.adpPrice.toFixed(2));
+                                      		    productView.model.attributes.SAP.yourPrice=yourPrice2;
+                                                productView.model.attributes.SAP.adpPrice=yourPrice2;
+											}
+                                        }
+                                    }
+                                }
+                               //LB Agent Only
+                				if(detailEffectiveAccount.Account_Group__c=='ZEAG' &&
+                				(detailEffectiveAccount.Customer_Segmentation__c=='LB' || detailEffectiveAccount.Customer_Segmentation__c=='Lamp' )
+                				&& priceAgreementItem.currencyISOCode!=''){
+                                    var yourPrice3 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.adpPrice.toFixed(2));
+                                    productView.model.attributes.SAP.yourPrice=yourPrice3;
+                                    productView.model.attributes.SAP.adpPrice=yourPrice3;
+                                    $(".skuADPDiv").css('display', 'none');
+                     				$(".skuADP2").css('display', 'none');
+                                }
+                				//LB Agent and Distributor
+                				if(detailAgentAccount.agent!==undefined && detailEffectiveAccount.Account_Group__c=='Z001' && priceAgreementItem.currencyISOCode!=''){
+                                    if(detailAgentAccount.agent.Customer_Segmentation__c=='LB' || detailAgentAccount.agent.Customer_Segmentation__c=='Lamp'){
+                                        if (priceAgreementItem.priceAgreementValue != '0') {
+                                        	var yourPrice4 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                        	productView.model.attributes.SAP.yourPrice=yourPrice4;
+                                            productView.model.attributes.SAP.adpPrice=yourPrice4;
+                                    	}
+                                        else{
+                                            if(priceAgreementItem.currencyISOCode!='' && productView.model.attributes.price){
+                                                var yourPrice5 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(productView.model.attributes.price.toFixed(2));
+                                      		    productView.model.attributes.SAP.yourPrice=yourPrice5;
+                                                productView.model.attributes.SAP.adpPrice=yourPrice5;
+                                                console.log('fixed toFixed');
+											}
+                                        }
+                                        $(".skuADPDiv").css('display', 'none');
+                     				    $(".skuADP2").css('display', 'none');
+                                    }
+                                }
+                				//Distributor only
+                				if(detailAgentAccount.agent==undefined && detailEffectiveAccount.Account_Group__c=='Z001'){
+                                        if (priceAgreementItem.priceAgreementValue != '0') {
+                                        	var yourPrice6 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                        	productView.model.attributes.SAP.yourPrice=yourPrice6;
+                                            productView.model.attributes.SAP.adpPrice=yourPrice6;
+                                            //console.log("if Distributor");
+                                    	}
+                                        else{
+                                            productView.model.attributes.SAP.yourPrice="Contact Your Agent";
+                                            //productView.model.attributes.SAP.adpPrice="Contact Your Agent";
+                                            //console.log("else Distributor");
+                                        }
+                                    	$(".skuADPDiv").css('display', 'none');
+                     				 	$(".skuADP2").css('display', 'none');
+
+
+
+                                }
+                /*  if(productView.model.attributes.SAP.adpPrice != '' ){
+                      $(".addtocartbuttonplp").attr("disabled", false);
+               		 }
+           			 else{
+            			}*/
+                /*  setTimeout(function () {
+                      $(".addtocartbuttonplp").attr("disabled", false);
+                }, 500);*/
+                break;
+                                }
+                            }
+
+                            productView.render();
+           // Permission Set As Per Loggedin User
+                    if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                        var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                        userData = JSON.parse(userData);
+                        var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+                        var permissionSets = (permissionData? permissionData['permissionSet'] : '');
+                        var profileName = (permissionData? permissionData['profileName'] : '');
+
+                        if (profileName == "Agent Read Only B2B Storefront Registered Users" || profileName == "Distributor Read Only B2B Storefront Registered Users" ) {
+                            if (permissionSets.includes("View_Commissions_Set_Price") == false) {
+                                $(".showcommissionWidgetModalButton").hide();
+                            }
+
+                        }
+                    }
+
+    						if(detailEffectiveAccount!== undefined && detailAgentAccount!==undefined){
+                            if(detailEffectiveAccount.Account_Group__c==='Z001') {
+                                if(detailAgentAccount.agent!== undefined){
+                                   if(detailAgentAccount.agent.Customer_Segmentation__c !=='FD' &&
+                                   detailAgentAccount.agent.Customer_Segmentation__c !=='Fixture'){
+
+                                     $(".skuADPDiv").css('display', 'none');
+                                     $(".skuADP2").css('display', 'none');
+
+
+                                    }
+                                }
+                                else if(detailEffectiveAccount.Account_Group__c==='Z001' &&
+                                (detailEffectiveAccount.Customer_Segmentation__c==='LB' || detailEffectiveAccount.Customer_Segmentation__c==='Lamp')){
+                                     $(".skuADPDiv").css('display', 'none');
+                                     $(".skuADP2").css('display', 'none');
+
+                                 }
+                            }
+                            else if(detailEffectiveAccount.Account_Group__c==='ZEAG' &&
+                            (detailEffectiveAccount.Customer_Segmentation__c==='LB' || detailEffectiveAccount.Customer_Segmentation__c==='Lamp')){
+                                     $(".skuADPDiv").css('display', 'none');
+                                     $(".skuADP2").css('display', 'none');
+
+                            }
+                            }
+                        }
+                    }
+                    showCommissionWidget();
+                    CCRZ.pubSub.trigger('view:productItemsView:refresh', this);
+                }, {
+                    nmsp: false,
+                    escape: false,
+                    timeout: 120000
+                });
+
+            
+
+                }, 2000);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        /*function getRealTimeInventory(productViews) {
+            let skus = [];
+            let sfids = [];
+            for (const productView of productViews) {
+                productView.model.attributes.SAP.inventoryAvailable = null;
+                productView.model.attributes.SAP.totalInventory = null
+                productView.model.attributes.SAP.quantity = null;
+                skus.push(productView.model.attributes.SKU);
+                sfids.push(productView.model.attributes.sfid);
+                productView.render();
+            }
+            var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                className: 'InventoryController'
+            });
+            remoteCall.invokeCtx('getInventoryAvailability', JSON.stringify(skus), JSON.stringify(sfids), function (res, err) {
+                if (res != null && res.data != null) {
+                    //console.log(`getInventoryAvailability res`, res);
+                    let inventoriesBySkuNumbers = res.data.inventoryMap;
+                    for (let productView of productViews) {
+                        productView.model.attributes.SAP.totalInventory = '';
+                        productView.model.attributes.SAP.inventoryAvailable = '';
+                        productView.model.attributes.SAP.quantity = '';
+                        let skuNumber = productView.model.attributes.SKU;
+                        if (inventoriesBySkuNumbers.hasOwnProperty(skuNumber.padStart(18, '0'))) {
+                            let inventories = inventoriesBySkuNumbers[skuNumber.padStart(18, '0')];
+                            for (i = 0; i < inventories.length; i++) {
+                                if (i === inventories.length - 1) {
+                                    productView.model.attributes.SAP.totalInventory = numberFormat.format(inventories[i].totalQuantity);
+                                }
+                                if (inventories[i].isDefaultWarehouse && inventories[i].isDisplay) {
+                                    productView.model.attributes.SAP.inventoryAvailable = numberFormat.format(inventories[i].quantity);
+                                }
+                                if (inventories[i].roundedQty != null) {
+                                    productView.model.attributes.SAP.quantity = numberFormat.format(inventories[i].roundedQty);
+                                }
+                            }
+                        }
+                        productView.render();
+                    }
+                }
+            }, {
+                nmsp: false,
+                escape: false,
+                timeout: 120000
+            });
+        }*/
+
+        Handlebars.registerPartial("typeMarkModal", $("#Type-Mark-Modal").html());
+
+        Handlebars.registerHelper('uomLabel', function (uomCode) {
+            return getUomLabelByUomCode(uomCode);
+        });
+
+        Handlebars.registerHelper('uomOptionElement', function (currentUOM, uomOption) {
+            if (currentUOM === uomOption) {
+                return `<option value=${uomOption} selected>${getUomLabelByUomCode(uomOption)}</option>`
+            }
+            return `<option value=${uomOption}>${getUomLabelByUomCode(uomOption)}</option>`
+        });
+
+        Handlebars.registerHelper('isWarehouseProductsToDisplay', function (key, productSKU) {
+            return key.lastIndexOf(productSKU) > 0;
+
+        });
+
+        Handlebars.registerHelper('numberFormat', function (data) {
+            if (data != null && data !== '') {
+                return numberFormat.format(data);
+            }
+            return '';
+        });
+
+    </script>
+    <script>
+    /*function enableAddtoCart(){
+        //console.log("Test123111");
+        $(".addtocartbuttonplp").attr("disabled", false);
+        //console.log("Test123111");
+         }*/
+
+    </script>
+    <style>
+        .dropdown-menu>li>.btn:hover{
+            background-color: #5f88b6 !important;
+        }
+        .red {
+            border: 2px solid red;
+        	color: red;
+        	font-weight: bold;
+         }
+        .green {
+            border: 2px solid green;
+        	color:  green;
+        	font-weight: bold;
+         }
+        .darkOrange {
+            border: 2px solid #FF9F19;
+        	color:  #FF9F19;
+        	font-weight: bold;
+         }
+        input::-webkit-outer-spin-button,
+		input::-webkit-inner-spin-button {
+ 		 -webkit-appearance: none;
+ 		 margin: 0;
+		}
+  }
+
+    </style>
+</apex:page>

@@ -1,0 +1,34 @@
+<apex:page standardController="Opportunity" extensions="GE_LGT_FormulaFields">
+    <!-- Rashmitha Changed the API vesion from 35 to 45 on 5-Mar-2019 as per 1447 request-->
+<apex:form >
+<apex:pageBlock >
+<apex:pageBlockSection columns="1">
+
+    <apex:pageBlockSectionItem >
+    Next Steps : <apex:outputPanel ><b><apex:outputField value="{!opptylist[0].Next_Steps__c}"/></b></apex:outputPanel> 
+    </apex:pageBlockSectionItem>
+    
+    <apex:pageBlockSectionItem >
+    Info :<apex:outputPanel ><b><apex:outputField value="{!opptylist[0].Info__c}"/></b></apex:outputPanel>
+    </apex:pageBlockSectionItem>
+    
+    <apex:pageBlockSectionItem >
+   Info :<apex:outputPanel ><b>Following are the applied values of Probability(%) for respective stages: S1 - 10%, S2 - 30%, S3 - 50%, S4 - 70%, S5 - 90%, PO Received - 100%.  </b></apex:outputPanel> 
+   </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!if(opptylist[0].RecordType.Name='StandardAdvance'&&opptylist[0].Owner_Pole_Opp__c=='North America',TRUE,FALSE)}">
+    <apex:outputLabel rendered="{!if(opptylist[0].RecordType.Name='StandardAdvance'&&opptylist[0].hasOrders__c,TRUE,FALSE)}"> Warning : </apex:outputLabel><apex:image id="theImage" value="/servlet/servlet.FileDownload?file=01531000008nzSb" width="600" height="40" rendered="{!if(opptylist[0].RecordType.Name='StandardAdvance'&&opptylist[0].hasOrders__c,TRUE,FALSE)}"/>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!if(opptylist[0].OpportunityContactRoles.size<1,TRUE,FALSE)}" >
+    <apex:outputLabel > Warning : </apex:outputLabel>
+    <b>You will need to add a contact with role in order to save the opportunity</b>
+    </apex:pageBlockSectionItem>
+    <apex:pageBlockSectionItem rendered="{!if(opptylist[0].RecordType.Name='IntelligentEnvironmentAdvance',TRUE,FALSE)}" >
+    <apex:outputLabel > </apex:outputLabel>
+    <b>For 'Intelligent Environment Segment Opportunities' with ISV Productivity Segment, the Total Order Amount reflects the value of the opportunity between the Partner and the End Customer</b>
+    </apex:pageBlockSectionItem>
+    
+</apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+ 
+</apex:page>

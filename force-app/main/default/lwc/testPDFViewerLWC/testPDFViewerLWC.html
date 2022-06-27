@@ -1,0 +1,149 @@
+<template>
+    <template if:true={isOrder}>
+        <lightning-button label={label} variant={variant} onclick={showModal}></lightning-button>
+    </template>
+    <template if:true={isInvoice}>
+        <a onclick={showModal}>{number}</a>
+    </template>
+
+    <template if:true={showPDFModal}>
+        <section role="dialog" tabindex="-1"
+                aria-labelledby="modal-heading-01"
+                aria-modal="true"
+                aria-describedby="modal-content-id-1"
+                class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <!--<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal1}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                </button> -->
+                
+                <h2 id="modal-heading-05" class="slds-text-heading_medium slds-hyphenate" >{type}: {number}</h2>
+                
+                
+            </header>
+            <!-- modal body -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" >
+
+                <div class="slds-grid slds-gutters slds-wrap">
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12 slds-text-align_left">
+                        <h3 class="slds-section-title--divider">Enter Recipients</h3>
+                      <div class="row">  
+                            <lightning-input 
+                                            type="email" 
+                                            placeholder="test@example.com" 
+                                            label="Email To"
+                                            minlength="5"
+                                            message-when-too-short="Your email address must be more 5 characters."
+                                            required
+                                            
+                                            class="em validVal"></lightning-input> <br>
+                            <lightning-textarea field-level-help="For multiple emails, please separate with a comma (,)" name="additionalEmails" class="aem" label="CC Email To" placeholder="enter additional emails here... multiple emails separate with a comma (,)"></lightning-textarea>
+                            <br>
+                           
+                            <lightning-button class="slds-align_absolute-right" variant="brand-inverse"
+                                    label="Send"
+                                    icon-name="utility:send"
+                                    icon-position="right"
+                                    title="Send"
+                                    
+                                    onclick={handleEmailValidation}></lightning-button> 
+                        </div>
+                       
+                        <div class="row slds-is-relative">
+                            <template if:true={isSending}>
+                                <lightning-spinner class="sending" alternative-text="Sending" variant="brand"></lightning-spinner>
+                            </template>
+                            <template if:true={emailSent}>
+                                <text class="success">Email Sent Successfully!</text>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12 slds-is-relative">
+                        <template if:true={isLoading}>
+                            <lightning-spinner class="loading" alternative-text="Loading PDF" variant="brand"></lightning-spinner>
+                        </template>
+                        <h3 class="slds-section-title--divider">PDF Preview for {type}: {number}</h3>
+
+                        <iframe id="pdfFrame" src="/resource/pdfjs1/web/viewer.html" width="100%" height="400" onload={loadpdf}></iframe>
+                    </div>
+                </div>
+               
+            </div>
+            
+           
+
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+                
+                <lightning-button variant="brand"
+                                  label="Close"
+                                  title="Close"
+                                  onclick={closeModal}></lightning-button>
+
+                <!--<lightning-button variant="brand-inverse"
+                                  label="Email"
+                                  title="Email"
+                                  onclick={emailModal}></lightning-button>-->
+                                  <!--<template if:true={showEmailModal}>
+                                    <div class="slds-grid slds-gutters">
+                                        <div class="slds-col slds-size_2-of-3">
+                                            <lightning-input type="text" label="Email To:" class="em"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-3">
+                                            <lightning-button variant="success"
+                                                      label="Send"
+                                                      title="Send"
+                                                      onclick={sendEmail}></lightning-button>
+                                        </div>
+                                    </div>
+                                </template>-->
+            </footer>
+            
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+       
+    </template>
+
+
+   <template if:true={showEmailModal}>
+        <section role="dialog" tabindex="-1"
+                aria-labelledby="modal-heading-01"
+                aria-modal="true"
+                aria-describedby="modal-content-id-1"
+                class="slds-modal slds-fade-in-open slds-modal_small">
+        <div class="slds-modal__container">
+            
+           
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2" >
+
+
+            <lightning-input type="text" label="Email To:" class="em"></lightning-input>
+                   
+               
+            </div>
+            
+           
+
+            
+            <footer class="slds-modal__footer">
+                <lightning-button variant="brand"
+                                  label="Close"
+                                  title="Close"
+                                  onclick={closeEmailModal}></lightning-button>
+                <lightning-button variant="success"
+                                  label="Send"
+                                  title="Send"
+                                  onclick={sendEmail}></lightning-button>
+            </footer>
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+       
+    </template>
+
+
+
+
+</template>

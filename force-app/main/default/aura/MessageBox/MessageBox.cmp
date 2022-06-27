@@ -1,0 +1,17 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+    
+    <div class="slds-m-around_xx-large">
+        
+        <!--Modal Box Start-->
+        <article class="slds-card" style="padding:0px 0px 0px 0px;" >
+            <!--header class="slds-modal__header">
+                <h1 style="Color:#fba819;" class="slds-text-heading-medium">Information</h1>
+            </header-->
+            
+            <div style="background-color:#fba819;Color:White;" class="slds-modal__content slds-p-around--medium;" font-size="150%">
+                <center><b>GE Current, A Daintree Company will close our offices on 12/24, 12/25, and 1/1 in observance of company holidays.Our responses will be delayed until the next business day.</b></center>
+            </div>
+        </article>
+        
+    </div>
+</aura:component>

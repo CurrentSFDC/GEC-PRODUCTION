@@ -1,0 +1,19 @@
+<apex:page standardController="Sample__c" extensions="GE_LGT_inlinecontrol_Sample" >
+    <apex:form >
+        <apex:pageBlock title="Opportunity Products">
+            <apex:outputPanel style="overflow:scroll;width:100%;height:150px;" layout="block">
+                <apex:pageBlockTable value="{!prreclist}" var="pr" style="overflow:scroll;" border="1" align="left">
+                    <apex:column headerValue="Product Family" >{!MID(pr.product2.Levels_3__c,FIND("-", pr.product2.Levels_3__c) + 1,LEN(pr.product2.Levels_3__c) - FIND("-", pr.product2.Levels_3__c) - 2)}</apex:column> 
+                    <apex:column headerValue="Product Name" >{!MID(pr.product2.Name,FIND("-", pr.product2.Name) + 1,LEN(pr.product2.Name) - FIND("-", pr.product2.Name) - 2)}</apex:column> 
+                    <apex:column headerValue="CAT Logic/Description" value="{!pr.Description}"/>
+                    <apex:column headerValue="Product Code/SKU/Material #" value="{!pr.SKU_Number__r.GE_LGT_EM_SAP_MaterialNumber__c}"/>  
+                    <apex:column headerValue="Expected Ship Date" value="{!pr.ServiceDate}"/> 
+                    <apex:column headerValue="Quantity" value="{!pr.quantity}"/>
+                    <apex:column headerValue="Unit of measure?" value="{!pr.Unit_of_measure__c}"/>
+                    <apex:column headerValue="Sales Price per Unit" value="{!pr.UnitPrice}" />
+                    <apex:column headerValue="Revenue" value="{!pr.totalprice}" />
+                </apex:pageBlockTable> 
+            </apex:outputPanel>   
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

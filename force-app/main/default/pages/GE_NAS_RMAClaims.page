@@ -1,0 +1,189 @@
+<apex:page id="thePage" standardcontroller="GE_NAS_RMA_Claim__c" extensions="GE_NAS_RMAClaims" showHeader="true" sidebar="true">
+    <apex:form >
+        <apex:pageBlock id="thepageBlock" title="Claim ID: {!claim.Name}">
+            <apex:pageblockbuttons >
+                
+                <apex:commandButton action="{!unConfirmOrder}" value="Un Confirm Order" rendered="{!!showConfirmOrder}"/>
+                <apex:commandButton action="{!saveClaim}" value="Save Claim" rerender="lines" onclick="confirmSave();"  />
+                <apex:commandButton value="New" onclick="return createNew();" rendered="{!if(claim.Name=='',false,true)}" />
+                
+            </apex:pageblockbuttons> 
+            <apex:pageBlockSection id="thepageBlockSection" title="Claims" columns="2" collapsible="false">   
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Claim ID"/>
+                    <apex:outputfield value="{!claim.Name}" id="Name"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Customer"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Customer__c}" id="customer"/>
+                </apex:pageblocksectionItem>  
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Date Logged"/>
+                    <apex:outputfield value="{!claim.GE_NAS_DateLoged__c}" id="dateLoged"/>
+                </apex:pageblocksectionItem> 
+                <apex:pageblocksectionItem >  
+                    <apex:outputLabel value="JobSite"/>
+                    <apex:inputfield value="{!claim.GE_NAS_JobSite__c}" id="jobsite"/>
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >  
+                    <apex:outputLabel value="Logged By"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Logged_By__c}" id="logby"/>
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >   
+                    <apex:outputLabel value="Reported By"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Reported_By__c}" id="ReportedBy"/>
+                </apex:pageblocksectionItem>  
+                <apex:pageblocksectionItem > 
+                    <apex:outputLabel value="Original Order"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Original_Reqn__c}" id="OriginalReqn"/>
+                </apex:pageblocksectionItem>  
+                <apex:pageblocksectionItem > 
+                    <apex:outputLabel value="BIRDIN_Word"/>
+                    <apex:inputfield value="{!claim.GE_NAS_BIRDIN_Word__c}" id="BIRDIN"/>
+                </apex:pageblocksectionItem> 
+                <apex:pageblocksectionItem >  
+                    <apex:outputLabel value="RMA"/>
+                    <apex:inputfield value="{!claim.GE_NAS_RMA_No__c}" id="RMA"/>
+                    
+                </apex:pageblocksectionItem>  
+                <apex:pageblocksectionItem >  
+                    <apex:outputLabel value="Receipt RMA"/>
+                    <apex:inputfield value="{!claim.GE_NAS_ReplacementOrder__c}" id="RepOrder"/>
+                </apex:pageblocksectionItem> 
+                <apex:pageblocksectionItem > 
+                    
+                    <apex:outputLabel value="Ship Year"/>
+                    <apex:inputfield value="{!claim.GE_NAS_ShipYear__c}" id="ShipYear" style="width:50px" />
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Parts Run"/>
+                    
+                    <apex:inputfield value="{!claim.GE_NAS_PartsRun__c}" id="PartsRun" />
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem > 
+                    <apex:outputLabel value="Ship Month"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Ship_Month__c}" id="ShipMonth" style="width:50px" />
+                </apex:pageblocksectionItem> 
+                <apex:pageblocksectionItem > 
+                    <apex:outputLabel value="RMA Claim Status"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Claim_Status__c}" id="RMAStatus"/>
+                </apex:pageblocksectionItem> 
+                <apex:pageblocksectionItem > 
+                    <apex:outputLabel value="Confirmed Order Status"/>
+                    <apex:inputfield value="{!claim.GE_NAS_ConfirmedOrder__c}" id="Confirmed"/>
+                </apex:pageblocksectionItem> 
+                <apex:pageblocksectionItem > 
+                    <apex:outputLabel value="PSO Comments"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Memo__c}" id="Memo" style="width:300px;"/>
+                </apex:pageblocksectionItem>  
+                <apex:pageblocksectionItem > 
+                    <apex:outputLabel value="Complaint Reason"/>
+                    <apex:inputfield value="{!claim.GE_NAS_ComplaintReason__c}" id="ComplaintReason" style="width:300px;"/>
+                </apex:pageblocksectionItem>       
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="sectionAddress" title="Shipping Address" columns="2" collapsible="false">
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Customer Name"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Customer_Name__c}" id="CustName"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Customer Number"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Customer_Number__c}" id="CustNum"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Address"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Address__c}" id="Addr"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="City"/>
+                    <apex:inputfield value="{!claim.GE_NAS_City__c}" id="city"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="State"/>
+                    <apex:inputfield value="{!claim.GE_NAS_State__c}" id="state"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Zip Code"/>
+                    <apex:inputfield value="{!claim.GE_NAS_Zip_Code__c}" id="zip"/>
+                </apex:pageblocksectionItem>    
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="sectionLines" title="Claim Lines" columns="2" collapsible="false" rendered="{!showClaimLines}">
+            </apex:pageBlockSection>
+            <apex:outputpanel id="lines" rendered="{!showClaimLines}">
+                <table class="list" cellpadding="0" cellspacing="0" width="100%">
+                    <tr class="headerRow">
+                        <td>Item</td>
+                        <td>Delete</td>
+                        <td>Evaluation</td>
+                        <td>Item Description</td>
+                        <td>Item #</td>
+                        <td>Product Line</td>
+                        <td>QTY</td>
+                        <td>Cost</td>
+                        <td>Total Cost</td>
+                        <td>Product</td>
+                        <td>Reason</td>
+                        <td>RMA Type</td>
+                    </tr>
+                    <apex:repeat value="{!claimLines}" var="lines" id="theRepeat">
+                        <tr>
+                            <td>{!lines.GE_NAS_Item__c}</td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_Delete__c}"/></td>
+                            <td><apex:outputpanel id="pnlEvalBtn" rendered="{!if(lines.ID != null,true,false)}">
+                                <input class="btn" type="button" name="Evaluate" value="Eval" onclick="javascript:openPopUp('{!lines.ID}');"/></apex:outputpanel>
+                            </td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_CAT_NO__c}" style="width:120px;"/></td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_MfgNo__c}" style="width:120px;"/></td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_ProdLine__c}" style="width:60px;"/></td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_QTY__c}" style="width:20px;"/></td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_Cost__c}" style="width:80px;"/></td>
+                            <td>{!lines.GE_NAS_TotalCost__c}</td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_PRODU__c}" style="width:80px;"/></td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_Reason__c}"/></td>
+                            <td><apex:inputfield value="{!lines.GE_NAS_RMA_Type__c}"/></td>
+                        </tr>
+                    </apex:repeat>
+                    <tr>
+                        <td colspan="12" align="center">
+                            <apex:commandButton action="{!saveLineItems}" value="Save Line Items" rerender="lines" />&nbsp;&nbsp;&nbsp;
+                            <apex:commandButton action="{!addLine}" value="Add Line Items" rerender="lines"/>&nbsp;&nbsp;&nbsp;
+                            <apex:commandButton action="{!deleteLine}" value="Delete Line Items" rerender="lines" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label style="font-size:90%;color:red">Note: Please save line items before Evaluation</label>
+                            
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputpanel>               
+        </apex:pageBlock>
+        <script>
+        function openPopUp(LineId) {
+            var win = window.open("/apex/GE_NAS_RMAClaimItemEvaluation?id=" + LineId,'evaluation');
+            win.focus();
+        }
+        
+        function confirmSave() {
+            if(confirm('Would you like to Save?'))
+                return true;
+            else
+                return false;
+        }
+        function confirmQADSave() {
+            if(confirm('Would you like to Save to QAD?'))
+                return true;
+            else
+                return false;
+        }
+        function confirmDelete() {
+            if(confirm('Would you like to Delete?'))
+                return true;
+            else
+                return false;
+        }
+        function createNew() {
+            window.location='/apex/GE_NAS_RMAClaims';
+            return false;
+        }
+        </script>
+    </apex:form> 
+    <apex:relatedList list="CombinedAttachments"/>   
+</apex:page>

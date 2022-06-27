@@ -1,0 +1,7 @@
+<apex:page standardController="Distributor__c" extensions="ErrorMessageDistributorController" >
+    <apex:form >
+        <apex:outputPanel id="MsgSection" rendered="true">
+           <b> <apex:outputLabel style="color:RED;" value="{!message}"/> </b>
+        </apex:outputPanel>
+    </apex:form>  
+</apex:page>

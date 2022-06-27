@@ -1,0 +1,103 @@
+<apex:page extensions="GE_LGT_EM_massupdate" standardController="GE_LGT_EM_ComplaintLineItem__c" recordSetVar="ComplaintLineItem">
+<apex:form >
+<script>
+function StatusUpdate(){
+var CompLineSize;     
+if('{!CompLineSize}' != '') 
+    CompLineSize = '{!CompLineSize}';
+else
+    CompLineSize = 0;
+
+for(var i=0;i<CompLineSize;i++) {
+    if(document.getElementById('j_id0:j_id1:j_id3:j_id10:' + i + ':StatusF').value=='002-Approved(CR/DR/RE Required)')
+        document.getElementById('j_id0:j_id1:j_id3:j_id10:' + i + ':StatusF').value='006-CM/DM/RE Created - Invoice is created';                
+} 
+return;        
+}
+</script>
+
+<apex:pageBlock >
+<apex:pageBlock >
+Note: All modifications made on the page will be lost if Return button is clicked without clicking the Save button first. 
+</apex:pageBlock>
+    <apex:pageBlockButtons >
+    <apex:commandButton value="Save" action="{!saveRecord}"/>
+    <apex:commandButton value="Return" action="{!cancel}"/>
+    <apex:commandButton value="Update Status to 006" onclick="StatusUpdate();"/>
+    </apex:pageBlockButtons>
+
+<apex:pageBlockTable value="{!updatelineItem}" var="cli">
+        <apex:column headerValue="Complaint Item No">
+        <apex:inputField value="{!cli.Name}"/>
+        </apex:column>
+
+        <apex:column headerValue="Req. Qty">
+        <apex:inputField value="{!cli.GE_LGT_EM_RequestedQuantity__c}"/>
+        </apex:column>
+        <apex:column headerValue="Req Price">
+        <apex:inputField value="{!cli.GE_LGT_Req_Price__c}" />
+        </apex:column>
+        <apex:column headerValue="Req PriceUnit">
+        <apex:inputField value="{!cli.GE_LGT_EM_Req_Price_Unit__c}"/>
+        </apex:column>
+
+        <apex:column headerValue="Approved Qty">
+        <apex:inputField value="{!cli.GE_LGT_EM_ApprovedQuantity__c}"/>
+        </apex:column>
+        <apex:column headerValue="Approved Price">
+        <apex:inputField value="{!cli.GE_LGT_EM_ApprovedUnitPrice__c}"/>
+        </apex:column>
+
+        <apex:column headerValue="Approved PriceUnit">
+        <apex:inputField value="{!cli.GE_LGT_EM_Approved_Price_Unit__c}"/>
+        </apex:column>
+
+        <apex:column headerValue="Invoiced Qty">
+        <apex:inputField value="{!cli.GE_LGT_EM_InvoicedQuantity__c}"/>
+        </apex:column>
+        <apex:column headerValue="Invoiced Price">
+        <apex:inputField value="{!cli.GE_LGT_EM_InvoicedPrice__c}"/>
+        </apex:column>
+        <apex:column headerValue="Invoiced Price Unit">
+        <apex:inputField value="{!cli.GE_LGT_EM_Invoiced_Price_Unit__c}"/>
+        </apex:column>
+
+        <!--<apex:column headerValue="Manual Invoiced Quantity">
+        <apex:inputField value="{!cli.GE_LGT_EM_Manual_Invoiced_Quantity__c}"/>
+        </apex:column>-->
+        <apex:column headerValue="Approving Function">
+        <apex:inputField value="{!cli.GE_LGT_EM_ApprovingFunction__c}"/>
+        </apex:column>
+        <apex:column headerValue="Doc Type">
+        <apex:inputField value="{!cli.GE_LGT_EM_Doc_Type__c}"/>
+        </apex:column>
+
+        <apex:column headerValue="CN/DN/RE Number">
+        <apex:inputField value="{!cli.GE_LGT_EM_CM_DM_RO_Number__c}"/>
+        </apex:column>
+        <apex:column headerValue="CMR/DMR/ZRE Nr">
+        <apex:inputField value="{!cli.GE_LGT_EM_CMR_DMR_RO_Number__c}"/>
+        </apex:column>
+        <!--<apex:column headerValue="No complaint notification">
+        <apex:inputField value="{!cli.GE_LGT_EM_No_Complaint_Notification__c}"/>
+        </apex:column>-->
+        <apex:column headerValue="Manual CR/DR/RE">
+        <apex:inputField value="{!cli.GE_LGT_EM_Manual_CR_DR_RE__c}"/>
+        </apex:column>
+        <apex:column headerValue="Status">
+        <apex:inputField value="{!cli.GE_LGT_EM_Status__c}" id="StatusF"/>
+        </apex:column>
+        <!--<apex:column headerValue="Block CR">
+        <apex:inputField value="{!cli.GE_LGT_EM_Block_CR__c}"/>
+        </apex:column>-->
+        <apex:column headerValue="Manual Invoice Number">
+        <apex:inputField value="{!cli.GE_LGT_EM_Manual_Invoice_Number__c}"/>
+        </apex:column>
+        <apex:column headerValue="Category">
+        <apex:inputField value="{!cli.GE_LGT_EM_Category__c}"/>
+        </apex:column>
+
+</apex:pageBlockTable>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

@@ -1,0 +1,82 @@
+<aura:component
+  implements="forceCommunity:searchInterface,forceCommunity:availableForAllPageTypes"
+  access="global"
+  controller="PASelectionController"
+>
+  <aura:attribute name="searchText" type="String" default="" />
+  <aura:attribute name="data" type="List" default="[]" />
+  <aura:attribute name="columns" type="List" />
+  <!--<aura:attribute name="startDate" type="Date" default="" />
+  <aura:attribute name="endDate" type="Date" default="" />-->
+
+  <aura:handler name="init" value="{! this }" action="{! c.init }" />
+
+  <lightning:card title="{!$Label.c.priceAgreementSelectionTitle}">
+    <div
+      class="slds-grid slds-gutters slds-align_absolute-center"
+      style="width: 60%; margin-bottom: 20px"
+    >
+      <div
+        class="slds-form-element slds-lookup slds-col"
+        data-select="single"
+        style="width: 50%"
+      >
+        <div class="slds-form-element__control">
+          <div
+            class="slds-input-has-icon slds-input-has-icon--right slds-align_absolute-center"
+            onkeyup="{!c.handleKeyUp}"
+            style="margin-top: 20px"
+          >
+            <lightning:buttonIcon
+              iconName="utility:search"
+              variant="bare"
+              onclick="{! c.handleClick }"
+              alternativeText="{!$Label.c.PASearchBarText}"
+              class="slds-input__icon"
+            />
+            <ui:inputText
+              value="{!v.searchText}"
+              class="slds-lookup__search-input slds-input"
+              placeholder="{!$Label.c.PASearchBarText}"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!--<div class="slds-col">
+        <ui:inputDate
+          aura:id="startDateInput"
+          class="field"
+          label="{!$Label.c.PASearchFrom}"
+          value="{!v.startDate}"
+          displayDatePicker="true"
+        />
+      </div>
+      <div class="slds-col">
+        <ui:inputDate
+          aura:id="endDateInput"
+          class="field"
+          label="{!$Label.c.PASearchTo}"
+          value="{!v.endDate}"
+          displayDatePicker="true"
+        />
+      </div>-->
+    </div>
+    <div
+      id="myPATable"
+      class="slds-align_absolute-center"
+      style="height: 600px; width: 90%; display: none"
+    >
+      <lightning:datatable
+        keyField="id"
+        data="{! v.data }"
+        columns="{! v.columns }"
+        onrowaction="{! c.handleRowAction }"
+        hideCheckboxColumn="true"
+      />
+    </div>
+
+    <lightning:navigation aura:id="navigationService" />
+    <c:AgreementPdf aura:id="AgreementPDFLineItems"/>
+  </lightning:card>
+</aura:component>

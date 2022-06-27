@@ -1,0 +1,9 @@
+.datatable-orange{
+  color:#0a0a0a;
+  background-color:#e0dede;
+}
+.datatable-orange:hover{
+  color:#0a0a0a;
+  background-color:#e0dede;
+  font-style: italic;
+}

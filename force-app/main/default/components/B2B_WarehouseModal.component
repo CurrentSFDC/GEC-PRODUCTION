@@ -1,0 +1,204 @@
+<apex:component id="B2B_WarehouseModal" controller="InventoryController">
+    <apex:slds />
+    <style>
+        #productAvailabilityModal table {
+            color: #1b1b1b;
+        }
+
+        #productAvailabilityModal table tbody th {
+            padding: 0 2px !important;
+        }
+
+        .highlight-quickStock {
+            background-color: #5f88b6;
+            color: #fff;
+        }
+
+        .inventory-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1b1b1b;
+            margin: 0;
+        }
+
+        .inventory-title > p {
+            display: inline-block;
+        }
+
+        #productAvailabilityModal .modal-footer button {
+            float: left;
+        }
+
+        #productAvailabilityModal .modal-header .close {
+            margin-top: -9px;
+            font-weight: 400;
+        }
+
+        .warning-ifo span {
+            margin: 10px 0 0 0;
+            padding: 10px;
+            border-radius: 3px;
+            color: #059;
+            background-color: #BEF;
+        }
+
+        @media (min-width: 600px) {
+            #productAvailabilityModal .modal-dialog {
+                width: 450px;
+                padding-top: 230px;
+                /*vertical-align: middle;*/
+            }
+
+            #productAvailabilityModal span {
+                display: block;
+            }
+
+            tr.rowhighlight {
+                background-color: #d9dee0;
+                margin: 0;
+                border: 0;
+                padding: 0;
+            }
+        }
+    </style>
+
+
+
+
+    <script id="InventoryDetail-Desktop" type="text/template">
+        <!-- MOVED MODAL TO HERE, INSIDE SCRIPT TAG FOR TEMPLATE -->
+        <div id="productAvailabilityModal" class="modal fade cc_modal productAvailabilityModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content cc_modal_content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <!-- MODAL HEADER STUFF GOES HERE -->
+                        <h4 class="inventory-title">{{pageLabelMap 'Warehouse_ModalHeader'}} - {{productTitle}}</h4>
+                    </div>
+                    <div class="modal-body cc_modal-body">
+                        <div class="slds-scope">
+
+                            <table style="width:100%; font-size: 10px;">
+                                <thead>
+                                    <tr>
+                                       <th style="width:31%; font-size: 10px;">{{pageLabelMap 'Warehouse_Inventory'}}</th>
+                                       <th style="width:19%; font-size: 10px; text-align:right">{{pageLabelMap 'Warehouse_QuickStock'}}</th>
+                                       <th style="width:25%; font-size: 10px; text-align:right">{{pageLabelMap 'Warehouse_Days'}}</th>
+                                       <th style="width:25%; font-size: 10px; text-align:right">{{pageLabelMap 'Warehouse_OrderCutoff'}}</th>
+                                    </tr>
+                                </thead>    
+
+                                <tbody>
+                                {{#eachInMap inv.inventoryMap}}
+                                {{#if (isWarehouseProductsToDisplay key ../productSKU)}}
+                                {{#each value}}
+                                {{#ifEquals this.isDisplay true}}
+                                <tr {{#ifEquals this.isDefaultWarehouse true}}class="highlight-quickStock"{{/ifEquals}}>
+                                    <th>
+                                        {{#each this}}
+                                        {{#ifEquals @key "warehouseName"}}
+                                        <strong>{{this}}</strong>
+                                        {{/ifEquals}}
+                                        {{/each}}
+                                    </th>
+                                    <th style="text-align:right">
+                                        {{#ifEquals this.isDefaultWarehouse true}}
+                                            {{#ifEquals this.IsQuickstock true}}
+                                                {{#ifNotEquals this.quantity 0}}
+                                                    {{numberFormat this.quantity}}
+                                                {{/ifNotEquals}}
+                                            {{/ifEquals}}
+                                        {{/ifEquals}}
+                                    </th>
+                                    <th style="text-align:right">
+                                        {{#each this}}
+                                        {{#ifEquals @key "quantity"}}
+                                        {{numberFormat this}}
+                                        {{/ifEquals}}
+                                        {{/each}}
+                                    </th>
+                                    <th style="text-align:right">
+                                        {{#each this}}
+                                        {{#ifEquals @key "orderCutoff"}}
+                                        {{this}}
+                                        {{/ifEquals}}
+                                        {{/each}}
+                                    </th>
+                                </tr>
+                                {{/ifEquals}}
+                                {{/each}}
+                                {{/if}}
+                                {{/eachInMap}}
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                </tr>
+                                <tr class="rowhighlight">
+                                    <th><strong>{{pageLabelMap 'Warehouse_Total'}}</strong></th>
+                                    <th style="text-align:right">
+                                        {{#eachInMap inv.inventoryMap}}
+                                            {{#if (isWarehouseProductsToDisplay key ../productSKU)}}
+                                                {{#each value}}
+                                                    {{#ifEquals this.isDisplay true}}
+                                                        {{#ifEquals this.isDefaultWarehouse true}}
+                                                            {{#ifEquals this.IsQuickstock true}}
+                                                                {{#ifNotEquals this.quantity 0}}
+                                                                    {{numberFormat this.quantity}}
+                                                                {{/ifNotEquals}}
+                                                            {{/ifEquals}}
+                                                        {{/ifEquals}}
+                                                    {{/ifEquals}}
+                                                {{/each}}
+                                            {{/if}}
+                                        {{/eachInMap}}
+                                    </th>
+                                    <th style="text-align:right">
+                                        {{#eachInMap inv.inventoryMap}}
+                                        {{#if (isWarehouseProductsToDisplay key ../productSKU)}}
+                                        {{#each value}}
+                                        {{#if @last}}
+                                        {{#each this}}
+                                        {{#ifEquals @key "totalQuantity"}}
+                                        {{numberFormat this}}
+                                        {{/ifEquals}}
+                                        {{/each}}
+                                        {{/if}}
+                                        {{/each}}
+                                        {{/if}}
+                                        {{/eachInMap}}
+                                    </th>
+                                    <th></th>
+                                </tr>
+
+                                
+
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 warning-ifo">
+                                <span><i class="fa fa-info-circle"></i>Inventory is updated as of {{sysDate}}.</span>
+                            </div>    
+                        </div>
+                        <!-- <div class="row" style="padding-top:15px;">
+                            <div class="col-sm-5">
+                                <button type="button" class="btn btn-default btn-sm " data-dismiss="modal">
+                                    {{pageLabelMap 'Warehouse_ModalClose'}}
+                                </button>
+                            </div>
+                        </div> -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        
+                    Estimated Lead Time: {{ECommItemName}}.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+</apex:component>

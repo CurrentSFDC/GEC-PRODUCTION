@@ -1,0 +1,2 @@
+<apex:page standardcontroller="Opportunity_Support_Request__c" extensions="GE_LGT_OSRNewPage" action="{!GE_LGT_Redirect}">
+</apex:page>

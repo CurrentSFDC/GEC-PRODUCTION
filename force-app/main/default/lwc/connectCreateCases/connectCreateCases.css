@@ -1,0 +1,25 @@
+.tiles {
+    font-size: 20px;
+    font-family: 'Segoe UI', serif;
+    color: #5F82B6;
+    font-weight: bold;
+}
+
+.button-container {
+    font-size: 15px;
+    font-family: 'Segoe UI', serif;
+    color: #5F82B6;
+}
+
+.button-container .slds-col {
+    font-size: 15px;
+    font-family: 'Segoe UI', serif;
+    color: #5F82B6;
+    height: 4.5rem;
+}
+
+.slds-button {
+    width: 100%;
+    height: 100%;
+    line-height: inherit;
+}

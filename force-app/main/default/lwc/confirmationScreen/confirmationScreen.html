@@ -1,0 +1,28 @@
+<template>
+         
+    <div class="slds-box"> 
+
+        <div if:true={isOrderIdAvailable}>
+        
+            <div class="slds-col slds-size_8-of-8">
+                <h3 class="slds-section-title--divider">Lines Selected for Request</h3> 
+                <div class="slds-box slds-theme_shade border">
+            <template if:true={orderItemList}>
+                <lightning-datatable data={orderItemList} columns={columns} key-field="Id" onrowaction={handleRowAction} hide-checkbox-column>
+                </lightning-datatable>
+                                
+            </template>
+            <template if:true={error}>
+                {error}
+            </template>
+
+           
+        
+        </div>
+        </div>
+    </div>
+    </div>
+
+
+  
+</template>

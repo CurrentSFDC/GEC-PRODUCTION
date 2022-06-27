@@ -1,0 +1,45 @@
+<apex:page extensions="GE_LGT_EM_InstallBase_Mass_Upload" standardController="Install_Base__c" recordSetVar="InstallBaseItem">
+   <apex:form >
+      <apex:sectionHeader title="Upload Installed Base data to {!optyTitle}"/>
+      {!Prerequisite}
+      {!ShowError}
+      <style>
+        .vfHelpText a            {position:relative;}
+        .vfHelpText a span       {display: none;}
+        .vfHelpText a:hover span {display: block;
+                                  position:absolute;
+                                  top:1.25em;
+                                  padding:5px 5px;
+                                  left:5em; width:60em;
+                                  z-index:100;
+                                  border:2px solid blue;
+                                  background-color:#FFFFFF;
+                                  color:black;
+                                 }
+    </style>
+    <span class="vfHelpText">
+        
+        <apex:outputLink value="javascript:return false;"> 
+            <img src="/s.gif" alt="" class="helpOrb"/> 
+            <span><table>
+            <tr><td>Please use the template file from this page and insert all necessary data then save as CSV file, that file should be uploaded.</td></tr>
+            <tr><td>Be aware: 1.Installed base site ID must be unique</td></tr>
+            <tr><td>2. Date formats follow SFDC format</td></tr>
+            <tr><td>3. File storage should not contain any http(s)://</td></tr>
+            <tr><td>4. File storage URL has to be filled, unless you can not upload the Installed Bases//</td></tr>
+            <tr><td>5. Installed Base Name mandatory field//</td></tr>
+
+            </table></span>Help for this Page
+        </apex:outputLink>
+   </span>
+   <apex:pagemessages />
+      <apex:pageBlock >
+             <center>
+              <apex:inputFile value="{!contentFile}" filename="{!nameFile}" /> 
+              <apex:commandButton action="{!ReadFile}" value="Upload File" id="theButton" style="width:70px;"/>
+              <apex:commandButton value="Return" action="{!cancel}"/>
+              <apex:outputLink value="{!URLFOR($Resource.Installed_Base)}">Installed Base Template</apex:outputLink>
+             </center>     
+      </apex:pageBlock>       
+   </apex:form>   
+</apex:page>

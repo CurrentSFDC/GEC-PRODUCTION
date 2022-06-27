@@ -1,0 +1,66 @@
+@import 'c/communityCSS';
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+.slds-grid {
+    border-top: 1px solid rgb(221, 219, 218);
+    padding: 8px 4px;
+}
+
+.slds-col {
+    overflow-wrap: break-word;
+}
+
+a {
+    color: #ED7D3E;
+    font-size: 14px;
+}
+
+.slds-checkbox {
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+.button-container {
+    text-align: right;
+}
+
+.button-container .slds-button {
+    color: #fff;
+    border-radius: 14px;
+    display: inline-block;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    width: 11rem;
+    font-size: 12px;
+    padding: 0;
+    text-align: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.button-container .slds-button:first-child {
+    background-color: #ED7D3E;
+}
+
+@media screen and (max-width: 30em) {
+    .slds-checkbox {
+        height: 1.5rem;
+        width: 1.5rem;
+    }
+
+    .slds-col {
+        margin-bottom: 6px;
+    }
+
+    .button-container {
+        text-align: center;
+    }
+}

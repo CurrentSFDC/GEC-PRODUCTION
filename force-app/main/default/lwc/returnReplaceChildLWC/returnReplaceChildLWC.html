@@ -1,0 +1,37 @@
+<template>
+    <div class="slds-box">
+        <div class="slds-text-title_caps">Review</div> <br>   
+    
+
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title--divider">Requestor Information</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <b>Account: </b>{Account}<br>
+                            <b>Requestor Name: </b>{requestorName}<br>
+                            <b>Requestor Email: </b>{requestorEmail}<br>
+                            <b>Requestor Phone: </b>{requestorPhone}<br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title--divider">Return Info</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <b>Requested Action:</b> {requestedAction}<br>
+                            <b>Return Reason:</b> {returnReason}<br>
+                            <b>Reason Sub Code:</b> {secondaryReason} <br>
+                            <b>Comments: </b>{comments}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</template>

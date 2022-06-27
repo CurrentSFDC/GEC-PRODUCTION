@@ -1,0 +1,23 @@
+<apex:component controller="CaseProductController" access="global">
+<apex:attribute name="disIdValue" type="Id" description="This is the Id of the DisputeObject" assignTo="{!caseId}" access="global"/>
+
+    
+     <table width="581" border="1">
+        <thead>    
+            <tr>
+                <th width="61" scope="col">Product Code</th> 
+                
+            </tr>
+        </thead> 
+         <tbody>
+        <apex:repeat value="{!caseProds}" var="prod">
+                <tr>
+                    <td>{!prod.GE_NAS_Product_Code__c}</td>
+                                                                    
+                </tr>           
+        </apex:repeat>
+        </tbody>        
+       
+    </table>
+
+</apex:component>

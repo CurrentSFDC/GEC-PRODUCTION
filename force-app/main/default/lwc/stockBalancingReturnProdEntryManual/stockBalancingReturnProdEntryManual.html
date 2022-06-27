@@ -1,0 +1,127 @@
+<!--
+ - Created by andra on 2021. 03. 25..
+ -->
+
+<!-- Stock Balancing Return Prod Entry Manual -->
+<template>
+    <template if:true={isStockBalancingReturnsFileUpload}>
+        <div class="slds-col slds-size_8-of-8">
+            <h3 class="slds-section-title_divider">Stock Balancing Files (FILE UPLOAD)</h3>
+            <div class="slds-box slds-theme_shade border">
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_2-of-8">
+                        <lightning-file-upload
+                                label="Attach Files"
+                                class="fileupload"
+                                name="uploadFile"
+                                accept={acceptedFormats}
+                                onuploadfinished={handleFileUpload}>
+                        </lightning-file-upload>
+                        <h4>Accepted Formats: <lightning-helptext content={acceptedFormats}></lightning-helptext></h4>
+                    </div>
+                    <div class="slds-col slds-border_left slds-size_6-of-8">
+                        <div class="slds-p-left_medium">
+                            <h2 class="slds-section-title__divider">
+                                <a href={templateURL} download="StockAccommodationTemplate.csv">Download Template</a>
+                            </h2>
+                            <h2 class="slds-section-title__divider">
+                                <a href={helpURL} download="StockAccommodationInfo.pdf">How to use this Template</a>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <br>
+    <template if:true={isReturnNumberNotNull}>
+        <div class="slds-align_absolute-center slds-text-heading_medium">
+            Number of remaining return requests for this account: <span style="color:red;font-weight:bold"> {remainingReturns}</span>
+        </div>
+    </template>
+    <br>
+    <div class="bordered">
+        <h3 class="slds-section-title_divider">Stock Balancing Lines (ONLINE FORM)</h3>
+        <div class="slds-box slds-theme_shade border">
+            <br>
+            <div class="slds-text-align_left slds-p-horizontal_small">
+                <lightning-button variant="brand" label="Add Product" onclick={addOrderItem}>Add New Line</lightning-button>
+            </div>
+            <br>
+        <div class="slds-grid slds-show_medium">
+            <div class="slds-col slds-size_3-of-12 slds-p-horizontal_small"><abbr class="slds-required">* </abbr><b>Catalog No. / SKU #</b></div>
+            <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><abbr class="slds-required">* </abbr><b>Quantity</b></div>
+            <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><abbr class="slds-required">* </abbr><b>Unit of Measure</b></div>
+            <div class="slds-col slds-size_3-of-12 slds-p-horizontal_small"><abbr class="slds-required"></abbr><b>Agent</b></div>
+            <div class="slds-col slds-size_1-of-12 slds-p-horizontal_small"><abbr class="slds-required"></abbr></div>
+            <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><abbr class="slds-required"></abbr></div>
+        </div>
+        <template for:each={orderItems} for:item="orderItem" for:index='index'>
+            <div class="slds-grid slds-wrap order-item-row" key={orderItem.materialMaster}>
+                <div class="slds-col slds-max-medium-size_1-of-1 slds-medium-size_3-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                    <div class="slds-hide_medium slds-m-bottom_x-small">
+                        <b><abbr class="slds-required">* </abbr>Catalog No. / SKU #</b>
+                    </div>
+                    <c-material-lookup
+                            data-index={index}
+                            required
+                            account-id={soldToAccountId}
+                            return-type={returnType}
+                            product-families={productFamilies}
+                            selected-material={orderItem.materialMaster}
+                            onselect={handleMaterialMasterSelect}
+                            onchange={lineValidation}
+                            onreset={handleMaterialMasterReset}
+                    ></c-material-lookup>
+                </div>
+                <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                    <div class="slds-hide_medium slds-m-bottom_x-small">
+                        <abbr class="slds-required">*</abbr><b> Quantity</b>
+                    </div>
+                    <lightning-input label="" type="number" required variant="label-hidden" value={orderItem.returnQuantity}
+                                     data-index={index} onchange={handleQtyChange} onblur={validateQty}></lightning-input>
+                </div>
+                <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                    <div class="slds-hide_medium slds-m-bottom_x-small">
+                        <abbr class="slds-required">*</abbr><b> Unit of Measure</b>
+                    </div>
+                    <lightning-combobox label="" required variant="label-hidden" options={orderItem.uomOptions} value={orderItem.uom}
+                                        data-index={index} onchange={handleUomChange}
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_3-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                    <div class="slds-hide_medium slds-m-bottom_x-small">
+                        <abbr class="slds-required">*</abbr><b>Agent</b>
+                    </div>
+                    <lightning-combobox label="" variant="label-hidden" options={agentCodeOptions} value={orderItem.agent}
+                                        data-index={index} onchange={handleAgentChange}
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                    <button class="slds-button slds-button_brand" data-index={index} icon-name="utility:delete" variant="brand" onclick={removeOrderItem}>
+                        <lightning-button-icon icon-name="utility:delete"  variant="brand" alternative-text="Delete" title="Delete"></lightning-button-icon>
+                    </button>
+
+                </div>
+                <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                    <div class="slds-hide_medium slds-m-bottom_x-small">
+                    </div>
+                    <b><lightning-formatted-text label="" disabled=TRUE variant="label-hidden" value={orderItem.validationComment}
+                                        data-index={index}
+                    ></lightning-formatted-text></b>
+                </div>
+            </div>
+        </template>
+            <br>
+            <template if:true={isBottomAddProductNeeded}>
+            <div class="slds-text-align_left slds-p-horizontal_small">
+                <lightning-button variant="brand" label="Add Product" onclick={addOrderItem}>Add New Line</lightning-button>
+            </div>
+            </template>
+            <br>
+        <div class="slds-m-vertical_medium" if:true={returnsCreateResponse}>
+            <p class="slds-text-color_error slds-text-title_bold" if:true={returnsCreateResponse.errorMessage}>{returnsCreateResponse.errorMessage}</p>
+        </div>
+        </div>
+    </div>
+</template>

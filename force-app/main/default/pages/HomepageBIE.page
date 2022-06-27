@@ -1,0 +1,10 @@
+<apex:page id="HomepageBIE" docType="html-5.0" sidebar="false" showHeader="false" standardStylesheets="false" cache="false" applyHtmlTag="false">
+    <script>
+        if(window.location.hostname.includes('visualforce.com')){
+            window.location.href = "/apex/ccrz__ProductList" + CCRZ.buildQueryString('');
+        }
+        else{
+            window.location.href = "/DefaultStore/ccrz__ProductList" + CCRZ.buildQueryString('');
+        }
+    </script>
+</apex:page>

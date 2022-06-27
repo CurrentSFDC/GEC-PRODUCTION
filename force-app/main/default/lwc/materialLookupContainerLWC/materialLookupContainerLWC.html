@@ -1,0 +1,397 @@
+<template>
+    <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title--divider">Search Catalog</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <!--<div if:true={searchProducts}>-->
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_2-of-4">
+                                <lightning-button icon-name="utility:edit_form" label="Manual Entry" onclick={showManualEntry}></lightning-button><br>
+                                <h5>Helpful Tip: <lightning-helptext content="If unable to find the Product, click on Manual Entry above to add products manually to your Service Request"></lightning-helptext>
+                                </h5>
+                            </div> <div class="slds-col slds-size_2-of-4">
+                                <lightning-button icon-name="utility:search" label="Search for Products" onclick={addModal}></lightning-button><br>
+                                
+                            </div>
+                          <!--  <div class="slds-col slds-size_2-of-4 slds-border_left">
+                                <lightning-record-edit-form object-api-name="Case"  >
+                                    <lightning-messages></lightning-messages>
+                                    <label for="Product_SKU__c">Catalog Number</label>
+                                    
+                                    <lightning-input-field  
+                                        field-name='Product_SKU__c' onchange={handleChange} value={paramString} variant="label-hidden">
+                                    </lightning-input-field>
+                                </lightning-record-edit-form>
+                            </div>-->
+                        </div>
+                    <!--</div>--> 
+                    <div if:true={searchProducts}>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-size_2-of-4"> 
+                                <lightning-button icon-name="utility:search" class="hidesearchbyprod" label="Search by Products" onclick={showProduct}></lightning-button>
+                            </div>
+                            <div class="slds-col slds-border_left slds-size_2-of-4">                                 
+                                <h4 class="manulaDesc">Click on Add Product button below to manually <br> add Products to your Pricing Enquiry.</h4>
+                            </div>
+                        </div>
+                    </div>      
+                </div>
+            </div>
+
+            <div class="slds-col slds-p-right_small slds-max-medium-size_1-of-1 slds-medium-size_3-of-6 slds-large-size_6-of-12">
+                <h3 class="slds-section-title--divider">Cart Information</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <lightning-button-group>
+                            <!---   <lightning-button icon-name="utility:cart" label="Add to Cart" onclick={handleClick}></lightning-button>-->
+                                <lightning-button icon-name="utility:preview" label="View Cart" onclick={showCart}></lightning-button>
+                                <!--<lightning-button icon-name="utility:clock" label="Save Cart" onclick={saveCart}></lightning-button>-->
+                            </lightning-button-group> 
+                        </div>   
+                        <div class="slds-border_left slds-col headerSection">
+                            <h2>Items in Cart<br></h2>
+                            <div class="items"><lightning-icon icon-name="utility:cart" alternative-text="Cart" size="x-small" variant="brand"
+                                title="x-small size"></lightning-icon>&nbsp; <text >{cartCount}</text> </div>
+                        </div>
+                        <div class="slds-border_left slds-col headerSection">
+                            <h2>Transaction ID: <br>{transactionID}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><br/>
+
+
+
+
+<!--ADD PRODUCT MODAL-->
+<template if:true={openAddModal}>
+<section role="dialog" tabindex="-1"
+        aria-labelledby="modal-heading-01"
+        aria-modal="true"
+        aria-describedby="modal-content-id-1"
+        class="slds-modal slds-fade-in-open">
+<div class="slds-modal__container">
+    <!-- modal header -->
+    <header class="slds-modal__header">
+
+        
+        <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate" >Add to Request</h2>
+        
+        
+    </header>
+    <!-- modal body -->
+    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" if:false={isEditForm}>
+     
+    </div>
+    
+    <!-- showing record edit form -->
+    <div class="slds-theme_default">
+       
+            <lightning-messages></lightning-messages>
+            <div class="slds-box slds-is-relative">
+                <template if:true={isLoading}>
+                    <lightning-spinner class="spins" alternative-text="Loading" variant="brand"></lightning-spinner>
+                </template>
+                <div class="slds-grid">
+
+                    <div class="slds-col slds-size_6-of-6">
+                        <c-material-lookup
+                                                data-index={index}
+                                                required
+                                                account-id={selectedDistributorID}
+                                                return-type="Warranty"
+                                                product-families={prodFamilies}
+                                                selected-material={selectedMaterial}
+                                                onselect={handleMaterialSelected}
+                                                label="Search Products"
+                                                onreset={handleMaterialMasterReset}
+                                        ></c-material-lookup>
+                    </div>
+                </div><br>
+
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_3-of-6">
+                        <!--lightning-output-field field-name="Id"></lightning-output-field-->
+
+                      
+                        
+                        <br>
+                        <label class="slds-form-element__label" for="form-element-01">Catalog #</label>
+                        <p><lightning-formatted-text
+                        value={materialDescription}></lightning-formatted-text>  </p>         
+                        <br>
+                        <label class="slds-form-element__label" for="form-element-01">SKU #</label>
+                        <p><lightning-formatted-text
+                        value={materialNumber}></lightning-formatted-text>  </p>  
+                        
+                                                  
+                    </div> 
+                    <div class="slds-col slds-size_3-of-6">
+                        <lightning-input type="number" label="Quantity" value={quantity} class="qty"></lightning-input>
+                        <lightning-input type="text" label="Comments"  max-length="25" value={comments} class="com"></lightning-input>
+                        <text class="notify">Max Characters: 25</text> 
+                    </div>                           
+                   
+                </div>
+            </div>
+            
+           <!-- <div style="text-align:center;">
+                <lightning-button class="slds-m-top_small"
+                                  variant="brand"
+                                  type="submit"
+                                  name="update"
+                                  label={cartLabel}></lightning-button>
+            </div> -->
+     <br/>
+        <div></div>
+    </div>
+
+    <!-- modal footer start-->
+    <footer class="slds-modal__footer">
+        <lightning-button variant="brand-outline"
+                          label="Close"
+                          title="Close"
+                          onclick={closeAddModal}></lightning-button>
+        <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                          variant="brand"
+                          onclick={createItem}
+                          name="update"
+                          label={cartLabel}
+                          disabled={addToRequest}></lightning-button>
+    </footer>
+</div>
+</section>
+<div class="slds-backdrop slds-backdrop_open"></div>
+
+</template>
+
+<!-- MODAL FOR SHOWING THE CART-->
+            <!-- Detail view modal start -->
+            <template if:true={cartModal}>
+                <section role="dialog" tabindex="-1"
+                        aria-labelledby="modal-heading-01"
+                        aria-modal="true"
+                        aria-describedby="modal-content-id-1"
+                        class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    <!-- modal header start -->
+                    <header class="slds-modal__header">
+            
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Cart Details</h2>
+                        <!--Transaction ID: {transactionID}-->
+                    </header>
+                    <!-- modal body start -->
+                    <div class="slds-theme_default slds-is-relative">
+                        <template if:true={isRemoving}>
+                            <lightning-spinner class="removal" alternative-text="Removing" variant="brand"></lightning-spinner>
+                        </template>
+                        <div class="slds-card">
+                            <div class="slds-card__header slds-grid slds-wrap">
+                                
+                                <div class="slds-col headerSection">
+                                    <h2>
+                                        
+                                        Transaction ID: <br>
+                                        
+                                    </h2> {transactionID}
+                                </div>
+                            
+                                <div class="slds-col headerSection">
+                                    <h2>
+                                        
+                                           Cart Actions<br>
+                                        
+                                    </h2> <lightning-button icon-name="utility:clear" variant='destructive' label="Clear Cart" onclick={popDeleteModal}></lightning-button>
+                                </div>
+                            </div><br>
+
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div if:true={storedLines} >
+                                    <div style="height: 240px;">
+                                        <lightning-datatable 
+                                            key-field="id"
+                                            data={storedLines}
+                                            columns={cartColumns}
+                                            onrowaction={cartActions}
+                                            hide-checkbox-column="true">
+                                        </lightning-datatable>
+                                    </div>
+                                   
+                                    </div>
+                                    <div if:false={storedLines}>
+                                        <div class="items">No Items In Your Cart</div>
+                                    </div>
+                            </div>
+                        </div>
+                            
+                          
+                    </div>
+                        
+                    <!-- modal footer start-->
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="brand"
+                        label="Close"
+                        title="Close"
+                        onclick={closeCartModal}
+                        ></lightning-button>
+                    </footer>
+                </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+            <!-- Detail view modal end -->
+
+<!--END SHOW CART MODAL-->
+
+<!-- MODAL FOR ADDING PRODUCTS -->
+<template if:true={addProductModal}>
+<section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+    aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+    <div class="slds-modal__container">
+        <!-- modal header -->
+        <header class="slds-modal__header">
+
+            <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">Add to Request
+            </h2>
+        </header>
+        <!-- modal body -->
+
+
+        <!-- showing record edit form -->
+        <lightning-messages></lightning-messages>
+        <div class="slds-modal__content slds-p-around_medium">
+            <!--<div class="slds-box"> < BOX 1 UPPER
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col">
+                    <lightning-input
+                        label="NoCAT Input"
+                        type="toggle"
+                        message-toggle-active = ''
+                        message-toggle-inactive = ''
+                        onchange={handleChecked}
+                        class="nci"
+                    ></lightning-input> <br>
+                </div>
+                <div class="slds-col">
+
+                    <div if:true={noCatInput}>
+                        <lightning-input
+                            label="NoCAT #"
+                            type="text"
+                            class="nc"
+                            onchange={onNoCatChange}
+                        ></lightning-input>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+            <br>
+            <div class="slds-box slds-is-relative">
+                <template if:true={isLoading}>
+                    <lightning-spinner class="spins" alternative-text="Loading" variant="brand"></lightning-spinner>
+                </template>
+                <!-- BOX 2 LOWER-->
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col">
+                        <lightning-input label="Catalog #" type="text" required class="di validValue">
+                        </lightning-input>
+                        <lightning-input type="number" label="Quantity" value={manualQuantity} class="mqty"></lightning-input>
+                        <lightning-input type="text" label="Comments"  max-length="25" class="po"></lightning-input>
+                        <text class="notify">Max Characters: 25</text> 
+                        <!--<lightning-input label="Comment" type="text" required class="po">
+                        </lightning-input>-->
+                    </div>
+                </div>
+            </div>
+            <br>
+            <br>
+        </div>
+
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+            <div class="slds-align_absolute-center">
+                <div style="text-align:center;">
+
+
+
+                <lightning-button variant="brand-outline"
+                    label="Close"
+                    title="Close"
+                    onclick={closeProductModal}></lightning-button>
+                <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                    variant="brand"
+                    onclick={addManualProduct}
+                    name="update"
+                    label={cartLabel}></lightning-button>
+
+                </div>
+            </div>
+
+        </footer>
+    </div>
+</section>
+<div class="slds-backdrop slds-backdrop_open"></div>
+
+</template>
+
+<!-- MODAL FOR SHOWING THE CONFIRMATION DELETE MODAL-->
+            <!-- Detail view modal start -->
+            <template if:true={deleteModal}>
+                <section role="dialog" tabindex="-1"
+                        aria-labelledby="modal-heading-01"
+                        aria-modal="true"
+                        aria-describedby="modal-content-id-1"
+                        class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="slds-modal__container">
+                    <!-- modal header start -->
+                    <header class="slds-modal__header">
+                       
+                        <h2 id="modal-heading-23" class="slds-text-heading_medium slds-hyphenate">CONFIRM DELETE</h2>
+                        
+                    </header>
+                    <!-- modal body start -->
+                    <div class="slds-theme_default">
+                        <div class="slds-card">
+                            <div class="slds-card__header slds-grid slds-wrap">
+                                
+                                
+                                    <h2 if:true={deleteFromRow}>               
+                                        Are you sure you want to delete SKU: {currentSKU} from your Cart? <br>     
+                                    </h2>
+                                    <h2 if:true={deleteClearAll}>               
+                                        Are you sure you want to Clear Your Cart? <br>     
+                                    </h2> 
+                            </div><br>
+                        </div>
+                    </div>
+                        
+                    <!-- modal footer start-->
+                    <footer class="slds-modal__footer">
+                        <lightning-button if:true={deleteFromRow} variant="destructive"
+                        label="CONFIRM"
+                        title="Close"
+                        onclick={deleteCurrentRecord}
+                        ></lightning-button>
+                        <lightning-button if:true={deleteClearAll} variant="destructive"
+                        label="CONFIRM"
+                        title="Close"
+                        onclick={clearCart}
+                        ></lightning-button>
+                        <lightning-button variant="brand"
+                        label="Close"
+                        title="Close"
+                        onclick={closeDeleteModal}
+                        ></lightning-button>
+                    </footer>
+                </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </template>
+            <!-- Detail view modal end -->
+
+            <!--END DELETE MODAL MODAL-->
+
+
+</template>

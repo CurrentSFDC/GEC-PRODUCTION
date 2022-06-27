@@ -1,0 +1,85 @@
+<aura:component
+  implements="forceCommunity:searchInterface,forceCommunity:availableForAllPageTypes"
+  access="global"
+  controller="InvoiceSelectionController"
+>
+  <aura:attribute name="searchText" type="String" default="" />
+  <aura:attribute name="data" type="List" default="[]" />
+  <aura:attribute name="columns" type="List" />
+  <aura:attribute name="startDate" type="Date" default="" />
+  <aura:attribute name="endDate" type="Date" default="" />
+  <aura:attribute name="sortBy" type="String"/>
+  <aura:attribute name="sortDirection" type="String"/>
+
+  <aura:handler name="init" value="{! this }" action="{! c.init }" />
+
+  <lightning:card title="{!$Label.c.invoiceSelectionTitle}">
+    <div
+      class="slds-grid slds-gutters slds-align_absolute-center"
+      style="width: 60%; margin-bottom: 20px"
+    >
+      <div
+        class="slds-form-element slds-lookup slds-col"
+        data-select="single"
+        style="width: 50%"
+      >
+        <div class="slds-form-element__control">
+          <div
+            class="slds-input-has-icon slds-input-has-icon--right slds-align_absolute-center"
+            onkeyup="{!c.handleKeyUp}"
+            style="margin-top: 20px"
+          >
+            <lightning:buttonIcon
+              iconName="utility:search"
+              variant="bare"
+              onclick="{! c.handleClick }"
+              alternativeText="{!$Label.c.invoiceSelectionSearchText}"
+              class="slds-input__icon"
+            />
+            <ui:inputText
+              value="{!v.searchText}"
+              class="slds-lookup__search-input slds-input"
+              placeholder="{!$Label.c.invoiceSelectionSearchText}"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="slds-col">
+        <ui:inputDate
+          aura:id="startDateInput"
+          class="field"
+          label="{!$Label.c.invoiceSelectionFrom}"
+          value="{!v.startDate}"
+          displayDatePicker="true"
+        />
+      </div>
+      <div class="slds-col">
+        <ui:inputDate
+          aura:id="endDateInput"
+          class="field"
+          label="{!$Label.c.invoiceSelectionTo}"
+          value="{!v.endDate}"
+          displayDatePicker="true"
+        />
+      </div>
+    </div>
+    <div
+      id="myInvoiceTable"
+      class="slds-align_absolute-center"
+      style="height: 600px; width: 90%; display: none"
+    >
+      <lightning:datatable
+        keyField="id"
+        data="{! v.data }"
+        columns="{! v.columns }"
+        onrowaction="{! c.handleRowAction }"
+        hideCheckboxColumn="true"
+        sortedBy="{!v.sortBy}"
+        sortedDirection="{!v.sortDirection}"
+        onsort="{!c.handleSort}"
+      />
+    </div>    
+    <lightning:navigation aura:id="navigationService" />
+  </lightning:card>
+</aura:component>

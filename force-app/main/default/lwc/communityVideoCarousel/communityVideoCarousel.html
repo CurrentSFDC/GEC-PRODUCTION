@@ -1,0 +1,26 @@
+<!-- Community Video Carousel -->
+<template>
+    <div class="container slds-max-large-size_1-of-1 slds-large-size_2-of-3 slds-container_center">
+        <div class="media-container">
+            <c-you-tube-player if:true={selectedYoutubeId} you-tube-id={selectedYoutubeId}></c-you-tube-player>
+            <template if:true={selectedLocalVideoSource}>
+                <video controls>
+                    <source src={selectedLocalVideoSource} type="video/mp4">
+                    Sorry, your browser doesn't support embedded videos.
+                </video>
+            </template>
+            <template if:true={selectedImageSource}>
+                <img src={selectedImageSource} alt="">
+            </template>
+        </div>
+        <div class="carousel-container">
+            <div class="carousel-navigator" onclick={onPrevClick}>
+                <lightning-icon icon-name="utility:chevronleft" size="x-small" variant="inverse"></lightning-icon>
+            </div>
+            <div class="carousel-content" lwc:dom="manual"></div>
+            <div class="carousel-navigator" onclick={onNextClick}>
+                <lightning-icon icon-name="utility:chevronright" size="x-small" variant="inverse"></lightning-icon>
+            </div>
+        </div>
+    </div>
+</template>

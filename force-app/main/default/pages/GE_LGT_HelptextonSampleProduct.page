@@ -1,0 +1,17 @@
+<apex:page standardController="Sample_Product__c">
+    <apex:form >
+        <apex:pageBlock title="">
+            <apex:pageBlockSection columns="1">
+                <apex:pageBlockSectionItem >
+                    Next Steps : <apex:outputPanel ><b>1)  Search by SKU/Cat logic description</b></apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem ><br/> 
+                    <apex:outputPanel ><b>2)  If SKU/Cat Logic not found, please manually enter SKU or description in “Product” field.</b></apex:outputPanel>    
+                    
+                </apex:pageBlockSectionItem>
+                
+            </apex:pageBlockSection>
+            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

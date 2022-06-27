@@ -1,0 +1,946 @@
+<apex:page controller="HeaderActions" docType="html-5.0"
+           sidebar="false"
+           showHeader="false"
+           standardStylesheets="false"
+           applyHtmlTag="false">
+    <apex:stylesheet value="{!$Resource.CCHeaderStyle}"/>
+    <!--<c:HeaderBIE ></c:HeaderBIE>
+    <c:MenuBIE ></c:MenuBIE>-->
+
+
+    <script>
+
+        (function () {
+            var gdprAppliesGlobally = false;
+
+            function addFrame() {
+                if (!window.frames['__cmpLocator']) {
+                    if (document.body) {
+                        var body = document.body,
+                            iframe = document.createElement('iframe');
+                        iframe.style.cssText = 'display:none';
+                        iframe.name = '__cmpLocator';
+                        body.appendChild(iframe);
+                    } else {
+                        // In the case where this stub is located in the head,
+                        // this allows us to inject the iframe more quickly than
+                        // relying on DOMContentLoaded or other events.
+                        setTimeout(addFrame, 5);
+                    }
+                }
+            }
+
+            addFrame();
+
+            function stubCMP() {
+                var args = arguments;
+                // console.log('stubCMP', args);
+                __cmp.a = __cmp.a || [];
+
+                if (!args.length) return __cmp.a;
+                else if (args[0] === 'ping') {
+                    args[2]({
+                        "gdprAppliesGlobally": gdprAppliesGlobally,
+                        "cmpLoaded": false
+                    }, true);
+                } else {
+                    __cmp.a.push([].slice.apply(args));
+                }
+            }
+
+            function cmpMsgHandler(event) {
+                var msgIsString = typeof event.data === 'string';
+                var json = event.data;
+                if (typeof json !== 'object') {
+                    try {
+                        json = JSON.parse(json);
+                    } catch (err) {
+                        return;
+                    }
+                }
+                if (!json.__cmpCall) return;
+
+                var call = json.__cmpCall;
+                window.__cmp(call.command, call.parameter, function (retValue, success) {
+                    var returnMsg = {
+                        "__cmpReturn": {
+                            "returnValue": retValue,
+                            "success": success,
+                            "callId": call.callId
+                        }
+                    };
+
+                    if (event && event.source) event.source.postMessage(msgIsString ? JSON.stringify(returnMsg) : returnMsg, '*');
+                });
+            }
+
+            if (typeof (__cmp) !== 'function') {
+                window.__cmp = stubCMP;
+                __cmp.msgHandler = cmpMsgHandler;
+
+                if (window.addEventListener)
+                    window.addEventListener('message', cmpMsgHandler, false);
+                else
+                    window.attachEvent('onmessage', cmpMsgHandler);
+            }
+        })();
+        (function (id) {
+            function append(scriptid, url, async) {
+                var d = document, sn = 'script', f = d.getElementsByTagName(sn)[0];
+                if (!f) f = d.head;
+                var s = d.createElement(sn);
+                s.async = true;
+                s.id = scriptid;
+                s.src = url;
+                f.parentNode.insertBefore(s, f);
+            }
+
+            function is2parttld(value) {
+                var tldindicators = ['co', 'com', 'info', 'web', 'info', 'gov', 'edu', 'biz', 'net', 'org'];
+                var countryindicators = ['uk', 'us', 'fr', 'es', 'de', 'at', 'au', 'ae', 'be', 'br', 'ca', 'ch', 'cn', 'co', 'cz', 'dk', 'eg', 'eu', 'fi', 'gb', 'gr', 'hk', 'hr', 'hu', 'ie', 'in', 'jp', 'mx', 'nl', 'no', 'nz', 'pl', 'ro', 'ru', 'se'];
+                return (tldindicators.indexOf(value) !== -1 || countryindicators.indexOf(value) !== -1);
+            }
+
+            function getRootDomain() {
+                var parts = window.location.hostname.split('.');
+                if (parts.length === 2) rootDomain = parts[0];
+                else if (parts.length > 2) {
+                    // see if the next to last value is a common tld
+                    var part = parts[parts.length - 2];
+                    if (is2parttld(part)) {
+                        rootDomain = parts[parts.length - 3]; // go back one more
+                    } else {
+                        rootDomain = part;
+                    }
+                }
+
+                return rootDomain;
+            }
+
+            window.evidon = {};
+            window.evidon.id = id;
+            var cdn = '//c.evidon.com/', rootDomain = getRootDomain(), noticecdn = cdn
+                + 'sitenotice/';
+            append('evidon-notice', noticecdn + 'evidon-sitenotice-tag.js', false);
+            append('evidon-location', cdn + 'geo/country.js', true);
+            append('evidon-themes', noticecdn + id + '/snthemes.js', true);
+            if (rootDomain) append('evidon-settings', noticecdn + id + '/' + rootDomain
+                + '/settings.js', true);
+
+            window.evidon.priorConsentCallback = function () {
+                function gtm(w, d, s, l, i) {
+                    w[l] = w[l] || [];
+                    w[l].push({
+                        'gtm.start':
+                            new Date().getTime(), event: 'gtm.js'
+                    });
+                    var f = d.getElementsByTagName(s)[0],
+                        j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : '';
+                    j.async = true;
+                    j.src =
+                        'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+                    f.parentNode.insertBefore(j, f);
+                }
+
+                //gtm(window, document, 'script', 'dataLayer', 'GTM-MJMSR5');
+               gtm(window, document, 'script', 'dataLayer', 'GTM-K4K897R');
+            }
+            window.evidon.closeCallback = function () {
+// this is executed when a user closes a UI element (banner/barrier)without
+// providing consent.
+            }
+            window.evidon.consentWithdrawnCallback = function () {
+// this is exeucted if the user withdraws consent and elects to
+// no longer allow technologies to run on the site.
+            }
+        })(6598);
+
+    </script>
+
+
+    <script id="HeaderDesktop" type="text/template">
+        <div class="header-box">
+            <div class="header-box__logo-box">
+                <a href="#" id="logoUrl">
+                    <div id="cc_store_logo_img" class="cc_store_logo_img"></div>
+                </a>
+            </div>
+            <div class="header-box__items">
+                <div class="menu-items">
+                    <span class="misc-function cc_misc_function"></span>
+                    <!--<span class="cc_my_account"><a href="#" id="goToAccount"><i class="fa fa-user" aria-hidden="true"></i><span>&#160;{{pageLabelMap 'Component_SiteHeader_MyAccount'}}</span></a></span>-->
+                    <span class="cc_my_chead"><a href="#" id="cartHeader" class="chead cartHeaderLink"></a></span>
+                    <p class="impersonate"><a onclick='callLogout()'>** Logout of Impersonate **</a></p>
+                    <span class="loginoutsec cc_loginoutsec"></span>
+                </div>
+                <div class="search_form cc_search_form"></div>
+            </div>
+        </div>
+    </script>
+
+    <script id="EffAcctSel-Head-View-Desktop" type="text/template">
+        {{#if this.ro}}
+        <span class="effAccount cc_eff_account">
+                <a href="#" style="display: none" onclick="focusSearch()">
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                </a>
+            </span>
+        {{else}}
+        <span class="effAccount cc_eff_account" data-toggle="modal" data-target="#effAccounts">
+                <a href="#" style="display: none" onclick="focusSearch()">
+                    {{#if this.workingEffAccount }}
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                    {{else}}
+                    {{pageLabelMap 'SELECT_ACCOUNT' }}
+                    {{/if}}
+                    <span class="launchSel cc_launch_sel" aria-hidden="true"></span>
+                </a>
+            </span>
+        {{/if}}
+        <div class="modal fade cc_modal cc_effective_accounts_modal" id="effAccounts" tabindex="-1" role="dialog" aria-labelledby="effAccountsLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content cc_modal_content">
+                    <div class="modal-header cc_modal_header">
+                        <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                        <h4 class="modal-title cc_modal_title" id="effAccountsLabel">{{pageLabelMap 'EFFECTIVE_ACCOUNT_TITLE'}}</h4>
+                    </div>
+                    <div class="modal-body cc_modal_body">
+                        <div class="table-responsive">
+                            <div class="search-input-container">
+                                <table>
+                                    <tr style="border: 0px solid black">
+                                        <td>
+                                            <label for="account-search">Search Accounts</label>
+                                            <input id="account-search" type="text" value="{{this.searchText}}" autocomplete="off" autofocus>
+                                        </td>
+                                        <td style="width:50%">
+                                        </td>
+                                        <td style="text-align:right">
+                                            <p style="padding-right:15px">To view the lamp and ballast catalog, you must select a customer</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="dynamic-content">
+                                <!--Account list gets injected here-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script>
+        function focusSearch() {
+            setTimeout(function(){
+                $('#account-search').focus();
+            },1000);
+        }
+    </script>
+
+    <script id="LocaleSwitcher-Desktop" type="text/template">
+        <a class="changeLocale cc_change_locale" href="javascript:void(0)">{{pageLabelMap 'LocaleSwitcher_Label'}} {{pageLabelPrefixMap 'LOC_' locale locale}} </a>
+        <div id="modalSecLocale"></div>
+    </script>
+
+    <script id="MyAccount-Desktop" type="text/template">
+        {{#if this}}
+        {{#ifEquals this.UserType 'Guest'}}
+        <a href="#login" class="goToLogin cc_goto_login"><i class="fa fa-pencil" aria-hidden="true"></i>&#160;{{pageLabelMap 'Component_SiteHeader_Login'}}</a>
+        {{else}}
+        <a href="#logout" class="doLogout cc_do_logout"><i class="fa fa-pencil" aria-hidden="true"></i>&#160;{{pageLabelMap 'Component_SiteHeader_Logout'}} {{{this.FirstName}}}</a>
+        {{/ifEquals}}
+        {{else}}
+        <a href="#login" class="cc_login"><i class="fa fa-pencil" aria-hidden="true"></i>&#160;{{pageLabelMap 'Component_SiteHeader_Login'}}</a>
+        {{/if}}
+    </script>
+
+    <script id="productSearchTemplateDesktop" type="text/template">
+        {{#ifDisplay 'H.DisplSearch'}}
+        <div class="navbar-form cc_navbar_form" role="search">
+            <div class="input-group cc_input-group">
+                <input id="searchText" type="text" class="form-control search_input cc_search_input" placeholder="{{pageLabelMap 'ProductSearch'}}" title="{{pageLabelMap 'ProductSearch_Tooltip'}}"
+                       data-trigger="focus" autocomplete="off">
+                <span class="input-group-btn">
+       <button id="doSearch" class="btn btn-default search_button" type="Submit"><i class="fa fa-search" aria-hidden="true"></i></button>
+        </span>
+            </div>
+        </div>
+        <span id="cc_search_error" data-trigger="manual" data-placement="bottom" data-content="{{pageLabelMap 'ProductSearch_Tooltip'}}"></span>
+        <div class="searchTopBarErrorMessage searchBoxWidgetError"></div>
+        {{/ifDisplay}}
+    </script>
+
+    <script type="text/javascript">
+
+
+    </script>
+
+    <script type="text/javascript">
+
+        var uomCodeLabelMap = {};
+
+        function getUomCodeLabelMap() {
+            return uomCodeLabelMap;
+        }
+
+        function getUomLabelByUomCode(uomCode) {
+            return (uomCodeLabelMap[uomCode] ? uomCodeLabelMap[uomCode] : uomCode);
+        }
+
+        Backbone.View._extend = Backbone.View.extend;
+        Backbone.View.extend = function (protoProps, staticProps) {
+            if (protoProps.viewName) {
+                Backbone.trigger('view:' + protoProps.viewName + ':created', protoProps);
+            }
+            return this._extend(protoProps, staticProps);
+        };
+
+        /*const f = CCRZ.buildQueryString;
+        CCRZ.buildQueryString = function(inputQueryString){
+            let queryString = f(inputQueryString);
+            if (inputQueryString.toLowerCase().indexOf("agentId") === -1 && CCRZ.pagevars.agentId) {
+                queryString ? queryString += '&' : queryString += '?';
+                queryString += 'agentId=' + CCRZ.pagevars.agentId;
+            }
+            return queryString;
+        };*/
+
+        /*Backbone.on('all', function () {
+            console.log(`Backbone.on arguments`, arguments);
+        })*/
+
+        Backbone.on('view:Menu:created', function (viewProto) {
+            // Hide "New Specification Registration" Menu Item Under "New Request" For Distributor User By Sameer Mahadik On(7-9-2021)
+            if(localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                userData = JSON.parse(userData);
+                var userType = localStorage.getItem(userData['User Type']);
+                if (userType == "Distributor") {
+                    setTimeout(function () {
+                        $(".navbar-default .cc_navbar-nav > li:nth-child(9) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(1) > .dropdown-menu > li:nth-child(1)").hide();
+                    }, 2000);
+                }
+            }
+            /*viewProto.gotoURL = function (event) {
+                event.preventDefault();
+                let url = '/Agents/s';
+                let urlParams = [];
+                if(CCRZ.pagevars.effAccountId){
+                    urlParams.push('effectiveAccount=' + CCRZ.pagevars.effAccountId);
+                }
+                if(CCRZ.pagevars.agentId){
+                    urlParams.push('agentId=' + CCRZ.pagevars.effAccountId);
+                }
+                if (urlParams.length > 0) {
+                    url += '?' + urlParams.join('&');
+                }
+                window.location.href = url;
+            }*/
+        });
+
+        Backbone.on('view:EffAccountSelView:created', function (viewProto) {
+            console.log('view:EffAccountSelView:created');
+            viewProto.init = function () {
+                var v = this;
+                v.events['click .customer-account-select'] = 'proceedToCustomerAccount';
+                v.events['click .effAccountModal'] = 'openAccountSelectorModal';
+                v.events['click .change-agent'] = 'changeAgent';
+                v.events['keyup #account-search'] = 'searchAccounts';
+                v.dataSet = {};
+                v.accounts = new CCRZ.collections.EffAccountList();
+                v.miscData = {};
+                v.displayMode = CCRZ.getPageConfig('eff.dispmode', 'header');
+                v.communitySessionStorageKeys = {};
+                // {"ContactID":21,"User Type":22,"disableAlertBar":23,"AgentID":24,"DataStored":25,"AgentNumber":26,"AgentName":27,
+                //     "AgentSegment":28,"DistributorAccount":34,"DistributorName":35,"DistributorSegment":36,"DistributorID":37}
+                v.accountRelatedLocalStoragekeys = ['AgentID', 'AgentNumber', 'AgentName', 'AgentSegment',
+                    'DistributorAccount', 'DistributorName', 'DistributorSegment', 'DistributorID'];
+                let storageKeys = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                if (storageKeys) {
+                    let values = JSON.parse(storageKeys);
+                    for (const key in values) {
+                        v.communitySessionStorageKeys[key] = values[key];
+                    }
+                }
+                let autoLaunchAccountSelector = false;
+                if (v.communitySessionStorageKeys.AgentNumber != null && localStorage.getItem(v.communitySessionStorageKeys.AgentNumber) != null &&
+                    v.communitySessionStorageKeys.AgentSegment != null && (localStorage.getItem(v.communitySessionStorageKeys.AgentSegment) === 'LB'
+                    || localStorage.getItem(v.communitySessionStorageKeys.AgentSegment).toLowerCase() === 'lamp') &&
+                    (v.communitySessionStorageKeys.DistributorID == null && localStorage.getItem(v.communitySessionStorageKeys.AgentNumber).startsWith('C')
+                        || localStorage.getItem(v.communitySessionStorageKeys.AgentNumber).startsWith('U'))) {
+                    autoLaunchAccountSelector = true;
+                }
+                const urlParams = new URLSearchParams(window.location.search);
+
+                if (urlParams.get('effectiveAccount') != null) {
+                    CCRZ.pagevars.effAccountId = urlParams.get('effectiveAccount');
+                    CCRZ.pagevars.remoteContext.effAccountId = CCRZ.pagevars.effAccountId;
+                } else {
+                    const effAccId = localStorage.getItem(v.communitySessionStorageKeys['DistributorID']);
+                    if (effAccId) {
+                        CCRZ.pagevars.effAccountId = effAccId;
+                        CCRZ.pagevars.remoteContext.effAccountId = CCRZ.pagevars.effAccountId;
+                    }
+                }
+                if (urlParams.get('agentId') != null) {
+                    CCRZ.pagevars.agentId = urlParams.get('agentId');
+                } else {
+                    let existingAgentAccId = localStorage.getItem(v.communitySessionStorageKeys.AgentID);
+                    if (existingAgentAccId) {
+                        CCRZ.pagevars.agentId = existingAgentAccId;
+                        if (v.communitySessionStorageKeys.DistributorID == null || localStorage.getItem(v.communitySessionStorageKeys.DistributorID) == null) {
+                            CCRZ.pagevars.effAccountId = CCRZ.pagevars.agentId;
+                            CCRZ.pagevars.remoteContext.effAccountId = CCRZ.pagevars.effAccountId;
+                        }
+                    }
+                }
+
+                v.invokeCtx('fetchEffectiveAccounts', function (response) {
+                    console.log('fetchEffectiveAccounts response ',response);
+                    $('.cc_eff_account').attr( "style", "display: block !important;" );
+                    if (response && response.success) {
+                        v.dataSet = response.data;
+                        //v.accounts.reset(v.dataSet.effectiveList);
+                        /*v.dataSet.workingEffAccount = response.data.workingEffAccount;
+                        v.dataSet.cartBean = response.data.cartBean;
+                        if (v.dataSet.workingEffAccount && v.dataSet.workingEffAccount.sfid) {
+                            CCRZ.setCookie('apex__effacc', v.dataSet.workingEffAccount.sfid, 50);
+                            //localStorage.setItem('effAccId', v.dataSet.workingEffAccount.sfid);
+                            CCRZ.pagevars.effAccountId = v.dataSet.workingEffAccount.sfid;
+                        }*/
+                        console.log('cartbean ',v.dataSet.cartBean.encryptedId);
+                        if (v.dataSet.cartBean && v.dataSet.cartBean.encryptedId //&& !CCRZ.pagevars.currentCartID
+                            && v.dataSet.cartBean.encryptedId != CCRZ.pagevars.currentCartID) {
+                                console.log('cartChange before ',CCRZ.pagevars.currentCartID);
+                                console.log('Cartbean ',v.dataSet.cartBean);
+                            CCRZ.pagevars.currentCartID = v.dataSet.cartBean.encryptedId;
+                            CCRZ.pubSub.trigger('cartChange', CCRZ.pagevars.currentCartID);
+                            console.log('cartChange after ',CCRZ.pagevars.currentCartID);
+                        }
+                        v.dataSet.ro = false;
+                        v.render();
+                        if (autoLaunchAccountSelector) {
+                            document.querySelector('.cc_eff_account a').click();
+                            let effAccContainer = document.getElementById('effAccounts');
+                            effAccContainer.querySelector('.cc_modal_header button').style.display = 'none';
+                            let f = function (event) {
+                                if (event.target.id === 'effAccounts') {
+                                    window.setTimeout(() => {
+                                        document.querySelector('.cc_eff_account a').click();
+                                    }, 500)
+                                }
+                                //event.preventDefault();
+                                //event.stopImmediatePropagation();
+                                //event.stopPropagation();
+                            };
+                            effAccContainer.addEventListener('click', f);
+                            effAccContainer.addEventListener('keydown', event => {
+                                if (event.key === 'Escape') {
+                                    window.setTimeout(() => {
+                                        document.querySelector('.cc_eff_account a').click();
+                                    }, 500)
+                                }
+                            });
+                        }
+                        let getRelatedAccountsOfUserAction = _.extend(CCRZ.RemoteInvocation, {
+                            className: 'HeaderActions'
+                        });
+                            getRelatedAccountsOfUserAction.invokeCtx('getRelatedAccountsOfUser', function (res, evt) {
+                                console.log(`getRelatedAccountsOfUser res.data`, res.data);
+                                v.dataSet.userType = res.data.userType;
+                                v.dataSet.accountsToDisplay = [];
+                                v.dataSet.searchText = '';
+                                if (res.data.workingEffectiveAccount) {
+                                    CCRZ.pagevars.effAccountId = res.data.workingEffectiveAccount.sfid;
+                                    v.dataSet.workingEffAccount = res.data.workingEffectiveAccount;
+                                    let a = document.querySelector('.cc_eff_account a');
+                                    a.textContent = v.dataSet.workingEffAccount.Name + ' (' + v.dataSet.workingEffAccount.AccountNumber + ') - ' + v.dataSet.workingEffAccount.ShippingAddress?.city;
+                                    $('.cc_eff_account a').show();
+                                    CCRZ.pubSub.trigger('effectiveAccountLoaded', res.data.workingEffectiveAccount);
+                                }
+                                if (v.dataSet.userType === 'Agent') {
+                                    v.dataSet.view = 'AgentListView';
+                                    v.dataSet.agents = res.data.agents;
+                                    v.dataSet.accountsToDisplay = v.dataSet.agents;
+                                    v.accounts.reset(v.dataSet.agents.concat(res.data.customerAccounts));
+                                    if (CCRZ.pagevars.agentId && v.accounts.has(CCRZ.pagevars.agentId)) {
+                                        v.dataSet.agent = v.accounts.get(CCRZ.pagevars.agentId).toJSON();
+                                        if (CCRZ.pagevars.effAccountId !== CCRZ.pagevars.agentId) {
+                                            let a = document.querySelector('.cc_eff_account a');
+                                            a.textContent = v.dataSet.agent.Name + ' (' + v.dataSet.agent.GE_LGT_EM_SAP_Customer_Number__c + ')  |  ' + a.textContent;
+                                            $('.cc_eff_account a').show();
+                                        }
+                                    }
+                                } else {
+                                    v.dataSet.view = 'CustomerAccountListView';
+                                    v.dataSet.customerAccounts = res.data.customerAccounts;
+                                    v.dataSet.accountsToDisplay = v.dataSet.customerAccounts;
+                                    v.accounts.reset(v.dataSet.customerAccounts);
+                                }
+                                v.buildAccountSelectorTable();
+                            }, {
+                                nmsp: false,
+                                escape: false,
+                                timeout: 120000
+                            });
+
+                    }
+                }, {buffer: false});
+            };
+            viewProto.proceedToCustomerAccount = function (event) {
+                console.log('viewProto.proceedToCustomerAccount');
+                this.dataSet.customerAccounts = [];
+                const agentId = event.currentTarget.dataset.id;
+                if (agentId && this.accounts.has(agentId)) {
+                    const agent = this.accounts.get(agentId).toJSON();
+                    this.dataSet.agent = agent;
+                    if (agent.customerAccountIds && agent.customerAccountIds.length > 0) {
+                        const customerAccounts = [];
+                        for (const customerAccountId of agent.customerAccountIds) {
+                            let customerAccount = this.accounts.get(customerAccountId);
+                            if (customerAccount) {
+                                customerAccounts.push(customerAccount.toJSON());
+                            }
+                        }
+                        this.dataSet.customerAccounts = customerAccounts;
+                        this.dataSet.accountsToDisplay = this.dataSet.customerAccounts;
+                        this.dataSet.view = 'CustomerAccountListView';
+                        document.querySelector('#account-search').value = null;
+                        this.buildAccountSelectorTable();
+                    }
+                }
+            };
+            viewProto.changeAgent = function (event) {
+                console.log('viewProto.changeAgent');
+                this.dataSet.view = 'AgentListView';
+                this.dataSet.customerAccounts = [];
+                this.dataSet.accountsToDisplay = this.dataSet.agents;
+                document.querySelector('#account-search').value = null;
+                this.buildAccountSelectorTable();
+            };
+            viewProto.searchAccounts = function (event) {
+                console.log('viewProto.searchAccounts');
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                let searchText = event.currentTarget.value;
+                let accounts = (this.dataSet.userType === 'Agent' && this.dataSet.view === 'AgentListView') ? this.dataSet.agents : this.dataSet.customerAccounts;
+                if (searchText == null || searchText === '') {
+                    this.dataSet.accountsToDisplay = accounts;
+                } else {
+                    searchText = searchText.toLowerCase();
+                    this.dataSet.accountsToDisplay = [];
+                    for (let i = 0; i < accounts.length; i++) {
+                        let account = accounts[i];
+                        if ((account.Name) && (account.Name.toLowerCase().includes(searchText)) ||
+                            (account.GE_LGT_EM_SAP_Customer_Number__c) && (account.GE_LGT_EM_SAP_Customer_Number__c.toLowerCase().includes(searchText)) ||
+                            account.ShippingAddress?.city?.toLowerCase().includes(searchText) || account.ShippingAddress?.state?.toLowerCase().includes(searchText)) {
+                            this.dataSet.accountsToDisplay.push(account);
+                        }
+                    }
+                }
+                this.buildAccountSelectorTable();
+            };
+            viewProto.buildAccountSelectorTable = function (event) {
+                console.log('viewProto.buildAccountSelector');
+                /*
+                {{#ifEquals userType 'Agent'}}
+                            {{#ifEquals view 'CustomerAccountListView'}}
+                                <button class="change-agent">Change Agent</button>
+                            {{/ifEquals}}
+                            {{/ifEquals}}
+                 */
+                try {
+                let container = document.querySelector('.cc_effective_accounts_modal .table-responsive .dynamic-content');
+                container.innerHTML = null;
+                if (this.dataSet.userType === 'Agent' && this.dataSet.view === 'CustomerAccountListView') {
+                    let button = document.createElement('button');
+                    button.classList.add('change-agent', 'btn', 'btn-default');
+                    button.textContent = 'Change Agent';
+                    container.append(button);
+                }
+                let table = document.createElement('table');
+                table.classList.add('table', 'table-hover', 'cc_table');
+                let thead = document.createElement('thead');
+                thead.classList.add('cc_thead');
+                let tr = document.createElement('tr');
+                tr.classList.add('cc_tr');
+                tr.innerHTML =
+                    '<th class="cc_th_name">Name</th>' +
+                    '<th class="">Segmentation</th>' +
+                    '<th class="cc_th_account_number">Account Number</th>' +
+                    '<th class="cc_th_address">Address</th>' +
+                    '<th class=""></th>' +
+                    '<th class=""></th>';
+                if (this.dataSet.view === 'AgentListView') {
+                    tr.innerHTML += '<th class=""></th>';
+                }
+                thead.append(tr);
+                table.append(thead);
+                let tbody = document.createElement('tbody');
+                tbody.classList.add('cc_tbody');
+                for (let i = 0; i < this.dataSet.accountsToDisplay.length; i++) {
+                    let account = this.dataSet.accountsToDisplay[i];
+                    let accSegmentLabel = account.Customer_Segmentation__c != null ? account.Customer_Segmentation__c : '';
+                    if (accSegmentLabel === 'FD') accSegmentLabel = 'Fixture';
+                    if (accSegmentLabel === 'LB') accSegmentLabel = 'Lamp';
+                    tr = document.createElement('tr');
+                    tr.classList.add('cc_tr_values');
+                    tr.innerHTML =
+                        `<td class="cc_td_name">${account.Name}</td>` +
+                        `<td class="">${accSegmentLabel}</td>` +
+                        `<td class="cc_td_sap_customer_number">${(account.GE_LGT_EM_SAP_Customer_Number__c != null ? account.GE_LGT_EM_SAP_Customer_Number__c : '')}</td>` +
+                        `<td class="cc_td_address">${formatAddress(account.ShippingAddress)}</td>`;
+                    if (this.dataSet.view === 'AgentListView') {
+                        if (account.Customer_Segmentation__c !== 'LB' && account.Customer_Segmentation__c.toLowerCase() !== 'lamp') {
+                            tr.innerHTML += `<td><a href="#" class="pickAccount btn btn-default" data-id="${account.sfid}" onclick="CCRZ.setCookie('apex__effacc', '${account.sfid}', 50);">Select Agent</a></td>`;
+                        } else {
+                            tr.innerHTML += `<td></td>`;
+                        }
+                        if (account.customerAccountIds.length > 0) {
+                            tr.innerHTML += `<td><a href="#" class="customer-account-select btn btn-default" data-id="${account.sfid}" onclick="CCRZ.setCookie('apex__effacc', '${account.sfid}', 50);">Select Customer Account</a></td>`;
+                        } else {
+                            tr.innerHTML += `<td></td>`;
+                        }
+                    } else {
+                        tr.innerHTML += `<td><a href="#" class="pickAccount btn btn-default" data-id="${account.sfid}" onclick="CCRZ.setCookie('apex__effacc', '${account.sfid}', 50);">Select Account</a></td>`;
+                    }
+                    tbody.append(tr);
+                }
+                table.append(tbody);
+                container.append(table);
+                } catch(error) {
+                    if (CCRZ.pagevars.currentPageName == "ccrz__OrderConfirmation" && localStorage.getItem('portalUserID') != null) {
+                        window.location.href = window.location.href + '&portalUser=' + localStorage.getItem('portalUserID');
+                    } else {
+                        console.log(error);
+                    }
+                }
+
+                if (new URLSearchParams(window.location.search).get('portalUser')){
+                    loadLocalStorageForCSR(this, CCRZ.pagevars.remoteContext.effAccountId);
+                } else {
+                    localStorage.removeItem('portalUserID');
+                }
+            };
+            viewProto.processSelection = function (selAccId) {
+                console.log('viewProto.ProcessSelection');
+                var v = this;
+                var selAcc = this.accounts.get(selAccId);
+                if (selAcc) {
+                    $('#effAccounts').toggle('close');
+                    // Show loader after select account By Sameer Mahadik On(2-9-2022)
+                     $("header").before("<div id='overlay' class='modal-backdrop fade in'><div class='customLoader'></div></div>");
+                    CCRZ.console.log(selAcc);
+                    if (v.dataSet.agents && v.dataSet.agents.findIndex(acc => acc.sfid === selAcc.get('sfid')) !== -1) {
+                        v.dataSet.agent = selAcc.toJSON();
+                    }
+                    CCRZ.pagevars.remoteContext.effAccountId = selAcc.get('sfid');
+                    v.invokeCtx('selectEffectiveAccount', {sfid: selAcc.get('sfid')}, v.miscData, function (response) {
+                        CCRZ.console.log('selectEffectiveAccount ',response);
+                        if (response && response.success) {
+                            CCRZ.pagevars.effAccountId = response.data.workingEffAccount.sfid;
+                            CCRZ.setCookie('apex__effacc', response.data.workingEffAccount.sfid, 50);
+                            if (typeof(CCRZ.currentUser.ContactId) != 'undefined') {
+                                CCRZ.setCookie('apex__cont', CCRZ.currentUser.ContactId, 50);
+                            }
+                            for (const key in v.communitySessionStorageKeys) {
+                                if (v.communitySessionStorageKeys.hasOwnProperty(key) && v.accountRelatedLocalStoragekeys.includes(key)) {
+                                    localStorage.removeItem(v.communitySessionStorageKeys[key]);
+                                }
+                            }
+                            //localStorage.removeItem('LSSIndex:LOCAL{"namespace":"c"}');
+                            //v.communitySessionStorageKeys = {DataStored: Math.random(), disableAlertBar: Math.random()};
+                            //localStorage.setItem(v.communitySessionStorageKeys.DataStored, 'YES');
+                            v.communitySessionStorageKeys.AgentNumber = null;
+                            v.communitySessionStorageKeys.AgentName = null;
+                            v.communitySessionStorageKeys.AgentSegment = null;
+                            v.communitySessionStorageKeys.AgentID = null;
+                            v.communitySessionStorageKeys.DistributorAccount = null;
+                            v.communitySessionStorageKeys.DistributorType = Math.random();
+                            v.communitySessionStorageKeys.DistributorName = null;
+                            v.communitySessionStorageKeys.DistributorSegment = null;
+                            v.communitySessionStorageKeys.DistributorID = null;
+                            //localStorage.setItem(v.communitySessionStorageKeys.disableAlertBar, 'YES');
+                            if (v.dataSet.userType === 'Agent') {
+                                v.communitySessionStorageKeys.AgentNumber = Math.random();
+                                v.communitySessionStorageKeys.AgentName = Math.random();
+                                v.communitySessionStorageKeys.AgentSegment = Math.random();
+                                v.communitySessionStorageKeys.AgentID = Math.random();
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentNumber, v.dataSet.agent.GE_LGT_EM_SAP_Customer_Number__c);
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentName, v.dataSet.agent.Name);
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentSegment, v.dataSet.agent.Customer_Segmentation__c);
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentID, v.dataSet.agent.sfid);
+                            }
+                            let workingEffectiveAccount = v.accounts.get(response.data.workingEffAccount.sfid);
+                            if (v.dataSet.userType !== 'Agent' || v.dataSet.agent.sfid !== workingEffectiveAccount.get('sfid')) {
+                                console.log('!Agent');
+                                v.communitySessionStorageKeys.DistributorAccount = Math.random();
+                                v.communitySessionStorageKeys.DistributorName = Math.random();
+                                v.communitySessionStorageKeys.DistributorSegment = Math.random();
+                                v.communitySessionStorageKeys.DistributorID = Math.random();
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorAccount, workingEffectiveAccount.get('GE_LGT_EM_SAP_Customer_Number__c'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorName, workingEffectiveAccount.get('Name'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorType, workingEffectiveAccount.get('GE_LGT_EM_Order_Block__c'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorSegment, workingEffectiveAccount.get('Customer_Segmentation__c'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorID, workingEffectiveAccount.get('sfid'));
+                            }
+                            localStorage.setItem('LSSIndex:LOCAL{"namespace":"c"}', JSON.stringify(v.communitySessionStorageKeys));
+                            console.log('LSS set to ', JSON.stringify(v.communitySessionStorageKeys));
+                            if (response.data.cartBean) {
+                                console.log('cartChange before :',CCRZ.pagevars.currentCartID);
+                                CCRZ.pagevars.currentCartID = response.data.cartBean.encryptedId;
+                                CCRZ.pubSub.trigger('cartChange', CCRZ.pagevars.currentCartID);
+                                console.log('cartChange after :',CCRZ.pagevars.currentCartID);
+                            }
+
+                            document.location =  CCRZ.pages.products +"?cartID=" + CCRZ.pagevars.currentCartID + getCSRQueryString();
+                        }
+                    });
+                }
+            };
+
+        });
+
+        Backbone.on('view:headerView:created', function (viewProto) {
+
+        viewProto.postRender =  function (event) {
+            console.log('PostRender executed');
+            var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+            userData = JSON.parse(userData);
+            var internalUserFirstName = localStorage.getItem(userData['internalUserFirstName']);
+
+            if(internalUserFirstName != null){
+                var impersonate =  true;
+                $('.loginoutsec').hide();
+            } else {
+                var impersonate =  false;
+                $('.impersonate').hide();
+            }
+            console.log('impersonate: '+impersonate);
+        }
+
+        viewProto.doLogout = function (event) {
+            console.log('remove namespace');
+            localStorage.removeItem('LSSIndex:LOCAL{"namespace":"c"}');
+            if (CCRZ.pagevars.linkOverrideMap['HeaderLogout']) {
+                window.location.href = CCRZ.pagevars.linkOverrideMap['HeaderLogout'];
+            } else {
+                window.location.href = "/DefaultStore/secur/logout.jsp";
+            }
+        };
+
+        var remoteCallHDR = _.extend(CCRZ.RemoteInvocation, {className: 'HeaderActions'});
+        remoteCallHDR.invokeCtx('getUomCodeLabelMap',
+            function (uomPairs, err) {
+                for (let i = 0; i < uomPairs.length; i++) {
+                    uomCodeLabelMap[i] = uomPairs[i].Code__c;
+                    Object.defineProperty(uomCodeLabelMap, uomPairs[i].Code__c, {
+                        value: uomPairs[i].Label,
+                        writable: true
+                    });
+                }
+            }, {
+                nmsp: false, escape: false
+            });
+        });
+
+        CCRZ.pubSub.on('view:headerView:refresh', function (obj) {
+            console.log('view:headerView:refresh');
+            CCRZ.headerModel.getUser(function () {
+                var accountId;
+                try {
+                     accountId = CCRZ.currentUser.Contact.AccountId;
+                } catch(error) {
+                    var match = document.cookie.match(new RegExp('(^| )apex__effacc=([^;]+)'));
+                    if (match) {
+                        accountId = match[2];
+                        CCRZ.effSelectorView.processSelection(accountId);
+                    } else {
+                        console.log(error);
+                    }
+                }
+                var remoteCallHDR = _.extend(CCRZ.RemoteInvocation, {className: 'HeaderActions'});
+                var userConId = CCRZ.currentUser.Id;
+                remoteCallHDR.invokeCtx('getRepCode', accountId,
+                    function (account, err) {
+                        CCRZ.currentUser.repCode = account.GE_LGT_Rep_Code__c;
+                        CCRZ.currentUser.GEAccountGroup = account.Account_Group__c;
+                        CCRZ.currentUser.shippingAddress = account.ShipToAddress__c;
+                        Backbone.trigger('currentUser:updated');
+                    }, {
+                        nmsp: false, escape: false
+                    });
+
+                remoteCallHDR.invokeCtx('getProfId', userConId,
+                    function (user, err) {
+                        // CCRZ.currentUser.repCode = user.Account.GE_LGT_Rep_Code__c;
+                        // CCRZ.currentUser.GEAccountGroup = user.Account.Account_Group__c;
+                        CCRZ.currentUser.profileName = user.Profile.Name;
+                        //Backbone.trigger('currentUser:updated');
+                    }, {
+                        nmsp: false, escape: false
+                    });
+
+                remoteCallHDR.invokeCtx('getPerSet', userConId,
+                    function (per, err) {
+                        if (CCRZ.currentUser) CCRZ.currentUser.permissionSet = per;
+                        //Backbone.trigger('currentUser:updated');
+                    }, {
+                        nmsp: false, escape: false
+                    });
+            });
+
+        });
+
+        function formatAddress(address) {
+            if (address == null) {
+                return '';
+            }
+            let response = [];
+            if (address.street) {
+                response.push(address.street);
+            }
+            if (address.city) {
+                response.push(address.city);
+            }
+            if (address.state) {
+                response.push(address.state);
+            }
+            if (address.postalCode) {
+                response.push(address.postalCode);
+            }
+            if (address.country) {
+                response.push(address.country);
+            }
+            return response.join(' ');
+        }
+
+        Handlebars.registerHelper('formattedAddress', formatAddress);
+
+
+
+        function loadLocalStorageForCSR(v, selAccId) {
+                console.log('viewProto.ProcessSelection');
+                console.log('loadLocalStorageForCSR');
+                var selAcc = v.accounts.get(selAccId);
+                console.log('selAcc', selAcc);
+                if (selAcc) {
+//                    $('#effAccounts').toggle('close');
+                    CCRZ.console.log(selAcc);
+                    if (v.dataSet.agents && v.dataSet.agents.findIndex(acc => acc.sfid === selAcc.get('sfid')) !== -1) {
+                        v.dataSet.agent = selAcc.toJSON();
+                    }
+                    CCRZ.pagevars.remoteContext.effAccountId = selAcc.get('sfid');
+                    v.invokeCtx('selectEffectiveAccount', {sfid: selAcc.get('sfid')}, v.miscData, function (response) {
+                        CCRZ.console.log('selectEffectiveAccount ',response);
+                        if (response && response.success) {
+                            CCRZ.pagevars.effAccountId = response.data.workingEffAccount.sfid;
+                            CCRZ.setCookie('apex__effacc', response.data.workingEffAccount.sfid, 50);
+                            if (typeof(CCRZ.currentUser.ContactId) != 'undefined') {
+                                CCRZ.setCookie('apex__cont', CCRZ.currentUser.ContactId, 50);
+                            }
+                            for (const key in v.communitySessionStorageKeys) {
+                                if (v.communitySessionStorageKeys.hasOwnProperty(key) && v.accountRelatedLocalStoragekeys.includes(key)) {
+                                    localStorage.removeItem(v.communitySessionStorageKeys[key]);
+                                }
+                            }
+                            //localStorage.removeItem('LSSIndex:LOCAL{"namespace":"c"}');
+                            //v.communitySessionStorageKeys = {DataStored: Math.random(), disableAlertBar: Math.random()};
+                            //localStorage.setItem(v.communitySessionStorageKeys.DataStored, 'YES');
+                            v.communitySessionStorageKeys.AgentNumber = null;
+                            v.communitySessionStorageKeys.AgentName = null;
+                            v.communitySessionStorageKeys.AgentSegment = null;
+                            v.communitySessionStorageKeys.AgentID = null;
+                            v.communitySessionStorageKeys.DistributorAccount = null;
+                            v.communitySessionStorageKeys.DistributorType = Math.random();
+                            v.communitySessionStorageKeys.DistributorName = null;
+                            v.communitySessionStorageKeys.DistributorSegment = null;
+                            v.communitySessionStorageKeys.DistributorID = null;
+                            //localStorage.setItem(v.communitySessionStorageKeys.disableAlertBar, 'YES');
+                            if (v.dataSet.userType === 'Agent') {
+                                v.communitySessionStorageKeys.AgentNumber = Math.random();
+                                v.communitySessionStorageKeys.AgentName = Math.random();
+                                v.communitySessionStorageKeys.AgentSegment = Math.random();
+                                v.communitySessionStorageKeys.AgentID = Math.random();
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentNumber, v.dataSet.agent.GE_LGT_EM_SAP_Customer_Number__c);
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentName, v.dataSet.agent.Name);
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentSegment, v.dataSet.agent.Customer_Segmentation__c);
+                                localStorage.setItem(v.communitySessionStorageKeys.AgentID, v.dataSet.agent.sfid);
+                            }
+                            let workingEffectiveAccount = v.accounts.get(response.data.workingEffAccount.sfid);
+                            if (v.dataSet.userType !== 'Agent' || v.dataSet.agent.sfid !== workingEffectiveAccount.get('sfid')) {
+                                console.log('!Agent');
+                                v.communitySessionStorageKeys.DistributorAccount = Math.random();
+                                v.communitySessionStorageKeys.DistributorName = Math.random();
+                                v.communitySessionStorageKeys.DistributorSegment = Math.random();
+                                v.communitySessionStorageKeys.DistributorID = Math.random();
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorAccount, workingEffectiveAccount.get('GE_LGT_EM_SAP_Customer_Number__c'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorName, workingEffectiveAccount.get('Name'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorType, workingEffectiveAccount.get('GE_LGT_EM_Order_Block__c'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorSegment, workingEffectiveAccount.get('Customer_Segmentation__c'));
+                                localStorage.setItem(v.communitySessionStorageKeys.DistributorID, workingEffectiveAccount.get('sfid'));
+                            }
+                            localStorage.setItem('LSSIndex:LOCAL{"namespace":"c"}', JSON.stringify(v.communitySessionStorageKeys));
+                            console.log('LSS set to ', JSON.stringify(v.communitySessionStorageKeys));
+                            localStorage.setItem('portalUserID', new URLSearchParams(window.location.search).get('portalUser'));
+                            if (response.data.cartBean) {
+                                console.log('cartChange before :',CCRZ.pagevars.currentCartID);
+                                CCRZ.pagevars.currentCartID = response.data.cartBean.encryptedId;
+                                CCRZ.pubSub.trigger('cartChange', CCRZ.pagevars.currentCartID);
+                                console.log('cartChange after :',CCRZ.pagevars.currentCartID);
+                            }
+                        }
+                    });
+                }
+            }
+            if (CCRZ.pagevars.currentPageName == "ccrz__ProductCompare") {
+                var quickOrderTimerHDR = setInterval(function() {
+                if (document.getElementsByClassName('cc_mini_quick_order').length > 0) {
+                    clearInterval(quickOrderTimerHDR);
+                    if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                        var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                        userData = JSON.parse(userData);
+                                            var agentSegment = (userData? (localStorage.getItem(userData['User Type']) == 'Distributor' ? userData['DistributorSegment'] : userData['AgentSegment']) : '');
+                        if (!(localStorage.getItem(agentSegment) == 'LB' || localStorage.getItem(agentSegment).toLowerCase() == 'lamp')) {
+                            document.getElementsByClassName('cc_mini_quick_order')[0].style.display='none';
+                        }
+                    }
+                }
+            }, 231);
+        }
+
+        function callLogout(){
+
+var baseURL = window.location.origin;
+
+console.log('Base URL: '+baseURL);
+
+var logoutURL = baseURL + '/secur/logout.jsp?retUrl=' + baseURL;
+
+console.log('PostRender executed');
+
+var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+
+userData = JSON.parse(userData);
+
+var contactID = localStorage.getItem(userData['ContactID']);
+
+
+
+var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'HeaderActions' });
+
+remoteCall.invokeCtx('resetImpersonateFlag', contactID, function (res, err) {
+
+    console.log('Function Body of callLogout -> resetImpersonateFlag');
+
+    //window.location.replace("https://stage-gecurrent.cs91.force.com/Agents/secur/logout.jsp?retUrl=https%3A%2F%2Fstage-gecurrent.cs91.force.com%2FAgents%2FCommunitiesLanding");
+
+    window.location.replace(logoutURL);
+
+}, {nmsp: false, escape: false});
+
+}
+    </script>
+</apex:page>

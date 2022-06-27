@@ -1,0 +1,258 @@
+<!--
+ - Created by Paksy Andras on 2021. 03. 22..
+ -->
+
+<!-- Stock Balancing Return Lwc -->
+<template>
+    <div class="slds-media__body">
+        <div class="slds-page-header__name">
+            <div class="slds-page-header__name-title">
+                <h1>
+                    <span class="slds-page-header__title slds-truncate" title="Claimback">Claimback</span>
+                </h1>
+            </div>
+        </div>
+    </div>
+        <br>
+    <div class="slds-readonly-path">
+    <lightning-progress-indicator
+            current-step={currentStep}
+            type="path"
+            variant="base"
+    >
+        <lightning-progress-step
+                label="1. Requestor Information"
+                value="accountinfo"
+        ></lightning-progress-step>
+        <lightning-progress-step
+                label="2. Product Selection"
+                value="productentry"
+        ></lightning-progress-step>
+        <lightning-progress-step
+                label="3. Review"
+                value="review"
+        ></lightning-progress-step>
+        <lightning-progress-step
+                label="4. Confirmation"
+                value="thankyou"
+        ></lightning-progress-step>
+    </lightning-progress-indicator> <br>
+    </div>
+    <lightning-messages> </lightning-messages>
+
+    <!--STEP ONE-->
+    <template if:true={steps.accountinfo}>
+        <div class="slds-box">
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col slds-size_4-of-8">
+                    <h3 class="slds-section-title_divider">Requestor Information</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <lightning-record-edit-form object-api-name="Case"  >
+                                    <lightning-input-field if:false={isDistributor}
+                                            required label="Account"
+                                            field-name='AccountId'
+                                            onchange={handleAccountChange}
+                                            value={accountID}
+                                            disabled=true
+                                            class="acc">
+                                    </lightning-input-field>
+                                    <lightning-input-field if:true={isDistributor}
+                                            required label="Account"
+                                            field-name='AccountId'
+                                            onchange={handleSoldToAccountLookupSelect}
+                                            value={soldToAccountId}
+                                            disabled=true
+                                            class="acc">
+                                    </lightning-input-field>
+                                </lightning-record-edit-form>
+                                <lightning-input
+                                        type="text"
+                                        placeholder="Name..."
+                                        label="Requestor Name"
+                                        required
+                                        disabled
+                                        value={mainData.reqName}
+                                        data-fieldname="reqName"
+                                        onchange={handleAccountDataChange}
+                                        class="rn validValue"></lightning-input>
+                                <lightning-input
+                                        type="email"
+                                        placeholder="test@example.com"
+                                        label="Requestor Email"
+                                        minlength="5"
+                                        message-when-too-short="Your email address must be more 5 characters."
+                                        value={mainData.reqEmail}
+                                        data-fieldname="reqEmail"
+                                        onchange={handleAccountDataChange}
+                                        required
+                                        disabled
+                                        class="em validValue"></lightning-input>
+                                <lightning-input
+                                        type="tel"
+                                        placeholder="(xxx) xxx-xxxx"
+                                        label="Requestor Phone"
+                                        pattern="\([0-9]{3}\)\s[0-9]{3}-[0-9]{4}"
+                                        value={mainData.reqPhone}
+                                        data-fieldname="reqPhone"
+                                        onchange={handleAccountDataChange}
+                                        onkeydown={handlePhoneChange}
+                                        required
+                                        disabled
+                                        class="rp validValue"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_4-of-8">
+                    <h3 class="slds-section-title_divider">Type &amp; Account Information</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <lightning-input
+                                        type="text"
+                                        value={mainData.returnRefNumber}
+                                        data-fieldname="returnRefNumber"
+                                        label="Credit Request Reference #"
+                                        placeholder="Type your reference number here"
+                                        onchange={handleAccountDataChange}
+                                        required
+                                        class="rrn validValue">>
+                                </lightning-input>
+                                <div class="slds-m-bottom_x-small">
+                                    <c-sold-to-account-lookup
+                                            label="Sold to Account"
+                                            type="soldto"
+                                            required
+                                            place-holder="Search Accounts..."
+                                            selected-account={soldToAccount}
+                                            account-id={accountID}
+                                            onaccountselect={handleSoldToAccountLookupSelect}
+                                            onreset={handleSoldToAccountLookupReset}
+                                            class={hideIfDistributor}
+                                    ></c-sold-to-account-lookup>
+                                </div>
+                                <!--<div class="slds-m-bottom_x-small">
+                                    <c-ship-to-account-lookup
+                                            label="Ship to Account"
+                                            type="shipto"
+                                            disabled={isShipToAccountLookupDisabled}
+                                            place-holder="Search Accounts..."
+                                            required
+                                            sold-to-account-id={soldToAccountId}
+                                            selected-account={shipToAccount}
+                                            onaccountselect={handleShipToAccountLookupSelect}
+                                            onreset={handleShipToAccountLookupReset}
+                                    ></c-ship-to-account-lookup>
+                                </div>-->
+
+                                <lightning-textarea
+                                        name="comments"
+                                        value={comments}
+                                        label="Comments"
+                                        data-fieldname="comments"
+                                        onchange={handleAccountDataChange}
+                                        placeholder="Type here..."
+                                        class="cm"></lightning-textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><br>
+        </div>
+        <div class="slds-align_absolute-center">
+            <lightning-button
+                    class="slds-m-top_small"
+                    label={nextLabel}
+                    data-targetstep="productentry"
+                    data-validate="validate"
+                    onclick={goToStep}
+                    variant="brand"
+                    disabled={nextDisabled}
+            ></lightning-button>
+        </div>
+        <br><br>
+    </template>
+    <!--END OF STEP ONE-->
+
+    <!--STEP TWO-->
+    <template if:true={steps.productentry}>
+        <!--MANUAL PRODUCT ENTRY SCREEN STARTS HERE! -->
+        <c-claim-back-product-entry 
+            sold-to-account-id={soldToAccount}
+            return-type="claimBack"
+            product-families={prodFamilies}
+            price-agreement-numbers={priceAgreementNumbers}
+            oninvoicedatachange={handleInvoiceDataChange}
+            invoicesfromparent={mainData.invoices}
+            account-currency={accountCurrency}
+        ></c-claim-back-product-entry>
+        <div class="slds-align_absolute-center">
+            <lightning-button-group>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        data-targetstep="accountinfo"
+                        data-validate="novalidate"
+                        onclick={goToStep}
+                ></lightning-button>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label="Next"
+                        data-targetstep="review"
+                        data-validate="validate"
+                        onclick={goToStep}
+                        variant="brand"
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+        <br><br>
+    </template>
+    <!--END OF STEP TWO-->
+
+    <!--STEP THREE-->
+    <template if:true={steps.review}>
+
+        <c-claim-back-review main-details={mainData} account-currency={accountCurrency}></c-claim-back-review>
+        <div class="slds-align_absolute-center">
+            <lightning-button-group>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        data-targetstep="productentry"
+                        data-validate="novalidate"
+                        onclick={goToStep}
+                ></lightning-button>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label={toggleSubmitLabel}
+                        type="submit"
+                        variant="brand"
+                        data-targetstep="thankyou"
+                        data-validate="novalidate"
+                        data-save="save"
+                        onclick={goToStep}
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+        <br><br>
+    </template>
+    <!--END OF STEP THREE-->
+
+    <!--STEP FOUR-->
+    <template if:true={steps.thankyou}>
+        <div class="slds-col slds-size_8-of-8">
+            <h3 class="slds-section-title_divider">Confirmation</h3>
+            <div class="slds-box slds-theme_shade border confirmation">
+                <h2><b>THANK YOU FOR YOUR SUBMISSION! </b><br/><br/>
+
+                    REFERENCE NUMBER FOR YOUR REQUEST: {SAPOrderNumber} </h2>
+                <p>Your submission was successful. You can review the status within 30 minutes from the menu: Account > Transactions > Claimbacks.</p>
+            </div>
+        </div>
+    </template>
+    <!--END OF STEP FOUR-->
+
+</template>

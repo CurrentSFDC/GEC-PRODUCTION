@@ -1,0 +1,152 @@
+<template>
+    <div class="slds-box">
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_8-of-8">
+                <lightning-button variant="brand" label="Add Product" onclick={addProduct}></lightning-button>
+                <div class="slds-box slds-theme_shade border">
+
+                    <template if:true={isLoading}>
+                        <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                    </template>
+
+                    <template if:false={isLoading}>
+                    <div if:true={showReturnItems}>
+                        <template if:true={returnLines}>
+                            <lightning-datatable wrap-text-max-lines="2" data={returnLines} columns={columns}
+                                key-field="Id" onrowaction={handleRowAction} suppress-bottom-bar="true"
+                                hide-checkbox-column>
+                            </lightning-datatable>
+                        </template>
+                    </div>
+                </template>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL FOR ADDING PRODUCTS -->
+    <template if:true={addProductModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- modal header -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small"></lightning-icon>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Add to Request
+                    </h2>
+                </header>
+                <!-- modal body -->
+
+
+                <!-- showing record edit form -->
+                <lightning-messages></lightning-messages>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <!--<div class="slds-box"> < BOX 1 UPPER
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-input
+                                label="NoCAT Input"
+                                type="toggle"
+                                message-toggle-active = ''
+                                message-toggle-inactive = ''
+                                onchange={handleChecked}
+                                class="nci"
+                            ></lightning-input> <br>
+                        </div>
+                        <div class="slds-col">
+
+                            <div if:true={noCatInput}>
+                                <lightning-input
+                                    label="NoCAT #"
+                                    type="text"
+                                    class="nc"
+                                    onchange={onNoCatChange}
+                                ></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>-->
+                    <br>
+                    <div class="slds-box">
+                        <!-- BOX 2 LOWER-->
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col">
+                                <lightning-input label="Catalog #" type="text" required class="di validValue">
+                                </lightning-input>
+                                <lightning-input label="Comment" type="text" required class="po">
+                                </lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <br>
+                </div>
+
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer">
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+
+
+
+                            <lightning-button class="slds-m-top_small" variant="brand" onclick={handleSave}
+                                label="Add to Request">
+                            </lightning-button>
+
+                        </div>
+                    </div>
+
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+
+    </template>
+
+    <!-- MODAL FOR EDITING PRODUCTS -->
+    <template if:true={editProductModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
+            aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- modal header -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                            size="small"></lightning-icon>
+                    </button>
+                    <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">Edit Record</h2>
+                </header>
+            </div>
+
+            <!-- showing record edit form -->
+            <div if:true={isEditForm} class="slds-theme_default">
+                <lightning-record-edit-form layout-type="Full" record-id={currentRecordId} draft-values={draftValues}
+                    object-api-name="Return_Order_Item__c" onload={handleLoad} onsubmit={handleSubmit}>
+                </lightning-record-edit-form>
+            </div>
+
+
+
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+                <div class="slds-align_absolute-center">
+                    <div style="text-align:center;">
+                        <lightning-button variant="brand-outline" label="Close" title="Close" onclick={closeEditModal}>
+                        </lightning-button>
+                        <lightning-button class="slds-m-top_small" variant="brand" type="submit"
+                            onclick={handleSaveForm} label={editLabel}>
+                        </lightning-button>
+                    </div>
+                </div>
+
+            </footer>
+        </section>
+
+    </template>
+</template>

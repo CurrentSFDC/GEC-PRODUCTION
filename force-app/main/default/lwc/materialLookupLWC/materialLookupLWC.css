@@ -1,0 +1,27 @@
+.cusLookup .verticalAlign {
+	cursor: pointer;
+	margin: 6px 0px 0px 7px!important;
+}
+.cusLookup .fullWidth {
+	width: 100% !important;
+}
+.cusLookup .eachItem:hover {
+    background-color: #EEE;
+    cursor: pointer;
+}
+.cusLookup .slds-listbox__option_entity {
+    padding: .2rem .75rem !important;
+}
+ 
+/* For Scrolling */
+::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+::-webkit-scrollbar-track {
+   display: none !important;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: rgba(0,0,0,0.4);
+}

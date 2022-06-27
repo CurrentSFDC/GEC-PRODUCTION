@@ -1,0 +1,119 @@
+<aura:component controller="InvoiceDetailsController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global">
+    <!-- Need to add component? -->
+    
+    <aura:attribute name="invoiceTableData" type="Map" default="{}"/>  
+    <aura:attribute name="inProgress" type="Boolean" default="false" description="Getting the latest invoice details." />
+    <aura:attribute name="pageMessages" type="List" default="[]" description="Page messages" />
+
+    <aura:attribute name="invoiceItemData" type="List" default="[]"/>
+    <aura:html tag="style">.toastMessage.forceActionsText{white-space : pre-line !important;}</aura:html>
+    <aura:attribute name="bShowModal" type="Boolean"  default="false"     description="Display Invoice PDF" />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:handler event="aura:waiting" action="{!c.showSpinner}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}"/>
+    <aura:attribute name="spinner" type="boolean" default="FALSE"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>  
+    
+    <lightning:tabset selectedTabID="detail">
+       
+        <lightning:tab label="Details" id="detail">
+            <lightning:recordViewForm recordId="{!v.recordId}" objectApiName="GE_LGT_EM_InvoiceHeader__c">
+                <lightning:card title="Invoice Details">
+                    <p class="slds-p-horizontal_small">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning:outputField fieldName="Name" />
+                                <lightning:outputField fieldName="GE_LGT_EM_Sold_to_Account_Number__c" />
+                                <lightning:outputField fieldName="GE_LGT_EM_CustomerName__c" />
+                                <lightning:outputField fieldName="GE_LGT_EM_Invoice_Creation_Date__c" /> 
+                                <lightning:outputField fieldName="GE_LGT_EM_Billing_Date__c" />
+                            </div>
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning:outputField fieldName="GE_LGT_EM_SAPInvoiceNumber__c" />
+                                <lightning:outputField fieldName="GE_LGT_EM_Tax_Number_1__c" /> 
+                                <lightning:outputField fieldName="GE_LGT_EM_Net_value__c" />   
+                                <lightning:outputField fieldName="Invoice_Currency__c" />
+                            </div>
+                        </div>
+                    </p>
+                </lightning:card>
+            </lightning:recordViewForm>
+
+        </lightning:tab>
+        
+        <lightning:tab label="Invoice Items" id="lineitem">
+            <!--loading spinner start-->
+            <aura:if isTrue="{!v.spinner}">
+                <div aura:id="spinnerId" class="slds-spinner_container">
+                    <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                        <span class="slds-assistive-text">Loading...</span>
+                        <div class="slds-spinner__dot-a"></div>
+                        <div class="slds-spinner__dot-b"></div>
+                    </div>
+                </div>
+            </aura:if>
+            <!-- Loading spinner end-->
+
+            <lightning:card title="">
+                <lightning:accordion aura:id="invoiceItemsAccordion" allowMultipleSectionsOpen="true">
+                    <aura:iteration items="{!v.invoiceItemData}" var="item">
+                            <lightning:accordionSection name="{!item.materialDescription}" label="{!item.materialDescription}">
+
+                                <div class="slds-grid">
+                                    <div class="slds-col slds-size_1-of-2">                                       
+                                        <span class="slds-form-element__label">Invoice No.</span>                                        
+                                        <span class="fieldFormatting"><button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.showInvoicePdfModal}" id="{!item.sapInvoiceNumber}">{!item.sapInvoiceNumber}</button> </span><br />
+                                        
+                                        <span class="slds-form-element__label">Complaint Line Item No.</span>
+                                        <span class="fieldFormatting">{!item.compliantLineItemNumber}</span><br />
+                                        <span class="slds-form-element__label">Complaint No.</span>
+                                        <span class="fieldFormatting">{!item.compliantNum}</span><br />
+                                        <span class="slds-form-element__label">Currency</span>
+                                        <span class="fieldFormatting">{!item.isoCurrency}</span><br />
+                                        <span class="slds-form-element__label">Delivery Plant</span>
+                                        <span class="fieldFormatting">{!item.deliveryPlant}</span><br />
+                                        <span class="slds-form-element__label">Invoiced Price</span>
+                                        <span class="fieldFormatting">{!item.invoicedPrice}</span><br />
+                                        <span class="slds-form-element__label">Invoiced Price Unit</span>
+                                        <span class="fieldFormatting">{!item.invoicedPriceUnit}</span><br />
+                                        <span class="slds-form-element__label">Invoiced Quantity</span>
+                                        <span class="fieldFormatting">{!item.invoicedQuantity}</span><br />
+                                        <span class="slds-form-element__label">Invoiced Value</span>
+                                        <span class="fieldFormatting">{!item.invoicedValue}</span><br />
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2">
+                                        <span class="slds-form-element__label">Material</span>
+                                        <span class="fieldFormatting">{!item.material}</span><br />
+                                        <span class="slds-form-element__label">Material Description</span>
+                                        <span class="fieldFormatting">{!item.materialDescription}</span><br />
+                                        <span class="slds-form-element__label">Order Number</span>
+                                        <span class="fieldFormatting">{!item.orderNumber}</span><br />
+                                        <span class="slds-form-element__label">Sales Unit</span>
+                                        <span class="fieldFormatting">{!item.salesUnit}</span><br />
+                                        <span class="slds-form-element__label">Invoice Line Item Name</span>
+                                        <span class="fieldFormatting">{!item.invoiceLineItemName}</span><br />
+                                        <span class="slds-form-element__label">Line Item Number</span>
+                                        <span class="fieldFormatting">{!item.sapLineItemNumber}</span><br />
+                                        <span class="slds-form-element__label">Material Number</span>
+                                        <span class="fieldFormatting">{!item.sapMaterialNumber}</span><br />
+                                        <span class="slds-form-element__label">SKU</span>
+                                        <span class="fieldFormatting">{!item.SKU}</span><br />
+                                        <span class="slds-form-element__label">Sold To Account Number</span>
+                                        <span class="fieldFormatting">{!item.soldToAccountNumer}</span><br />
+                                        <span class="slds-form-element__label">Tax Amount</span>
+                                        <span class="fieldFormatting">{!item.taxAmount}</span><br />
+                                    </div>
+                                </div>
+
+                            </lightning:accordionSection>
+
+                    </aura:iteration>
+                </lightning:accordion>
+            </lightning:card>
+            <c:InvoicePdf aura:id="compInvoicePdfInvoiceLineItems"/>
+        </lightning:tab>
+    </lightning:tabset>
+    
+</aura:component>

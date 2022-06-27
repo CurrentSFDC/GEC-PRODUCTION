@@ -1,0 +1,13 @@
+export const SOMETHING_WENT_WRONG_PLEASE_TRY_AGAIN_LATER = 'Something went wrong. Please try again later.';
+export const SAVED_SUCCESSFULLY = 'Saved successfully';
+export const EMAIL_SENT_SUCCESSFULLY = 'Email sent successfully';
+export const PLEASE_FILL_ALL_REQUIRED_FIELDS = 'Please fill all required fields';
+export const PLEASE_SELECT_A_SOLD_TO_ACCOUNT = 'Please select a sold to account!';
+export const PO_NUMBER_TOO_SHORT = 'The PO Number must be at least 3 characters long.';
+export const INVOICE_FORM_NOT_FOUND = 'Invoice form not found';
+export const RETURNS_AND_STOCK_BALANCING_RETURNS = 'Returns & Stock balancing returns';
+export const WARRANTY_REPLACEMENT = 'Warranty/replacement';
+export const WARRANTY_DEFECTIVE_CREDIT = 'Warranty/defective credit';
+export const PLEASE_SELECT_A_MATERIAL_MASTER_IN_EACH_ROW = 'Please select a Material Master in each row';
+export const BILLING_ADJUSTMENT_CREDIT = 'Billing adjustment - Credit';
+export const BILLING_ADJUSTMENT_DEBIT = 'Billing adjustment - Debit';

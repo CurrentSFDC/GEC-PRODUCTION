@@ -1,0 +1,673 @@
+<apex:page >
+    
+<div>
+    <!-- <p>&nbsp;</p> -->
+
+<center>
+<!--
+    W-000501: "1. Can we have the copyright date auto-update each year."
+    W-000501: "2. Broken links on privacy and cookies." - TODO: Cookies year url? - other links DONE
+    W-000501: "3. Ensure that community and B2B have the same footer content. Terms doesn't work on B2B but it works on Community." - DONE
+-->
+    <p style="font-size: 10px; font-weight: 700; margin-bottom: 20px; color: #E9EAE9;">COPYRIGHT &copy; {!YEAR(TODAY())} GE CURRENT, A DAINTREE COMPANY&nbsp; |&nbsp;&nbsp;<span class="noprint" style="color: #E9EAE9; font-size: 10px; font-weight: bold;text-align: center;"><a href="/s/privacy" style="color: #FF9F19; text-decoration: none;">PRIVACY</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/s/terms" style="color: #FF9F19; text-decoration: none;">TERMS</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class="evidon-notice-link" style="text-decoration: none;"> </a></span></p>
+
+    <!--p style="font-size: 10px; font-weight: 700; margin-bottom: 20px;"><span style="color: #E9EAE9;">© {!YEAR(TODAY())} GE CURRENT, A DAINTREE COMPANY</span>&nbsp;&nbsp;<span style="color: #E9EAE9;">|</span>&nbsp;&nbsp;<a href="/Agents/s/privacy" style="color: #FF9F19;text-decoration: none;" data-ol-has-click-handler="">PRIVACY</a>&nbsp;&nbsp;<span style="color: #E9EAE9;">|</span>&nbsp;&nbsp;<a href="/Agents/s/terms" style="color: #FF9F19;text-decoration: none;" data-ol-has-click-handler="">TERMS</a>&nbsp;&nbsp;<span style="color: #E9EAE9;">|</span>&nbsp;&nbsp;<a href="#" onclick="event.preventDefault(); window.evidon.notice.showOptions();" style="color: #FF9F19;text-decoration: none;" data-ol-has-click-handler="">COOKIES &amp; DO NOT SELL MY INFO</a></p-->
+    <p class="copyright-content">&#169; {!YEAR(TODAY())} Current Lighting Solutions, LLC. All rights reserved. GE and the GE monogram are trademarks of the General Electric Company and are used under license.</p>
+    <p class="copyright-content">Information provided is subject to change without notice. All values are design or typical values when measured under laboratory conditions.</p>
+</center>
+</div>
+
+<div id="consent-popup">
+    <p class="aggrementConfig"><br>
+        We use technologies to personalize and enhance your experience on our site. 
+        Visit our <a href="https://www.gecurrent.com/privacy" target="_blank">Privacy Policy</a> to learn more.</br>
+        <br>By using our site, you agree to our use of these technologies. </br>
+    </p>
+    <p class="buttonConfig">
+        <input id="accept" class="acceptButton" type="button" value="Accept" />
+    </p>
+</div>
+
+<script>
+    const cookieContainer = document.querySelector("#consent-popup");
+    const cookieButton = document.querySelector(".acceptButton");
+
+    cookieButton.addEventListener("click", () => {
+        cookieContainer.classList.remove("active");
+        localStorage.setItem("cookieBannerDisplayed", "true");
+    });
+
+    setTimeout(() => {
+    if (!localStorage.getItem("cookieBannerDisplayed")) {
+        cookieContainer.classList.add("active");
+    }
+    }, 5000);
+
+    // Set fav icon & page title
+    $(document).ready(function() {
+        console.log("CCRZ Footer : ", CCRZ);
+        $('head').append('<link href="{!$Resource.Currentfavicon}" rel="shortcut icon" />');
+        var currentPage = CCRZ.pagevars.currentPageName;
+        var currentPageNames = currentPage.split("__");
+        var pageTitle = currentPageNames[1];
+
+        if(pageTitle == "MyAccount") {
+            pageTitle = "My Profile";
+        } else if(pageTitle == "CheckoutNew") {
+            pageTitle = "Checkout";
+        } else if(pageTitle == "ProductList") {
+            pageTitle = "Product List";
+        } else if (pageTitle == "ProductDetails") {
+            pageTitle = "Product Detail";
+        }
+
+        $(document).prop('title', pageTitle + ' | GE Current, A Daintree Company');
+        // if (pageTitle !== "ProductDetails") {
+        //    $(document).prop('title', pageTitle + ' | GE Current, A Daintree Company');
+        // }
+
+        // Redirect To Community Reset Password Page By Sameer Mahadik On(9-9-2021)
+        if (pageTitle == "CCChangePassword") {
+            $("body").hide();
+            var currentUrl = new URL(window.location.href);
+
+            window.location.href = currentUrl.origin;
+        }
+
+        // Permission Set As Per Loggedin User By Sameer Mahadik On (8-13-2021)
+        if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+            var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+            userData = JSON.parse(userData);
+            var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+
+            if (permissionData !== null) {
+                var permissionSets = permissionData['permissionSet'];
+                var profileName = permissionData['profileName'];
+                
+                if (profileName == "Agent Read Only B2B Storefront Registered Users" ||
+                    profileName == "Distributor Read Only B2B Storefront Registered Users") {
+                    if (permissionSets.includes("View_PLP_and_PDP_Prices") == false) {
+                        $(".minicart").hide();
+                        $(".quick-order").hide();
+                        Backbone.on('view:Menu:created', function (viewProto) {
+                            $("#cartHeader").hide();
+                            // Hide Saved Carts & Price Agreemnt Links
+                            setTimeout(function() {
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(9) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(2) > .dropdown-menu > li:nth-child(1)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(9) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(2) > .dropdown-menu > li:nth-child(2)").hide();
+                            }, 5000);  
+                        });
+
+                        if (CCRZ.pagevars.currentPageName == "ccrz__ProductList") {
+                            CCRZ.pubSub.on('view:productItemsView:refresh', function (productItemsView) {
+                                $(".product-price").text('');
+                                $(".cc_add_to_btn").hide();
+                                $(".typemark-button").hide();
+                                $(".addInvalidButton").hide();
+                            });
+                        }
+
+                        if (CCRZ.pagevars.currentPageName == "ccrz__ProductDetails") {
+                            CCRZ.pubSub.on('view:productDetailView:refresh', function (param) {
+                                $(".product-price").hide();
+                                $(".skuADPDiv").hide();
+                                $(".skuFloorDiv").hide();
+                                $(".addItem").hide();
+                                $(".typemark-button").hide();
+                            });
+                        }
+
+                        if (CCRZ.pagevars.currentPageName == "ccrz__ProductCompare") {
+                            CCRZ.pubSub.on('view:productCompareView:refresh', function (param) {
+                                $(".cc_price_section .price").hide();
+                                $(".cartAddButton").hide();
+                                $(".cc_entry").removeClass("entry");
+                            });
+                        }
+                    }
+
+                    if (permissionSets.includes("Agent_Case_Management") == false &&
+                        permissionSets.includes("Distributor_Case_Management") == false) {
+                        // Hide All Links In Request Request Menu except Web Assistance
+                        Backbone.on('view:Menu:created', function (viewProto) {
+                            setTimeout(function() {
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(1)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(2)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(3)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(4)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(5)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(6)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(7)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(8)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(9)").hide();
+                                $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(10) > .dropdown-menu > li:nth-child(1)").show();
+                            }, 5000);
+                        });
+                    }
+
+                    if (permissionSets.includes("View_Commissions_Set_Price") == false) {
+                        if (CCRZ.pagevars.currentPageName == "ccrz__ProductList") {
+                            CCRZ.pubSub.on('view:productItemsView:refresh', function (productItemsView) {
+                                $(".showcommissionWidgetModalButton").hide();
+                            });
+                        }
+
+                        if (CCRZ.pagevars.currentPageName == "ccrz__ProductDetails") {
+                            CCRZ.pubSub.on('view:productDetailView:refresh', function (param) {
+                                $(".showcommissionWidgetModalButton").hide();
+                                $(".skuFloorDiv").remove();
+                                $(".adpCommissionlabel").text('');
+                            });
+                        }
+
+                        if (CCRZ.pagevars.currentPageName == "ccrz__Cart") {
+                            CCRZ.pubSub.on('view:CustomCartDetailView:refresh',function(view) {
+                                console.log("Footer Cart refresh");
+                                $('.showcommissionWidgetModalButton').hide();
+                            });
+                        }
+                    }
+                }
+            }
+
+            /*
+            * Hide Claimback For Agent User
+            * Hide New Spec. Registration For Distributor User
+            * Code Added By Sameer Mahadik On(12-16-2021)
+            */ 
+            var currentUserType = localStorage.getItem(userData["User Type"]);
+            Backbone.on('view:Menu:created', function (viewProto) {
+                setTimeout(function() {
+                    if (currentUserType == "Agent") {
+                        $(".navbar-default .cc_navbar-nav > li:nth-child(9) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(2) > .dropdown-menu > li:nth-child(4)").hide();
+                        $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(7) > .dropdown-menu > li:nth-child(2)").hide();
+                        $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(8) > .dropdown-menu > li:nth-child(1)").hide();
+                    } else {
+                        $(".navbar-default .cc_navbar-nav > li:nth-child(8) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(1) > .dropdown-menu > li:nth-child(1)").hide();
+                        //$(".navbar-default .cc_navbar-nav > li:nth-child(9) > ul.dropdown-menu.cc_dropdown-menu li:nth-child(2) > .dropdown-menu > li:nth-child(4)").css("display", "inline-block");
+                    }
+                }, 5000);
+            });
+        }
+
+        // Change Postion Of Back Button On Payment Section
+        CCRZ.pubSub.on('view:cartCheckoutView:refresh', (myModel) => {
+            if (myModel.currStep == 4) {
+                $(".processBack").remove();
+                if ($("#po").hasClass("active")) {
+                    trackPOForm();
+                }
+            }
+        });
+
+        function trackPOForm() {
+            if ($(".newPOForm").length == 1) {
+                if ($("#overlay").length == 1) {
+                    $("#overlay").remove();
+                }
+                $(".makePOPayment").attr("disabled", true);
+                $("#accountNumber").after('<a class="validate-po">Validate PO</a>');
+                $(".newPOForm .cc_po_action_buttons .cc_action_buttons").prepend('<input class="button processBack btn btn-default btn-sm" type="button" value="Back" alt="Back">');
+            } else {
+                if ($("#overlay").length == 0) {
+                    $("header").before("<div id='overlay' class='modal-backdrop fade in'><div class='customLoader'></div></div>");
+                }
+                setTimeout(function() {
+                    trackPOForm();
+                }, 500);
+            }
+        }
+
+    });
+
+    // Added to change breadcrumb label  
+    $(window).bind("load",function(){
+        setTimeout(function(){
+        $("ol.breadcrumb li.cc_breadcrumb_item  a").first().text("Price & Availability");  
+
+        }, 3000);
+    });
+         
+        /* Added to change the label of Process Payment button
+    $(window).bind("load",function(){
+        // $(".cc_make_po_payment  a").first().text("Submit Order");  
+        console.log("Payment button : ", $('.cc_make_po_payment').text());
+
+    });*/
+
+    $(window).on('load', function () {
+        console.log("Category : ", $('.cc_category_name').text());
+    });
+
+</script>
+
+    
+<style>
+
+/* Add to main CSS after confirmation  */
+    
+    
+.btn:hover{
+    background-color: #47699B !important;
+    color:#ffffff  !important;
+}      
+
+.btn{
+    background-color: #5F82B6 !important;
+}   
+    
+       
+.btn-default {
+    /* background-color: #FF9F19;*/
+}   
+    
+.btn-default.active   {
+    background-color: #E9EAE9;
+}  
+
+    
+.navbar-default {
+    /* background-color: #FF9F19; */
+}
+
+    
+#cc_store_logo_img {
+    background-image: url("{!$Resource.GECurrentLogo}");
+}
+    
+a {
+    color: #6082B6;
+} 
+    
+a.cc_category.gp_cat, ul.dropdown-menu.cc_dropdown-menu {
+    background-color: #53565A;
+}
+
+    
+a.cc_category.gp_cat:hover {
+  background-color: #FF9F19 !important;
+}
+
+#consent-popup {
+    font-size: 15px;
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    background: #fba919;
+    color: #ffffff;
+    padding: 0 32px;
+    box-shadow: 0 -2px 16px rgba(47, 54, 64, 0.39);
+
+    transition: 400ms;
+}
+
+#consent-popup.active {
+    bottom: 0;
+}
+
+.aggrementConfig {
+    float: left;
+}
+
+.buttonConfig {
+    float: right;
+    padding: 32px;
+}
+
+.acceptButton {
+    background: #ffffff;
+    border: 0;
+    color: #000000;
+    padding: 6px 24px;
+    font-size: 18px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.lockImg {
+    width: 20px;
+    filter: brightness(0) invert(1);
+    align-content: left;
+    padding-right: 5px;
+}
+
+
+.cc_po_label_name, .cc_payment_po_instructions, .cc_po_label_save_payment { 
+    display: none;
+}
+
+#displayName{
+    display: none;
+}
+    
+/* li.dropdown.cc_dropdown:hover ul.dropdown-menu.cc_dropdown-menu {
+    display: block;
+}
+
+li.dropdown.cc_dropdown ul.dropdown-menu.cc_dropdown-menu {
+    display: none;
+}
+
+li.menu-item.dropdown-submenu:hover ul.dropdown-menu{
+    display: block;
+}
+
+li.menu-item.dropdown-submenu ul.dropdown-menu{
+    display: none;
+} */
+    
+.mini_cart .updateCartButton {
+ display: none !important;
+}
+
+center .copyright-content {
+    font-size: 10px;
+    color: #BBBDBF;
+    margin: 0;
+}
+
+/* Custom Loader */
+.customLoader {
+    border: 10px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 10px solid #3498db;
+    width: 80px;
+    height: 80px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, 50%);
+    z-index : 9999;
+}
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Hide Edit Profile Button, Language and Currency lable on Profile Page By Sameer Mahadik On(8-24-2021) */
+.acctmainSection .gotoSectionContactInfoEdit,
+.acctmainSection .myAccLanguage,
+.acctmainSection .myAccCurrency {
+    display: none;
+}
+
+.newPOForm .validate-po {
+    float: right;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.nav-justified li.cc_checkoutStep.active a {
+    background-color: #5F82B6;
+}
+
+/*
+* Menu Css By Sameer Mahadik On(6-2-2021)
+*/
+#navbar .cc_navbar-nav li a {
+    padding: 5px 20px !important
+}
+#navbar .cc_navbar-nav .cc_dropdown-menu li a {
+    line-height: 25px !important;
+}
+.navbar-nav>li>.dropdown-menu {
+    margin-top: -1px !important;
+}
+.navbar-default .cc_navbar-nav {
+    margin-left: -15px !important;
+}
+/* Hide 1st Menu Element*/
+.navbar-default .nav.navbar-nav.cc_navbar-nav > li:first-child {
+    display: none;
+}
+.navbar-default .cc_navbar-nav li:nth-child(3) .cc_dropdown-menu li {
+    float: left;
+    width: 50%;
+}
+.navbar-default .cc_navbar-nav li:nth-child(3) ul.dropdown-menu.cc_dropdown-menu {
+    width: 330px;
+}
+.navbar-default .cc_navbar-nav li:nth-child(4) .cc_dropdown-menu li {
+    float: left;
+    width: 50%;
+}
+.navbar-default .cc_navbar-nav li:nth-child(4) ul.dropdown-menu.cc_dropdown-menu {
+    width: 330px;
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) .cc_dropdown-menu li {
+    float: left;
+    width: 50%;
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu {
+    width: 330px;
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li.dropdown-submenu .dropdown-menu {
+    width: 430px;
+    padding: 0px;
+}
+/* Set Fix Height for Evolve® Menu*/
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(5) > .dropdown-menu {
+    overflow: auto;
+    height: 318px;
+}
+/* Set Fix Height for Lumination Menu*/
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(8) > .dropdown-menu {
+    overflow: auto;
+    height: 318px;
+}
+/* Set Fix Height for Tetra Menu*/
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(9) > .dropdown-menu {
+    overflow: auto;
+    height: 310px;
+}
+
+/* Lumination Scroll Bar Start */
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(5) > .dropdown-menu::-webkit-scrollbar,
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(8) > .dropdown-menu::-webkit-scrollbar,
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(9) > .dropdown-menu::-webkit-scrollbar {
+  width: 5px;
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(5) > .dropdown-menu::-webkit-scrollbar-track,
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(8) > .dropdown-menu::-webkit-scrollbar-track,
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(9) > .dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(5) > .dropdown-menu::-webkit-scrollbar-thumb,
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(8) > .dropdown-menu::-webkit-scrollbar-thumb,
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(9) > .dropdown-menu::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(8) > .dropdown-menu::-webkit-scrollbar-thumb:hover,
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(9) > .dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(5) > .dropdown-menu::-webkit-scrollbar {
+  height: 5px;
+}
+/* Lumination Scroll Bar Start */
+
+/* Tetra Scroll Bar Start*/
+/*.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(13) > .dropdown-menu::-webkit-scrollbar {
+  width: 5px;
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(13) > .dropdown-menu::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(13) > .dropdown-menu::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+.navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(13) > .dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}*/
+/* Tetra Scroll Bar Start*/
+
+/* Set Fix Background Colour For Submenu*/
+.dropdown-submenu>.dropdown-menu {
+    background: #6e7071 !important;
+}
+.dropdown-submenu > .dropdown-menu > li > a {
+    background: #6e7071 !important;
+}
+
+@media (max-width: 1024px) {
+    .navbar-header {
+        float: none;
+    }
+    .navbar-toggle {
+        display: block;
+    }
+    .navbar-collapse {
+        border-top: 1px solid transparent;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .navbar-collapse.collapse {
+        display: none!important;
+    }
+    .navbar-nav {
+        float: none!important;
+        margin: 7.5px -15px;
+    }
+    .navbar-nav>li {
+        float: none;
+    }
+    .navbar-nav>li>a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .navbar-text {
+        float: none;
+        margin: 15px 0;
+    }
+    /* since 3.1.0 */
+    .navbar-collapse.collapse.in { 
+        display: block!important;
+    }
+    .collapsing {
+        overflow: hidden!important;
+    }
+    .navbar-default .navbar-collapse, .navbar-default .navbar-form {
+        border-color: transparent;
+        width: 100%;
+        position: absolute;
+        top: 65px;
+        left: 0;
+        right: 0;
+        margin: 0;
+        padding: 0;
+        background-color: #000;
+    }
+    .navbar-toggle {
+        position: absolute;
+        float: none;
+        padding: 9px 10px;
+        margin-top: 8px;
+        margin-right: 15px;
+        margin-bottom: 8px;
+        background-color: transparent;
+        background-image: none;
+        border: none;
+        border-radius: 0px;
+        top: 10px;
+        right: 0px;
+    }
+    .navbar-default .navbar-collapse, .navbar-default .navbar-form {
+        height: calc(100vh - 125px) !important;
+        overflow: auto !important;
+    }
+    .navbar-default .cc_navbar-nav li:nth-child(3) ul.dropdown-menu.cc_dropdown-menu,
+    .navbar-default .cc_navbar-nav li:nth-child(4) ul.dropdown-menu.cc_dropdown-menu,
+    .navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu,
+    .navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li.dropdown-submenu .dropdown-menu {
+        width: 100%;
+    }
+    .navbar-default .cc_navbar-nav li:nth-child(3) .cc_dropdown-menu li,
+    .navbar-default .cc_navbar-nav li:nth-child(4) ul.dropdown-menu.cc_dropdown-menu,
+    .navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu,
+    .navbar-default .cc_navbar-nav li:nth-child(4) .cc_dropdown-menu li,
+    .navbar-default .cc_navbar-nav li:nth-child(6) .cc_dropdown-menu li {
+        float: none;
+        width: 100%;
+    }
+    #navbar .cc_navbar-nav li a {
+        line-height: 35px;
+        padding: 5px 30px !important;
+    }
+    #navbar .cc_navbar-nav .cc_dropdown-menu li a {
+        background: #53565A;
+    }
+    .dropdown-submenu > a:after { display: none; }
+    .caret {
+        margin-left: 10px;
+        transform: rotate(-90deg);
+        font-size: 14px !important;
+        position: absolute;
+        right: 30px;
+        top: 20px;
+    }
+    .dropdown.cc_dropdown.open .caret {
+        transform: rotate(0deg);
+    }
+    .menu-item.dropdown.dropdown-submenu .dropdown-toggle .fa-caret-down {
+        transform: rotate(-90deg);
+        font-size: 14px !important;
+        position: absolute;
+        right: 30px;
+        top: 12px;
+        width: auto !important;
+    }
+    .menu-item.dropdown.dropdown-submenu.open .dropdown-toggle .fa-caret-down {
+        transform: rotate(0deg);
+    }
+    .navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(5) > .dropdown-menu,
+    .navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(8) > .dropdown-menu,
+    .navbar-default .cc_navbar-nav li:nth-child(6) ul.dropdown-menu.cc_dropdown-menu li:nth-child(9) > .dropdown-menu {
+        height: auto;
+    }
+    .navbar-default .cc_navbar-nav {
+        display: block;
+    }
+    .navbar-nav .open .dropdown-menu {
+        position: static;
+        float: none;
+        width: auto;
+        margin-top: 0;
+        background-color: transparent;
+        border: 0;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
+}
+
+/*
+* Show menu on mouse hover for desktop resolution
+*/
+@media only screen and (min-width: 1024px) {
+    li.dropdown.cc_dropdown:hover ul.dropdown-menu.cc_dropdown-menu {
+        display: block;
+    }
+    li.dropdown.cc_dropdown ul.dropdown-menu.cc_dropdown-menu {
+        display: none;
+    }
+    li.menu-item.dropdown-submenu:hover ul.dropdown-menu{
+        display: block;
+    }
+
+    li.menu-item.dropdown-submenu ul.dropdown-menu{
+        display: none;
+    }
+}
+   
+    
+    }
+
+</style>
+    
+</apex:page>

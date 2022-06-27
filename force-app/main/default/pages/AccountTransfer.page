@@ -1,0 +1,52 @@
+<apex:page controller="AccountTransferMainController" tabstyle="Account" action="{!autoRun}">
+    <!-- Rashmitha Changed the API vesion from 33 to 45 on 5-Mar-2019 as per 1447 request-->
+ <apex:pageBlock title="Account To Transfer">
+     <apex:pageBlockTable value="{!oldAccount}" var="acc">
+       <apex:column headerValue="Account Name" value="{!acc.name}"/>
+       <apex:column headerValue="Type" value="{!acc.type}"/>
+       <apex:column headerValue="Account Owner" value="{!acc.owner.name}"/>
+     </apex:pageBlockTable>
+  </apex:pageBlock>
+<script>
+    var newWin=null;
+    function openLookupPopup(name, id)
+    {
+        var url="/apex/AccountTransferPopup?namefield=" + name + "&idfield=" + id;
+        newWin=window.open(url, 'Popup','height=500,width=600,left=100,top=100,resizable=no,scrollbars=yes,toolbar=no,status=no');
+        if (window.focus) 
+        {
+            newWin.focus();
+        }
+            
+        return false;
+    }
+                  
+    function closeLookupPopup()
+    {
+       if (null!=newWin)
+       {
+          newWin.close();
+       }  
+    }
+</script>
+                  
+  <apex:form >
+    <apex:pageBlock title="Lookup To New SAP Account">
+      <apex:pageBlockSection columns="1">
+        <apex:pageBlockSectionitem >
+          <apex:outputLabel value="Account"/>
+          <apex:outputPanel >
+            <apex:inputHidden value="{!accountId}" id="targetId" />
+            <apex:inputText size="40" value="{!accountName}" id="targetName" onFocus="this.blur()" disabled="false"/> <a href="#" onclick="openLookupPopup('{!$Component.targetName}', '{!$Component.targetId}'); return false">Lookup</a>
+          </apex:outputPanel>
+        </apex:pageBlockSectionitem>
+      </apex:pageBlockSection>
+      <apex:pageBlockSection >
+        <apex:pageBlockSectionitem >
+           <apex:commandButton value="Transfer Data" action="{!TransferData}"/>
+        </apex:pageBlockSectionitem>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageMessages escape="false" ></apex:pageMessages>
+  </apex:form>
+</apex:page>

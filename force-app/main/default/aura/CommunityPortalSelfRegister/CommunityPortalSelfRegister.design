@@ -1,0 +1,3 @@
+<design:component label="Community Portal Register">
+    <design:attribute name="redirectIfLogin" label="Redirect to home if the user is already signed in" />
+</design:component>

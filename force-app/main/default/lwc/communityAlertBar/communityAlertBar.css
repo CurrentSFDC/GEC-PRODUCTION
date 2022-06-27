@@ -1,0 +1,53 @@
+.alertbar {
+    padding-top : 120px; /*was 120 px*/
+}
+
+img{
+  width: 250px;
+  height: 62px;
+  
+}
+
+h2{
+  font-family: 'Segoe UI';
+  font-weight: bold;
+}
+
+.alert{
+    padding:0px 30px 0px 0px;
+    border-color:white;
+    font-size: 14px;
+    font-family: 'Segoe UI';
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    background-color:#fba819;
+    height: 50px;
+    
+    
+}
+
+.message{
+  font-size: 14px;
+  font-family: 'Segoe UI';
+  text-align: center;
+}
+
+.headerSection{
+  text-align: center;
+  vertical-align: middle;
+  font-size: 20px;
+  font-family: 'Segoe UI';
+}
+
+.close{
+  
+  background-color:#fba819;
+  height: 45px;
+  
+}
+
+.buttonColor{
+  background-color:#fba819;
+}

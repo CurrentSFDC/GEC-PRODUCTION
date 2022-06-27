@@ -1,0 +1,1589 @@
+<apex:page id="ProductDetailBIE" docType="html-5.0" sidebar="false" showHeader="false" standardStylesheets="false" applyHtmlTag="false">
+    <c:B2B_PricingModal />
+    <c:B2B_WarehouseModal />
+    <c:ProductDetail />
+    <c:MenuBIE ></c:MenuBIE>
+    <c:B2B_CommissionWidgetModal2 />
+    <div id="commissionWidgetModalParent2"></div>
+
+    <div id="typeMark_modal" class="modal fade cc_modal cc_cart_comments_modal in" tabindex="-1" role="dialog" aria-labelledby="TypeMarks"
+         style="display: none; z-index: 2000; background: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content cc_modal_content" style="margin-top: 100px">
+                <div class="modal-header cc_modal_header">
+                    <button id="typeMark-close" type="button" class="close cc_close" data-dismiss="modal" aria-label="Close" style="cursor: pointer"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title cc_modal_title" id="RequestedDeliveryDate">
+                        TypeMarks
+                    </h4>
+                </div>
+                <div class="modal-body cc_modal_body">
+                    <form id="typeMarksForm{{sfid}}" class="cc_comments_form">
+                        <textarea autofocus="true" id="typeMark-textarea" placeholder="TypeMark" name="typeMarks" class="commentField form-control cc_comment_field typemark" maxlength="8"
+                                  value=""></textarea>
+                        <!-- <input type="text" name="typeMarks" class="cc_value" data-id="{{this.sfid}}" value="{{this.typeMarks}}"> -->
+                    </form>
+                </div>
+                <div class="modal-footer cc_modal_footer">
+                    <p>Remaining characters: <span id="characters_left_span">8</span></p>
+                    <input id="typeMark-save" type="button" class="saveTypeMarks btn btn-default btn-sm cc_save_comment" data-id="{{sfid}}" value="Save"/>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        CCRZ.uiProperties.productDetailView.desktop.tmpl = 'ProductDetail-Desktop-Override';
+        CCRZ.uiProperties.productAttributesView.tmpl = 'ProductDetail-ProductAttributes-Desktop-Override';
+        //CCRZ.uiProperties.Menu.desktop.tmpl = 'menu-desktop-template-override';
+
+        //NEW STUFF
+        var gloablInvData = null;
+        var globalUOMMultiplier = [];
+        var hasPromoPricing = false;
+        var priceObj = {};
+        var hasRetrivedPricing = false;
+        var hasFiresalePricing = false;
+        var perPcFiresalePrice = 0.00;
+        var firesaleCurrencyCode;
+        var priceFormat = '';
+        var calcPrice = '';
+        var extendedPrice;
+        var extendedPriceCurr;
+        var selEffectiveAccount;
+        var selEffectiveAgent;
+        var productListPrice = 0;
+        var userData;
+        var userType = "";
+        var permissionSets = [];
+        var profileName = "";
+
+        jQuery(function ($) {
+            Backbone.on('view:productAttributesView:created', function (viewPrototype) {
+                viewPrototype.updatePrice = function () {
+                    var theView = this;
+                    Backbone.on('attrPriceTrigger', function () {
+                        theView.updatePrice();
+                    });
+                    var idToPrice = {};
+                    var priceList = [];
+
+                    if (this.productAttributes.priceList && this.productAttributes.priceList.aL) {
+                        priceList = this.productAttributes.priceList.aL;
+                    }
+
+                    //set promo pricing for UOM items, based on priceObj
+                    if (hasPromoPricing) {
+                        for (const attr in this.productAttributes.models[0].attributes) {
+                            if (attr.includes('Measure')) {
+                                this.productAttributes.models[0].attributes[attr].forEach(function (uom) {
+                                    if (priceObj[uom.sfdcName]) {
+                                        //priceList[uom.sfid].pr = priceObj[uom.sfdcName];
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    var selectedUOM = '';
+                    var selectedUOMId = '';
+                    if (this.productAttributes.length > 0) {
+                        this.selectedAttributes.length = 0;
+                        var v = this;
+                        $("select option:selected").each(function () {
+                            v.selectedAttributes.push($(this).data("id"));
+                            selectedUOM = $(this).val().replace("<p>", "").replace("</p>", "");
+                            selectedUOMId = $(this).data("id");
+                        });
+                        if (hasFiresalePricing) {
+                            var multiplier;
+                            //console.log(selectedUOM);
+                            if (selectedUOM === 'EA') {
+                                multiplier = globalUOMMultiplier.EA;
+                            } else if (selectedUOM === 'PC') {
+                                multiplier = globalUOMMultiplier.PC;
+                            } else if (selectedUOM === 'BX') {
+                                multiplier = globalUOMMultiplier.BX;
+                            } else if (selectedUOM === 'ICV') {
+                                multiplier = globalUOMMultiplier.ICV;
+                            } else if (selectedUOM === 'CV') {
+                                multiplier = globalUOMMultiplier.CV;
+                            }
+                            //console.log(perPcFiresalePrice);
+                            //console.log(multiplier);
+                            //priceList[selectedUOMId].pr = perPcFiresalePrice * multiplier;
+                        }
+                        /*$('.gp_attribute_price').text(this.findPrice(priceList, v.selectedAttributes));
+                        priceFormat = this.findPrice(priceList, v.selectedAttributes).substr(0, 1);
+                        calcPrice = this.findPrice(priceList, v.selectedAttributes).substr(1)
+                        $('.gp_attribute_extprice').text(priceFormat + (calcPrice * $(".gp_attr_qty").val()).toFixed(2));
+                        $('.gp_attribute_uomdef').text(multiplier + " Piece(s)");*/
+                        this.checkQty();
+                    }
+                    if (!hasRetrivedPricing) {
+                        $('.gp_attribute_price').html(CCRZ.pagevars.pageLabels['ProductDetails_Loading'] + '<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+                        $('.cc_add_to_batch').css('display', 'none');
+                    }/*else if(hasFiresalePricing){
+                        if(selectedUOM.indexOf("CV")>0){
+                            console.log(perPcFiresalePrice);
+                            $('.gp_attribute_price').text(new Intl.NumberFormat('en-US', { style: 'currency', currency: firesaleCurrencyCode }).format(perPcFiresalePrice*12));
+                            priceList[selectedUOMId].pr=perPcFiresalePrice*12;
+                        }else{
+                            $('.gp_attribute_price').text(new Intl.NumberFormat('en-US', { style: 'currency', currency: firesaleCurrencyCode }).format(perPcFiresalePrice));
+                            priceList[selectedUOMId].pr=perPcFiresalePrice;
+                        }
+                    }*/
+                }
+                viewPrototype.render = function () {
+                    var v = this;
+                    if (this.productAttributes.length > 0) {
+                        v.setElement($(CCRZ.uiProperties.productAttributesView.selector));
+                        v.$el.html(v.templateDesktop({attr: v.productAttributes.toJSON()}));
+                    }
+                    if (!hasRetrivedPricing) {
+                        $('.gp_attribute_price').html(CCRZ.pagevars.pageLabels['ProductDetails_Loading'] + '<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+                        $('.cc_add_to_batch').css('display', 'none');
+                    }
+
+                    if(localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                        userData = JSON.parse(localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}'));
+                        userType = localStorage.getItem(userData['User Type']);
+                        var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+                        if (permissionData !== null) {
+                            permissionSets = permissionData['permissionSet'];
+                            profileName = permissionData['profileName'];
+                        }
+                    }
+                }
+
+            });
+            setTimeout(function () {
+ 
+                /*var sfid = CCRZ.productDetailModel.attributes.product.prodBean.sfid;
+                let uom = CCRZ.productDetailModel.attributes.product.prodBean.unitOfMeasure;
+                var SKU = CCRZ.productDetailModel.attributes.product.prodBean.SKU;
+                var qtyPerUnit = CCRZ.productDetailModel.attributes.product.prodBean.qtyPerUnit;
+                var upc = CCRZ.productDetailModel.attributes.product.prodBean.UPC;
+                var basePrice = CCRZ.productDetailModel.attributes.product.prodBean.basePrice;
+                if (basePrice) {
+                    basePrice = '$' + basePrice.toFixed(2);
+                } else {
+                    basePrice = 'null';
+                }
+                var yourPrice = CCRZ.productDetailModel.attributes.product.prodBean.price;
+                if (yourPrice) {
+                    yourPrice = '$' + yourPrice.toFixed(2);
+                } else {
+                    yourPrice = 'Not Available';
+                }
+                CCRZ.productDetailModel.attributes.product.prodBean.formattedPrice = yourPrice;*/
+
+                //inserting Extended Price
+                $('.cc_prod_attr_price').removeClass('col-md-3').addClass('col-md-1');
+                var extendedPriceHTML = '<div class="col-md-2 cc_prod_attr_extprice"><span class="cc_attr_extprice cc_extprice_label">Extended Price</span><p class="gp_attribute_extprice"></p></div>'
+                $('.cc_prod_attr_price').after(extendedPriceHTML);
+
+                //inserting UOM defination
+                var uomdef = '<div class="col-md-2 cc_prod_attr_uomdef"><span class="cc_attr_uomdef cc_uomdef_label">Definition</span><p class="gp_attribute_uomdef"></p></div>';
+                $('.cc_attr').after(uomdef);
+
+                //to calculate Price Tag on Quantity Change in PDP page
+                $('input.gp_attr_qty').keyup(function () {
+                    console.log("inside Quantity Change", extendedPrice);
+                    var extendedPriceUp = new Intl.NumberFormat('en-US', {style: 'currency', currency: extendedPriceCurr}).format((extendedPrice * $(".gp_attr_qty").val()).toFixed(2));
+                    $("#skuADP").text(extendedPriceUp);
+                    $('.gp_attribute_extprice').text(priceFormat + (extendedPrice * $(".gp_attr_qty").val()).toFixed(2));
+                });
+                //let html = '';
+                /*let html = '<div class="row">'
+                    + '<div class="sku-detials clearfix">'
+                    + '<div class="col-md-12"><p><span class="cc_label">SKU: </span><span>' + SKU + '</span><p></div>'
+                html += '<div class="col-md-6"><p><span class="cc_label">' + CCRZ.pagevars.pageLabels['ProductDetails_QuickStock'] + ' </span><span id="' + 'inventoryCount-' + sfid + '">' + CCRZ.pagevars.pageLabels['ProductDetails_Loading'] + ' <i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p></div>';
+                html += '<div class="col-md-6"><p><span class="cc_label">' + CCRZ.pagevars.pageLabels['ProductDetails_TotalInventory'] + ' </span><span id="' + 'totalinventoryCount-' + sfid + '">' + CCRZ.pagevars.pageLabels['ProductDetails_Loading'] + ' <i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p></div>';
+                html += '</div>'
+                    + '</div>';
+                //html = Handlebars.compile(html);
+
+                if ((CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup === 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'View_PLP_and_PDP_Prices') || (CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup === 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Agent B2B Storefront Registered Users')) {
+
+                    html += '<div class="row">';
+                    html += '<div class="product-price-box clearfix">';
+                    html += '<div class="col-md-12"><p><span class="mr-5">UPC: </span><span>'+ upc +'</span></p></div>';
+                    html += '<div class="col-md-6"><p><span class="mr-5">Price UOM:</span><span>'  + uom + '</span></p></div>';
+                    html += '<div class="col-md-6"><p><span class="mr-5">Pieces Per Unit:</span><span>'+ qtyPerUnit +'</span></p></div>';
+                    html += '<div class="col-md-6"><span class="mr-5">List Price:</span><span>'+ basePrice +'</span></div>';
+                    html += '<div class="col-md-6"><p class="min-order-mr"><span class="mr-5">Minimum Order Quantity:</span><span>#</span></p></div>'
+                    html += '<div class="col-md-6"><p><span class="mr-5">Your Price:</span><span>' + yourPrice + '</span></p></div>';
+                    html += '<div class="col-md-6"><p class="sub-text"><span class="mr-5">Must purchase in increments of:</span><span>#</span></p></div>';
+                    html += '<div id="skuADPFloor-' + sfid + '" class="alignLeft addColumn spreadSheet clearfix"></div>';
+                    html += '<div class="col-md-6"><p><span><B>Floor </B>Price/Commission:</span><span id="skuFloorPricing-' + sfid + '" >' + '... ' + '<i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p></div>';
+                    html += '<div class="col-md-6"><p><span><B>ADP </B>Price/Commission:</span><span id="skuADP-' + sfid + '">' + CCRZ.pagevars.pageLabels['ProductDetails_Loading'] + '</span></p></div></div>';
+                    html += '</div>';
+                    html += '</div>';
+                }*/
+
+                //$('.cc_inventory').after('<div><a href="#" class="showinventoryModalButton" id="inventoryModal">Check Inventory</a><br></br>' + html + '</div>');
+                // $('.cc_inventory').after('<div>' + html + '</div>');
+                //$('.cc_inventory').after(html);
+                //$('.cc_short_desc').after(html);
+                $('.tabSection').prepend('<div id="productAvailabilityModalParent"></div> ');
+                setTimeout(function () {
+                    $('.cc_agg_selection').on('change', function () {
+                        if ($('.aggInv').length === 0) {
+                            //$('.cc_agg_selection').before('<div><a href="#" class="showinventoryModalButton aggInv" id="inventoryModal">Check Inventory</a><br></br>' + html + '<div>');
+                            $('.cc_agg_selection').before('<div>' + html + '</div>');
+                            $('.tabSection').prepend('<div id="productAvailabilityModalParent"></div> ');
+                        }
+                    });
+                }, 2000);
+            }, 2000);
+
+            Handlebars.registerHelper('isWarehouseProductsToDisplay', function (key, productSKU) {
+
+                if (key.lastIndexOf(productSKU) > 0) {
+                    return true;
+                }
+                return false;
+            });
+
+            Handlebars.registerHelper('numberFormat', function (data) {
+                //console.log(data);
+                if (data !== null && data !== '') {
+                    var nf = new Intl.NumberFormat();
+                    //console.log(nf.format(data));
+                    return nf.format(data);
+                }
+                return data;
+            });
+        });
+
+        function getRealTimePricing(realTimePricingInputs) {
+            document.querySelector('.cc_add_item').setAttribute('disabled', '');
+            //setTimeout(function () {
+                console.log(`realTimePricingInputs function`, realTimePricingInputs);
+                
+                var agentID = '';
+                var CustID = '';
+                var userType = '';
+                var AgentSegment = '';
+
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                    var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                    userData = JSON.parse(userData);
+                    agentID = localStorage.getItem(userData['AgentID']);
+                    console.log('agentID ', agentID);
+                    CustID = localStorage.getItem(userData['DistributorID']);
+                    console.log('DistributorID ', CustID);
+                    userType = localStorage.getItem(userData['User Type']);
+                    console.log('userType ', userType);
+                    AgentSegment = localStorage.getItem(userData['AgentSegment']);
+                    console.log('AgentSegment ', AgentSegment);
+                }
+
+                var userPermissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+                var userPermissionSets=[];
+                var userProfileName="";
+                if (userPermissionData !== null) {
+                    userPermissionSets = userPermissionData['permissionSet'];
+                    userProfileName = userPermissionData['profileName'];
+                }
+
+                if (userType == "Agent") {
+                    var userAgentSegment = localStorage.getItem(userData['AgentSegment']);
+                    if ((userAgentSegment !== "FD" && userAgentSegment !== "Fixture") ||
+                        (userProfileName == "Agent Read Only B2B Storefront Registered Users" &&
+                        userPermissionSets.includes("View_PLP_and_PDP_Prices") == false)) {
+                        $(".skuADPDiv").hide();
+                        $(".skuFloorDiv").hide();
+                    } else {
+                        $(".skuADPDiv").show();
+                        $(".skuFloorDiv").show();
+                    }
+                } else if(userType == "Distributor") {
+                    $(".skuADPDiv").hide();
+                    $(".skuFloorDiv").hide();
+                }
+                else {
+                    $(".skuADPDiv").hide();
+                    $(".skuFloorDiv").hide();
+                }
+
+                var distributorType='';
+                var sampleOrder = false;
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                    var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                    userData = JSON.parse(userData);
+                    distributorType = localStorage.getItem(userData['DistributorType']);
+                }
+                if(distributorType != null && distributorType != undefined && distributorType == 'Z1'){
+                    sampleOrder=true;
+                }
+                console.log('sampleOrder: ',sampleOrder);
+
+                /*var agentID = '';
+                if (CCRZ.effSelectorView.dataSet.agent !== undefined) {
+                    agentID = CCRZ.effSelectorView.dataSet.agent.sfid;
+                }
+                var CustID = CCRZ.effSelectorView.dataSet.workingEffAccount.sfid;*/
+                //console.log('CCRZ.effSelectorView.dataSet.workingEffAccount in function', CustID);
+                //console.log('CCRZ.effSelectorView.dataSet.agent in function', agentID);
+				var callType = 'D';
+                let remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'PriceAgreementController'
+                });
+                remoteCall.invokeCtx('getRealTimePricing', JSON.stringify(realTimePricingInputs), agentID, CustID, callType, sampleOrder, function (res, evt) {
+                    console.log('getRealTimePricing response', res, evt);
+                    document.querySelector('.cc_add_item').removeAttribute('disabled');
+                    //console.log(`document.querySelector('.cc_add_item')`,document.querySelector('.cc_add_item'));
+                    if (res?.data?.priceAgreementItemList != null && res.data.priceAgreementItemList.length > 0) {
+                        for (const priceAgreementItem of res.data.priceAgreementItemList) {
+                            for (const realTimePricingInput of realTimePricingInputs) {
+
+                                // Remove leading zero's from request & response material By Sameer Mahadik On (2-14-2022)
+                                var realInputMaterial = realTimePricingInput.material;
+                                realInputMaterial = realInputMaterial.replace(/^0+/, '');
+
+                                var priceAgreementItemMaterial = priceAgreementItem.material;
+                                priceAgreementItemMaterial = priceAgreementItemMaterial.replace(/^0+/, '');
+
+                                if (priceAgreementItemMaterial === realInputMaterial) {
+                                    //$("#skuADP").text(priceAgreementItem.adpPrice);
+                                    extendedPrice = priceAgreementItem.adpPrice;
+                                    extendedPriceCurr = priceAgreementItem.currencyISOCode;
+                                    //extendedPriceCurr='USD';
+                                    if (priceAgreementItem.adpPrice != null) {
+                                        var adp = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.adpPrice.toFixed(2));
+                                        if (priceAgreementItem.globalCommission != null) {
+                                            if (profileName == "Agent Read Only B2B Storefront Registered Users" && permissionSets.includes("View_Commissions_Set_Price") == false) {
+                                                $("#skuADP-" + CCRZ.productDetailModel.attributes.product.prodBean.sfid).text(adp);
+                                                $(".skuADPDiv").addClass("skuADPWithoutCommission");
+                                            } else {
+                                                $("#skuADP-" + CCRZ.productDetailModel.attributes.product.prodBean.sfid).text(adp + ' / ' + priceAgreementItem.globalCommission.toFixed(2) + '%');
+                                            }
+                                        } else {
+                                            $("#skuADP-" + CCRZ.productDetailModel.attributes.product.prodBean.sfid).text(adp);
+                                        }
+                                    }
+
+                                    /*if (priceAgreementItem.adpPrice != null) {
+                                           var extendedPrice1 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.adpPrice.toFixed(2));
+                                           $("#skuADP").text(extendedPrice1);
+                                       }*/
+
+                                     //Changes of CON-216 by Ravi Singh for Pricing logic
+                                       if (priceAgreementItem.currencyISOCode != '') {
+
+                                        var ListPriceCal1 = new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: priceAgreementItem.currencyISOCode
+                                        }).format(priceAgreementItem.bookPrice.toFixed(2));
+
+                                        $('#calListPrice').text(ListPriceCal1);
+                                        if (userType == 'Agent') {
+                                            if (AgentSegment== 'Fixture' || AgentSegment == 'FD') {
+                                                if (CustID != '' && CustID != null) {
+                                                    if (priceAgreementItem.priceAgreementValue != '0') {
+                                                        var yourPrice1 = new Intl.NumberFormat('en-US', {
+                                                            style: 'currency',
+                                                            currency: priceAgreementItem.currencyISOCode
+                                                        }).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                                        $("#skuYourPrice").text(yourPrice1);
+                                                        extendedPrice = priceAgreementItem.priceAgreementValue;
+                                                        console.log("FD Agent and Distributor");
+                                                    }
+                                                    else {
+                                                        var yourPrice2 = new Intl.NumberFormat('en-US', {
+                                                            style: 'currency',
+                                                            currency: priceAgreementItem.currencyISOCode
+                                                        }).format(priceAgreementItem.adpPrice.toFixed(2));
+                                                        $("#skuYourPrice").text(yourPrice2);
+                                                        extendedPrice = priceAgreementItem.adpPrice;
+                                                        console.log("FD Agent and Distributor");
+                                                    }
+                                                }
+                                                else {
+                                                    var yourPrice = new Intl.NumberFormat('en-US', {
+                                                        style: 'currency',
+                                                        currency: priceAgreementItem.currencyISOCode
+                                                    }).format(priceAgreementItem.adpPrice.toFixed(2));
+                                                    $("#skuYourPrice").text(yourPrice);
+                                                    extendedPrice = priceAgreementItem.adpPrice;
+                                                    console.log('FD Agent Only');
+
+                                                }
+
+                                            }
+
+                                            else if (AgentSegment == 'Lamp' || AgentSegment == 'LB') {
+                                                if (priceAgreementItem.priceAgreementValue != '0') {
+                                                    var yourPrice4 = new Intl.NumberFormat('en-US', {
+                                                        style: 'currency',
+                                                        currency: priceAgreementItem.currencyISOCode
+                                                    }).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                                    $("#skuYourPrice").text(yourPrice4);
+                                                    extendedPrice = priceAgreementItem.priceAgreementValue;
+                                                    console.log("LB Agent and Distributor");
+
+                                                }
+                                                else {
+
+                                                    var yourPrice5 = new Intl.NumberFormat('en-US', {
+                                                        style: 'currency',
+                                                        currency: priceAgreementItem.currencyISOCode
+                                                    }).format(priceAgreementItem.bookPrice.toFixed(2));
+                                                    $("#skuYourPrice").text(yourPrice5);
+                                                    extendedPrice = priceAgreementItem.bookPrice;
+                                                    console.log("LB Agent and Distributor");
+                                                }
+
+                                            }
+
+                                        }
+                                        else if (userType == 'Distributor') {
+                                            if (priceAgreementItem.priceAgreementValue != '0') {
+                                                var yourPrice6 = new Intl.NumberFormat('en-US', {
+                                                    style: 'currency',
+                                                    currency: priceAgreementItem.currencyISOCode
+                                                }).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                                $("#skuYourPrice").text(yourPrice6);
+                                                extendedPrice = priceAgreementItem.priceAgreementValue;
+                                                console.log("Distributor");
+                                            }
+                                            else {
+
+                                                $("#skuYourPrice").text("Contact Your Agent");
+                                                console.log("Distributor");
+                                            }
+
+                                        }
+                                    }
+
+                                   /* //FD Agent only
+                                    if (selEffectiveAccount.Account_Group__c == 'ZEAG' && selEffectiveAccount.Customer_Segmentation__c == 'FD') {
+                                        var yourPrice = new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: priceAgreementItem.currencyISOCode
+                                        }).format(priceAgreementItem.adpPrice.toFixed(2));
+                                        $("#skuYourPrice").text(yourPrice);
+                                        extendedPrice = priceAgreementItem.adpPrice;
+                                    }
+
+                                    //FD Agent and Distributor
+                                    if (selEffectiveAgent.agent !== undefined && selEffectiveAccount.Account_Group__c == 'Z001') {
+                                        if (selEffectiveAgent.agent.Customer_Segmentation__c == 'FD') {
+                                            if (priceAgreementItem.priceAgreementValue != '0') {
+                                                var yourPrice1 = new Intl.NumberFormat('en-US', {
+                                                    style: 'currency',
+                                                    currency: priceAgreementItem.currencyISOCode
+                                                }).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                                $("#skuYourPrice").text(yourPrice1);
+                                                extendedPrice = priceAgreementItem.priceAgreementValue;
+
+                                            } else {
+                                                var yourPrice2 = new Intl.NumberFormat('en-US', {
+                                                    style: 'currency',
+                                                    currency: priceAgreementItem.currencyISOCode
+                                                }).format(priceAgreementItem.adpPrice.toFixed(2));
+                                                $("#skuYourPrice").text(yourPrice2);
+                                                extendedPrice = priceAgreementItem.adpPrice;
+
+                                            }
+
+                                        }
+
+                                    }
+
+
+                                    //LB Agent Only
+                                    if (selEffectiveAccount.Account_Group__c == 'ZEAG' && selEffectiveAccount.Customer_Segmentation__c == 'LB') {
+                                        var yourPrice3 = new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: priceAgreementItem.currencyISOCode
+                                        }).format(priceAgreementItem.adpPrice.toFixed(2));
+                                        $("#skuYourPrice").text(yourPrice3);
+                                        extendedPrice = priceAgreementItem.adpPrice;
+
+                                    }
+
+                                    //LB Agent and Distributor
+                                    if (selEffectiveAgent.agent !== undefined && selEffectiveAccount.Account_Group__c == 'Z001') {
+                                        if (selEffectiveAgent.agent.Customer_Segmentation__c == 'LB') {
+                                            if (priceAgreementItem.priceAgreementValue != '0') {
+                                                var yourPrice4 = new Intl.NumberFormat('en-US', {
+                                                    style: 'currency',
+                                                    currency: priceAgreementItem.currencyISOCode
+                                                }).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                                $("#skuYourPrice").text(yourPrice4);
+                                                extendedPrice = priceAgreementItem.priceAgreementValue;
+                                            } else {
+
+
+                                                let selIndex = CCRZ.productDetailModel.attributes.product.prodBean.pricingUOMS.findIndex(e => e.UOM === realTimePricingInput.UOM);
+                                                if (selIndex !== -1) {
+                                                    var selQuant = CCRZ.productDetailModel.attributes.product.prodBean.pricingUOMS[selIndex].multiplier;
+                                                }
+
+                                                var yourPrice5 = new Intl.NumberFormat('en-US', {
+                                                    style: 'currency',
+                                                    currency: priceAgreementItem.currencyISOCode
+                                                }).format((CCRZ.productDetailModel.attributes.product.price * selQuant).toFixed(2));
+                                                $("#skuYourPrice").text(yourPrice5);
+                                                extendedPrice = CCRZ.productDetailModel.attributes.product.price * selQuant;
+                                            }
+
+                                        }
+
+                                    }
+
+
+                                    //Distributor only
+                                    if (selEffectiveAgent.agent == undefined && selEffectiveAccount.Account_Group__c == 'Z001') {
+                                        if (priceAgreementItem.priceAgreementValue != '0') {
+                                            var yourPrice6 = new Intl.NumberFormat('en-US', {
+                                                style: 'currency',
+                                                currency: priceAgreementItem.currencyISOCode
+                                            }).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                            $("#skuYourPrice").text(yourPrice6);
+                                            extendedPrice = priceAgreementItem.priceAgreementValue;
+                                        } else {
+                                            $("#skuYourPrice").text("Contact Your Agent");
+                                        }
+
+
+                                    }*/
+
+                                    var extendedPrice6 = new Intl.NumberFormat('en-US', {
+                                        style: 'currency',
+                                        currency: priceAgreementItem.currencyISOCode
+                                    }).format((extendedPrice * $(".gp_attr_qty").val()).toFixed(2));
+                                    $("#skuADP").text(extendedPrice6);
+
+                                    if (priceAgreementItem.floorPrice != null) {
+                                        var fp = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.floorPrice.toFixed(2));
+                                        if (priceAgreementItem.floorCommission != null) {
+                                            $("#skuFloorPricing-" + CCRZ.productDetailModel.attributes.product.prodBean.sfid).text(fp + ' / ' + priceAgreementItem.floorCommission.toFixed(2) + '%');
+                                        } else {
+                                            $("#skuFloorPricing-" + CCRZ.productDetailModel.attributes.product.prodBean.sfid).text(fp);
+                                        }
+                                    }
+
+
+                                    /*if (priceAgreementItem.priceAgreementValue != '0') {
+                                                            var yourPrice = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.priceAgreementValue.toFixed(2));
+                                                            $("#skuYourPrice").text(yourPrice);
+                                                        }
+                                                       else if(priceAgreementItem.adpPrice != 0){
+                                                         var yourPrice1 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(priceAgreementItem.adpPrice.toFixed(2));
+                                                            $("#skuYourPrice").text(yourPrice1);
+                                                        }
+                                                       else{
+                                                        var yourPrice2 = new Intl.NumberFormat('en-US', {style: 'currency', currency: priceAgreementItem.currencyISOCode}).format(CCRZ.productDetailModel.attributes.product.prodBean.price.toFixed(2));
+                                                            $("#skuYourPrice").text(yourPrice2);
+                                                       }
+
+
+                                          */
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }, {
+                    nmsp: false,
+                    escape: false,
+                    timeout: 120000
+                });
+
+
+            //}, 6000);
+
+
+        }
+
+        CCRZ.pubSub.on('effectiveAccountLoaded', function (effectiveAccount) {
+
+            var el_down = CCRZ.productDetailModel.attributes.product.prodBean.piecesPerUnit;
+            /*var ListPriceCal = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: CCRZ.productDetailModel.attributes.product.prodBean.sfdcCurrencyISOCode
+            }).format((CCRZ.productDetailModel.attributes.product.price * el_down).toFixed(2));
+            $('#calListPrice').text(ListPriceCal);*/
+            // Assigned UOM Price By Sameer Mahadik On(7-13-202)
+            productListPrice = CCRZ.productDetailModel.attributes.product.price * el_down;
+
+            console.log('pieces-per-unit', el_down);
+
+            console.log(`eeffectiveAccountLoaded`, effectiveAccount);
+            console.log('Dataset', CCRZ.effSelectorView.dataSet);
+            console.log('CCRZ.effSelectorView.dataSet.agents', CCRZ.effSelectorView.dataSet.agents);
+
+            selEffectiveAccount = effectiveAccount;
+            selEffectiveAgent = CCRZ.effSelectorView.dataSet;
+
+            if (userType == "Agent") {
+                var agentSegment = localStorage.getItem(userData['AgentSegment']);
+                if ((agentSegment !== "FD" && agentSegment !== "Fixture") ||
+                    (profileName == "Agent Read Only B2B Storefront Registered Users" &&
+                    permissionSets.includes("View_PLP_and_PDP_Prices") == false)) {
+                    $(".skuADPDiv").hide();
+                    $(".skuFloorDiv").hide();
+                } else {
+                    $(".skuADPDiv").show();
+                    $(".skuFloorDiv").show();
+                }
+
+            } else if(userType == "Distributor") {
+                var distributorSegment = localStorage.getItem(userData['DistributorSegment']);
+
+                $(".skuADPDiv").hide();
+                $(".skuFloorDiv").hide();
+            }
+            else {
+                $(".skuADPDiv").hide();
+                $(".skuFloorDiv").hide();
+            }
+        });
+
+
+        CCRZ.pubSub.on('view:productDetailView:refresh', function (param) {
+
+            console.log('view:productDetailView:refresh param, CCRZ.productDetailModel', param, CCRZ.productDetailModel);
+            console.log('CCRZ.effSelectorView.dataSet', CCRZ.effSelectorView.dataSet);
+            //var myMap = new Map(JSON.parse(CCRZ.effSelectorView.dataSet));
+            //  var obj = JSON.parse(CCRZ.effSelectorView.dataSet);
+
+
+            console.log('CCRZ.effSelectorView.dataSet.workingEffAccount', CCRZ.effSelectorView.dataSet.workingEffAccount);
+            console.log('CCRZ.productDetailModel.attributes.product', CCRZ.productDetailModel.attributes.product);
+            const product = CCRZ.productDetailModel.attributes.product;
+            let sfid = CCRZ.productDetailModel.attributes.product.prodBean.sfid;
+            let priceclass = ".cc_price" + sfid;
+            let skuNumber = product.prodBean.sku;
+
+            let isDistributor = [
+                'B2B Storefront Registered Users',
+                'Distributor B2B Storefront Registered Users',
+                'Distributor Read Only B2B Storefront Registered Users'].includes(product.prodBean.profileName) === false;
+
+            if (isDistributor === false) {
+                $("#skuADPFloor-" + sfid).css('display', 'none');
+            }
+            if (product.prodBean.pricingUOMS?.length > 0) {
+                if (product.prodBean.unitOfMeasure == null && product.prodBean.pricingUOMS?.length > 0) {
+                    // product.prodBean.piecesPerUnit = product.prodBean.pricingUOMS[0].multiplier;
+                    // product.prodBean.unitOfMeasure = product.prodBean.pricingUOMS[0].UOM;
+                    // Comment Above Line & Set Default Selected UOM By Sameer Mahadik On(8-9-2021)
+                    product.prodBean.unitOfMeasure = product.prodBean.UnitOfMeasure;
+                }
+                let realTimePricingInputs = [];
+                let selectElement = document.createElement('select');
+                selectElement.className = 'form-control input-sm gp_attr_select';
+                selectElement.addEventListener('change', function (event) {
+                    $("#skuADP").html('<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+                    $("#skuADP-" + sfid).html('<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+                    $("#skuFloorPricing-" + sfid).html('<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+                    $("#skuYourPrice").html('<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+                    $("#calListPrice").html('<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+
+                    let selectedUOM = event.currentTarget.value;
+                    let index = product.prodBean.pricingUOMS.findIndex(e => e.UOM === selectedUOM);
+                    let product1 = CCRZ.productDetailModel.attributes;
+                    if (index !== -1) {
+                        product.prodBean.piecesPerUnit = product.prodBean.pricingUOMS[index].multiplier;
+                        product.prodBean.unitOfMeasure = product.prodBean.pricingUOMS[index].UOM;
+                        $('#pieces-per-unit').text(product.prodBean.piecesPerUnit);
+                        console.log('CCRZ.productDetailModel.attributes.product.price', CCRZ.productDetailModel.attributes.product.price);
+                        /*var ListPriceCal1 = new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: CCRZ.productDetailModel.attributes.product.prodBean.sfdcCurrencyISOCode
+                        }).format((CCRZ.productDetailModel.attributes.product.price * product.prodBean.piecesPerUnit).toFixed(2));
+                        $('#calListPrice').text(ListPriceCal1);*/
+                        // Assigned UOM Price By Sameer Mahadik On(7-13-202)
+                        productListPrice = CCRZ.productDetailModel.attributes.product.price * product.prodBean.piecesPerUnit;
+                        //$('#calListPrice').text('$' + (CCRZ.productDetailModel.attributes.product.price * product.prodBean.piecesPerUnit).toFixed(2));
+
+                    }
+                    getRealTimePricing([{sfid: sfid, UOM: selectedUOM, material: skuNumber}]);
+                });
+                console.log("UOM Dropdown : ", product);
+                // Get Selected UOM value from local storage By sameer On(5-7-2021)
+                //let selectedStoredUom = localStorage.getItem(product.prodBean.sfid) !== null ? localStorage.getItem(product.prodBean.sfid) : '';
+
+                populateUomDropDown(product, selectElement);
+
+                //console.log('selectedStoredUom', selectedStoredUom);
+                /*let index2 = product.prodBean.pricingUOMS.findIndex(e => e.UOM === selectedStoredUom);
+                                if(index2 !== -1){
+                                    product.prodBean.piecesPerUnit = product.prodBean.pricingUOMS[index2].multiplier;
+                                    $('#pieces-per-unit').text(product.prodBean.piecesPerUnit);
+                            console.log('product.prodBean.piecesPerUnit', product.prodBean.piecesPerUnit);
+                            $('#calListPrice').text('$' + (CCRZ.productDetailModel.attributes.product.price * product.prodBean.piecesPerUnit).toFixed(2));
+
+                                }*/
+                realTimePricingInputs.push({sfid: sfid, UOM: product.prodBean.unitOfMeasure, material: skuNumber});
+                getRealTimePricing(realTimePricingInputs);
+            }
+            // var ECommItemName1 = CCRZ.productDetailModel.attributes.product.prodBean.ECommItemName;
+
+            //Type mark button - STARTS HERE
+    //   $('.action').append('<button class="pull-right typemark-button" id="typeMarkButton">ADD TYPE MARK</button>');
+
+
+            $('#typeMarkButton').on('click', function (event) {
+                $('#typeMark_modal').css('display', 'block');
+                $('#typeMark_modal textarea').focus();
+            });
+
+            $('#typeMark-close').on('click', function (event) {
+                $('#typeMark_modal').css('display', 'none');
+            });
+
+            $('#typeMark-save').on('click', function (event) {
+                $('#typeMark_modal').css('display', 'none');
+                console.log($('#typeMark-textarea').val());
+            });
+
+            $('#typeMark-textarea').on('keyup', function (event) {
+                var maxLength = $('#typeMark-textarea').attr('maxlength');
+                var typeMarkValue = $('#typeMark-textarea').val();
+                var length = typeMarkValue.length;
+
+                $('#characters_left_span').text((maxLength - length));
+            });
+
+            //Type mark button - ENDS HERE
+
+            //CommisionWidget Button and Modal logic - STARTS HERE
+            var calcButton = '<a class="showcommissionWidgetModalButton" data-id="{{product.SKU}}~{{product.sfid}}~{{product.sfdcName}}" href="#{{product.SKU}}~{{product.sfid}}~{{product.materialDescription}}" id="commissionWidgetModal" style="position: absolute; right: 50px; margin: 9px 0"><i class="fa fa-calculator" style="font-size:18px"></i></a>' +
+                '<label class="control-label" style="position: absolute; right: 12px; margin: 5px; padding: 0;">Price</label>';
+            $('#qty').parent().css('position', 'relative');
+            $('#qty').parent().after(calcButton);
+
+            $('.showcommissionWidgetModalButton').on('click', function (event) {
+
+                let contactId = CCRZ.currentUser.ContactId;
+                let modalTemplate = CCRZ.util.template('CommissionWidget-Desktop');
+                let productSKU = CCRZ.prodDetailView.model.attributes.product.prodBean.SKU;
+                let sfid = CCRZ.prodDetailView.model.attributes.product.prodBean.sfid;
+                let catalogNo = CCRZ.prodDetailView.model.attributes.product.prodBean.name;
+                let uom = CCRZ.prodDetailView.model.attributes.product.prodBean.unitOfMeasure;
+                let uomLabel = getUomLabelByUomCode(CCRZ.prodDetailView.model.attributes.product.prodBean.unitOfMeasure);
+                let qty = parseFloat($('.gp_attr_qty').val());
+                let piecesPerUnit = CCRZ.prodDetailView.model.attributes.product.prodBean.piecesPerUnit;
+                let isAgent = CCRZ.effSelectorView.dataSet.workingEffAccount.Account_Group__c == 'ZEAG';
+                let typeMark = $('#typeMark-textarea').val();
+                console.log('type mark at widget open', typeMark);
+                //TODO hardcoded
+                let currency = 'USD';
+
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'PriceAgreementController'});
+                remoteCall.invokeCtx('initSearchSoldTo', contactId,
+                    function (soldToAccounts, err) {
+
+                        var _self = this;
+                        _self.data = {
+                            productSKU: productSKU,
+                            sfid: sfid,
+                            catalogNo: catalogNo,
+                            unitOfMeasureLabel: uomLabel,
+                            unitOfMeasureCode  : uom,
+                            qty: qty,
+                            piecesPerUnit: piecesPerUnit,
+                            isAgent: isAgent,
+                            typeMark: typeMark
+                        };
+                        $('#commissionWidgetModalParent2').html(modalTemplate(_self.data));
+                        $('#commissionWidgetModal2').modal({
+                            backdrop: 'static',
+                            show: true
+                        }); //show modal
+                        $("#range_price").attr({
+                            "min": 0,
+                            "max": 100
+                        });
+                        $("#range_price_disp").text(0);
+                        // Don't fill Sold To field for Agent accounts
+                        if (CCRZ.effSelectorView.dataSet.workingEffAccount.Account_Group__c != 'ZEAG') {
+                            $(".soldToSearchTextCommissionWidget").val(CCRZ.effSelectorView.dataSet.workingEffAccount.Name);
+                        }
+                        getPriceAndCommission('getprice', '', productSKU, uom, qty, currency);
+
+                    }, {
+                        nmsp: false, escape: false
+                    });
+            });
+            //CommisionWidget Button and Modal logic - ENDS HERE
+
+            Handlebars.registerHelper('getUOMlabel', function (uom) {
+                return getUomLabelByUomCode(uom);
+            });
+
+            Handlebars.registerHelper('getPiecesPerUnit', function (uom, pricingUOMS) {
+                if (pricingUOMS == undefined) {
+                    return 0
+                }
+                ;
+                for (i = 0; i < pricingUOMS.length; i++) {
+                    if (pricingUOMS[i].UOM == uom) return pricingUOMS[i].multiplier;
+                }
+                return 0;
+            });
+
+            // Comment Permission Set Code & Added Into B2b_Footer_GEC.page File By Sameer Mahadik On (8-12-2021)
+            // if ((CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Agent Read Only B2B Storefront Registered Users' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'Default_Profile') || (CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Distributor Read Only B2B Storefront Registered Users' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'Default_Profile')) {
+            //     //$(priceclass).html(CCRZ.pagevars.pageLabels['ProductDetails_Loading']  + '<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+            //     $(priceclass).css('display', 'none');
+            //     $('.addItem').css('display', 'none');
+            //     $('#qty').css('display', 'none');
+            //     $('.cc_add_to_batch').css('display', 'none');
+
+            // }
+
+            var familyName = CCRZ.productDetailModel.attributes.product.prodBean.productFamily;
+            if (familyName) {
+                //let famhtml = '<div class="cc_catNo"><span class="cc_label">' + CCRZ.pagevars.pageLabels['FamilyName'] + '</span>';
+                let famhtml = '';
+                famhtml += ' <span class="value cc_value">' + familyName + '</span></div>';
+                $('.cc_product_title').after(famhtml);
+            }
+
+            /*console.log('CCRZ.currentUser.GEAccountGroup',CCRZ.currentUser.GEAccountGroup);
+                     if (CCRZ.currentUser.GEAccountGroup != 'ZEAG') {
+                        $('.skuADPDiv').css('display', 'none');
+                    }*/
+            setTimeout(function () { //wait 3 seconds
+                //CCRZ.pubSub.trigger('getPricingUOM', param.model.attributes.product.prodBean.SKU);
+                //CCRZ.pubSub.trigger('getRealTimePricing', param.model.attributes.product.prodBean.SKU, param.model.attributes.product.prodBean.sfid, param.model.attributes.product.prodBean.unitOfMeasure);
+                /*CCRZ.pubSub.trigger('getRealTimeInventory', param.model.attributes.product.prodBean.SKU,
+                    param.model.attributes.product.prodBean.sfid);*/
+                CCRZ.pubSub.trigger('accountSelectorDataset', CCRZ.effSelectorView.dataSet);
+            }, 4000);
+    //Product Interface change by Sagar
+    $(".secDocuments2 .value > a").attr("target", "_blank");
+        });
+    
+
+        CCRZ.pubSub.on("getPricingUOM", function (sku) {
+            var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'PriceAgreementController'});
+            remoteCall.invokeCtx('getPricingUOM', sku, function (res, err) {
+                if (res != null && res.data != null) {
+                    var callRespDate = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+                    globalUOMMultiplier = res.data;
+                }
+            }, {
+                nmsp: false,
+                escape: false,
+                timeout: 120000
+            });
+
+        });
+
+        CCRZ.pubSub.on("accountSelectorDataset", function (dataset) {
+            console.log('in effectiveAccountLoaded', dataset);
+
+        });
+
+
+        CCRZ.pubSub.on("getRealTimeInventory", function (sku, sfid) {
+
+            var productIds = '"' + sfid + '"';
+            var productSKUs = '"' + sku + '"';
+            var agentID = '';
+            if (CCRZ.effSelectorView.dataSet.agent !== undefined) {
+                agentID = CCRZ.effSelectorView.dataSet.agent.sfid;
+            }
+            var CustID = CCRZ.effSelectorView.dataSet.workingEffAccount.sfid;
+
+            console.log('CCRZ.effSelectorView.dataSet.workingEffAccount in getRealTimeInventory', CustID);
+            console.log('CCRZ.effSelectorView.dataSet.agent in getRealTimeInventory', agentID);
+
+            if (productSKUs != null && productSKUs.trim() !== '') {
+                skus = '[' + productSKUs + ']';
+                ids = '[' + productIds + ']';
+
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'InventoryController'});
+
+                var callReqDate = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+                remoteCall.invokeCtx('getInventoryAvailability', skus, ids, agentID, CustID, function (res, err) {
+                    if (res != null && res.data != null) {
+
+                        var callRespDate = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+                        console.log('Call Response = ', res);
+                        var inv = res.data;
+                        gloablInvData = res.data;
+
+                        $("#inventoryCount-" + sfid).text(0);
+                        $("#totalinventoryCount-" + sfid).text(0);
+                        for (var key in inv.inventoryMap) {
+                            if (key.lastIndexOf(sku) > 0) {
+                                var invArr = inv.inventoryMap[key];
+                                for (i = 0; i < invArr.length; i++) {
+                                    if (invArr[i].isDefaultWarehouse && CCRZ.productDetailModel.attributes.product.prodBean.quickship) {
+
+                                        var nf = new Intl.NumberFormat();
+                                        var qty = 0;
+                                        if (invArr[i].quantity !== null && invArr[i].quantity !== '') {
+                                            qty = nf.format(invArr[i].quantity);
+                                        }
+
+
+                                        $("#inventoryCount-" + sfid).text(' ' + qty);
+                                    }
+                                    if (i === invArr.length - 1) {
+                                        var dataId = sku + '~' + sfid;
+                                        var tnf = new Intl.NumberFormat();
+                                        var tqty = 0;
+                                        if (invArr[i].totalQuantity !== null && invArr[i].totalQuantity !== '') {
+                                            tqty = tnf.format(invArr[i].totalQuantity);
+                                        }
+                                        $("#totalinventoryCount-" + sfid).html('<a class="showinventoryModalButton" data-id="' + dataId + '" href="#' + dataId + '" id="inventoryModal" >' + tqty + '</a>');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, {
+                    nmsp: false,
+                    escape: false,
+                    timeout: 120000
+                });
+            }
+        });
+
+        function populateUomDropDown(product, selectElement) {
+            window.setTimeout(() => {
+                populateUomDropDownAsync(product, selectElement);
+            }, 100);
+        }
+
+        function populateUomDropDownAsync(product, selectElement) {
+            let uomMap = getUomCodeLabelMap();
+            try {
+                let foundMap = false;
+                for (let index in uomMap) {
+                    foundMap = true;
+                }
+                if (!foundMap) {
+                    populateUomDropDown(product, selectElement);
+                } else {
+                    for (const pricingUom of product.prodBean.pricingUOMS) {
+                        let optionElement = document.createElement('option');
+                        optionElement.value = pricingUom.UOM;
+                        // Selected the option where UOM value is match with local storage UOM By Sameer On(5-7-2021)
+                        if (product.prodBean.unitOfMeasure == pricingUom.UOM) {
+                            optionElement.selected = "selected";
+                        }
+                        //     optionElement.selected = "selected";
+                        optionElement.innerHTML = uomMap.hasOwnProperty(pricingUom.UOM) ? uomMap[pricingUom.UOM] : pricingUom.UOM;
+                        console.log('Uom map in pdp', getUomCodeLabelMap());
+                        console.log('UOM in pdp', getUomCodeLabelMap()[0]);
+                        console.log('UOM in pdp', getUomCodeLabelMap()['BX']);
+                        console.log('UOM in pdp', getUomCodeLabelMap().BX);
+                        selectElement.appendChild(optionElement);
+                    }
+                    $("#uom").append(selectElement);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        CCRZ.pubSub.on("getRealTimePricing", function (sku, sfid, duom) {
+
+            var productIds = '"' + sfid + '"';
+            var productSKUs = '"' + sku + '"';
+            var agentID = '';
+            var sampleOrder  = false;
+            if (CCRZ.effSelectorView.dataSet.agent !== undefined) {
+                agentID = CCRZ.effSelectorView.dataSet.agent.sfid;
+            }
+            var CustID = CCRZ.effSelectorView.dataSet.workingEffAccount.sfid;
+
+            console.log('CCRZ.effSelectorView.dataSet.workingEffAccount in getRealTimePricing', CustID);
+            console.log('CCRZ.effSelectorView.dataSet.agent in getRealTimePricing', agentID);
+
+            var distributorType='';
+            if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                userData = JSON.parse(userData);
+                distributorType = localStorage.getItem(userData['DistributorType']);
+            }
+            if(distributorType != null && distributorType != undefined && distributorType == 'Z1'){
+                sampleOrder=true;
+            }
+            console.log('sampleOrder: ',sampleOrder);
+            
+            if (productSKUs != null && productSKUs.trim() !== '') {
+                skus = '[' + productSKUs + ']';
+                ids = '[' + productIds + ']';
+
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                    className: 'PriceAgreementController'
+                });
+
+                var callReqDate = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+                var callType = 'D';
+                remoteCall.invokeCtx('getRealTimePricing', JSON.stringify([{material: sku, UOM: duom}]), agentID, CustID, callType, sampleOrder, function (res, evt) {
+                    console.log('getRealTimePricing response', res, evt)
+                    if (res != null && res.data != null) {
+                        var pr = res.data;
+                        var prArr = pr.priceAgreementItemList;
+                        for (j = 0; j < prArr.length; j++) {
+                            if (prArr[j].material.lastIndexOf(sku) > 0) {
+                                if ((CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup === 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'View_PLP_and_PDP_Prices') || (CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup === 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Agent B2B Storefront Registered Users')) {
+
+
+                                    /*if (prArr[j].extendedPrice != null) {
+                                        var extendedPrice = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(prArr[j].extendedPrice.toFixed(2));
+                                        $("#extended-price-" + sfid).text(extendedPrice);
+                                    }
+
+                                    if (prArr[j].adpPrice != null) {
+                                        var adp = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(prArr[j].adpPrice.toFixed(2));
+                                        if (prArr[j].globalCommission != null) {
+                                            $("#skuADP-" + sfid).text(adp + ' / ' + prArr[j].globalCommission.toFixed(2) + '%');
+                                        } else {
+                                            $("#skuADP-" + sfid).text(adp);
+                                        }
+                                    }
+
+                                    if (prArr[j].priceAgreementValue != '0') {
+                                        var yourPrice = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(prArr[j].priceAgreementValue.toFixed(2));
+                                        $("#skuYourPrice").text(yourPrice);
+                                    }
+                				   else if(prArr[j].adpPrice != 0){
+                                     var yourPrice1 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(prArr[j].adpPrice.toFixed(2));
+                                        $("#skuYourPrice").text(yourPrice1);
+                                    }
+                				   else{
+                                    var yourPrice2 = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(CCRZ.productDetailModel.attributes.product.prodBean.price.toFixed(2));
+										$("#skuYourPrice").text(yourPrice2);
+                                   }
+
+                                    if (prArr[j].floorPrice != null) {
+                                        var fp = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(prArr[j].floorPrice.toFixed(2));
+                                        if (prArr[j].floorCommission != null) {
+                                            $("#skuFloorPricing-" + sfid).text(fp + ' / ' + prArr[j].floorCommission.toFixed(2) + '%');
+                                        } else {
+                                            $("#skuFloorPricing-" + sfid).text(fp);
+                                        }
+                                    }
+                                    */
+                                }
+                                var priceclass = ".cc_price" + sfid;
+                                var priceforpc = 0;
+                                //check net credit - fire sale price
+                                if (prArr[j].netCredit != null && prArr[j].netCredit !== '' && prArr[j].netCredit !== '0') {
+                                    var sp = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(prArr[j].netCredit.toFixed(2));
+                                    $(priceclass).text(sp);
+                                    hasFiresalePricing = true;
+                                    perPcFiresalePrice = prArr[j].netCredit.toFixed(2);
+                                    firesaleCurrencyCode = prArr[j].currencyISOCode;
+                                    CCRZ.productDetailModel.attributes.product.prodBean.price = prArr[j].netCredit.toFixed(2);
+
+                                    CCRZ.productDetailModel.attributes.product.prodBean.priceUpdate = true;
+                                    priceforpc = prArr[j].netCredit.toFixed(2);
+                                }
+
+                                //check term or promo price
+                                if ((CCRZ.productDetailModel.attributes.product.prodBean.priceUpdate === false) && (prArr[j].priceAgreementValue != null) && (prArr[j].priceAgreementValue !== '') && (prArr[j].priceAgreementValue !== '0')) {
+                                    var pa = new Intl.NumberFormat('en-US', {style: 'currency', currency: prArr[j].currencyISOCode}).format(prArr[j].priceAgreementValue.toFixed(2));
+
+                                    if (CCRZ.productDetailModel.attributes.product.prodBean.approvedPriceAgreementPresent === true) {
+                                        $(priceclass).html(pa + '  <span class="applyagreementFont">' + CCRZ.pagevars.pageLabels['ProductDetails_ApplyPriceAgreement'] + '</span>');
+                                    } else {
+                                        $(priceclass).html(pa);
+                                        hasFiresalePricing = true;
+                                        console.log(prArr[j].priceAgreementValue);
+                                        perPcFiresalePrice = prArr[j].priceAgreementValue.toFixed(2);
+                                        firesaleCurrencyCode = prArr[j].currencyISOCode;
+                                    }
+
+
+                                    //CCRZ.productDetailModel.attributes.product.prodBean.OriginalPrice = pa;
+                                    CCRZ.productDetailModel.attributes.product.prodBean.price = prArr[j].priceAgreementValue.toFixed(2);
+                                    //console.log('pa ***' + pa);
+                                    CCRZ.productDetailModel.attributes.product.prodBean.priceUpdate = true;
+                                    hasPromoPricing = true;
+                                    priceforpc = prArr[j].priceAgreementValue.toFixed(2);
+                                    if (prArr[j].priceAgreement != null && prArr[j].priceAgreement !== '') {
+                                        CCRZ.productDetailModel.attributes.product.prodBean.priceAgreement = prArr[j].priceAgreement;
+                                    }
+                                }
+
+                                //if neither promo/term/fire sale price present - give message apply price agreement or contact your agent
+                                if (CCRZ.productDetailModel.attributes.product.prodBean.priceUpdate === false) {
+
+                                    var pa = new Intl.NumberFormat('en-US', {
+                                        style: 'currency',
+                                        currency: CCRZ.productDetailModel.attributes.product.prodBean.sfdcCurrencyISOCode
+                                    }).format(CCRZ.productDetailModel.attributes.product.prodBean.price.toFixed(2));
+                                    // console.log('pa****' + pa);
+
+                                    // console.log('step**** approvedPriceAgreementPresent' + CCRZ.productDetailModel.attributes.product.prodBean.approvedPriceAgreementPresent);
+                                    if (CCRZ.productDetailModel.attributes.product.prodBean.approvedPriceAgreementPresent === true) {
+                                        $(priceclass).html(pa + '  <span class="applyagreementFont">' + CCRZ.pagevars.pageLabels['ProductDetails_ApplyPriceAgreement'] + '</span>');
+                                    } else {
+                                        if ((CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup === 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'View_PLP_and_PDP_Prices') || (CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup === 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Agent B2B Storefront Registered Users')) {
+                                            $(priceclass).html(pa);
+                                            hasFiresalePricing = true;
+                                            console.log(CCRZ.productDetailModel.attributes.product.prodBean.price);
+                                            perPcFiresalePrice = CCRZ.productDetailModel.attributes.product.prodBean.price.toFixed(2);
+                                            firesaleCurrencyCode = CCRZ.productDetailModel.attributes.product.prodBean.sfdcCurrencyISOCode;
+                                        } else if ((CCRZ.productDetailModel.attributes.product.prodBean.EffectiveGEAccountGroup !== 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'View_PLP_and_PDP_Prices') || (CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup !== 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Distributor B2B Storefront Registered Users')) {
+
+                                            $(priceclass).html(pa + '  <span class="contactAgentFont">' + CCRZ.pagevars.pageLabels['ProductDetails_ContactAgent'] + '</span>');
+                                        }
+                                    }
+
+                                }
+                                //hasPromoPricing = true;
+                                //priceforpc = 9;
+                                hasRetrivedPricing = true;
+                                if (hasPromoPricing) {
+                                    hasRetrivedPricing = false;
+                                    // console.log('step**** sku = ' + sku);
+                                    var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'PriceAgreementController'});
+                                    // console.log('step**** hasPromoPricing true');
+                                    var callReqDate = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+                                    // console.log('Call getPricingUOM Requested = ' + callReqDate);
+                                    remoteCall.invokeCtx('getPricingUOM', sku, function (res, err) {
+                                        if (res != null && res.data != null) {
+                                            var callRespDate = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+                                            // console.log('Call getPricingUOM Response = ' + callRespDate);
+                                            var prArr = res.data;
+                                            //console.log(res.data);
+
+                                            let mp = new Map();
+                                            var noofpr = 0;
+                                            for (const [key, value] of Object.entries(prArr)) {
+                                                mp.set(key, value * priceforpc);
+                                                //console.log(key);
+                                                //console.log(value * priceforpc);
+                                                noofpr++;
+                                            }
+
+
+                                            if (noofpr > 1) {
+                                                let jsonObject = {};
+                                                mp.forEach((value, key) => {
+                                                    jsonObject[key] = value
+                                                });
+                                                priceObj = jsonObject;
+
+                                                hasRetrivedPricing = true;
+                                                Backbone.trigger('attrPriceTrigger');
+                                            }
+
+                                        }
+                                    }, {
+                                        nmsp: false,
+                                        escape: false,
+                                        timeout: 120000
+                                    });
+                                } else {
+                                    hasRetrivedPricing = true;
+                                    Backbone.trigger('attrPriceTrigger')
+                                }
+                                // Comment Permission Set Code & Added Into B2b_Footer_GEC.page File By Sameer Mahadik On (8-12-2021)
+                                // if ((CCRZ.productDetailModel.attributes.product.prodBean.GEAccountGroup === 'ZEAG' && CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Agent B2B Storefront Registered Users') || (CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Agent Read Only B2B Storefront Registered Users' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'View_PLP_and_PDP_Prices') || (CCRZ.productDetailModel.attributes.product.prodBean.profileName === 'Distributor Read Only B2B Storefront Registered Users' && CCRZ.productDetailModel.attributes.product.prodBean.permissionSet === 'View_PLP_and_PDP_Prices')) {
+                                //     $('.addItem').css('display', '');
+                                //     $('#qty').css('display', '');
+                                //     $('.cc_add_to_batch').css('display', '');
+
+                                // }
+                            }
+                        }
+
+                    }
+                }, {
+                    nmsp: false,
+                    escape: false,
+                    timeout: 120000
+                });
+            }
+        });
+
+        // CCRZ.pubSub.on('view:productAttributesBatchHeaderView:refresh', function(param){
+        //     $('.gp_attribute_price').html(CCRZ.pagevars.pageLabels['ProductDetails_Loading']  + '<i class="fa fa-1.5x fa-refresh fa-spin"></i>');
+        // }
+
+        CCRZ.pubSub.on('effectiveAccountLoaded', function (effectiveAccount) {
+            showCommissionWidget();
+        });
+
+        function showCommissionWidget() {
+            var permissionSets = [];
+            var profileName = "";
+            if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                userData = JSON.parse(userData);
+                var userType = localStorage.getItem(userData['User Type']);
+                var permissionData = JSON.parse(localStorage.getItem(userData['UserPermission']));
+
+                if (permissionData !== null) {
+                    var permissionSets = permissionData['permissionSet'];
+                    var profileName = permissionData['profileName'];
+                }
+            }
+
+            if (userType == 'Agent' &&
+                (CCRZ.effSelectorView.dataSet.workingEffAccount.Customer_Segmentation__c == 'FD' ||
+                CCRZ.effSelectorView.dataSet.workingEffAccount.Customer_Segmentation__c == 'Fixture') &&
+                ((profileName == "Agent Read Only B2B Storefront Registered Users" &&
+                permissionSets.includes("View_Commissions_Set_Price") == true) ||
+                profileName == "Agent B2B Storefront Registered Users")) {
+                    $('.showcommissionWidgetModalButton').show();
+            }
+        }
+
+        Backbone.on('view:productAttributesBatchHeaderView:created', function (viewPrototype) {
+            localStorage.setItem("Current page URL", window.location.href);
+            viewPrototype.processAddItem = function (sku, showMessage, attributes) {
+                var v = this;
+                this.className = 'cc_RemoteActionController';
+                console.log('in process Add item');
+                this.invokeContainerLoadingCtx(
+                    $('.prodDetailContainer')
+                    , 'addItem'
+                    , sku
+                    , null //qty
+                    , null //parentId
+                    , null //subTerm
+                    , null //sellerID
+                    , attributes
+                    , function (response) {
+                        var cartId = response.data;
+                        CCRZ.pagevars.currentCartID = cartId;
+                        //cart change will update cookie
+                        //CCRZ.pubSub.trigger('cartChange', cartId);
+                        if (showMessage) {
+                            var msgArr = new Array();
+                            msgArr[0] = sku;
+                            var msg = CCRZ.processPageLabelMap('ADDED_TO_CART', msgArr);
+                            var msgContext = CCRZ.createPageMessage('INFO', "messagingAction-Info", msg);
+                            CCRZ.pubSub.trigger("pageMessage", msgContext);
+                        }
+                        if (response.success) {
+                            //remote
+                            console.log('itt vagyok');
+                            if (hasPromoPricing || hasFiresalePricing) {
+
+                                var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                                    className: 'ProductListActions'
+                                });
+
+                                remoteCall.invokeCtx('addBatchPricedItem', cartId, sku, attributes,
+                                    function (res, err) {
+                                        if (res.success) {
+                                            var cartId = CCRZ.pagevars.currentCartID;
+                                            CCRZ.pubSub.trigger('cartChange', cartId);
+                                            v.removeAllFromBatch();
+                                            if (CCRZ.ga) {
+                                                CCRZ.ga.handleAddToCart({'sku': sku});
+                                            }
+                                        } else {
+                                            console.error('failed');
+                                        }
+                                    }, {
+                                        nmsp: false,
+                                        escape: false,
+                                        timeout: 120000
+                                    });
+                            } else {
+                                CCRZ.pubSub.trigger('cartChange', cartId);
+                                v.removeAllFromBatch();
+                                if (CCRZ.ga) {
+                                    CCRZ.ga.handleAddToCart({'sku': sku});
+                                }
+                            }
+                        }
+                        this.className = 'cc_ctrl_ProductDetailRD';
+                        if (CCRZ.pagevars.pageConfig.isTrue('pd.g2c')) {
+                            cartDetails();
+                        }
+                    }
+                );
+            }
+        });
+
+        Backbone.on('view:productDetailView:created', function (viewPrototype) {
+
+            viewPrototype.events["click .showinventoryModalButton"] = "showinventoryModal";
+            viewPrototype.events["click .addItem"] = "addItem";
+            viewPrototype.events["keypress .gp_attr_qty"] = "checkQtyKeyPress";
+            viewPrototype.events["input .gp_attr_qty"] = "checkQTYValue";
+
+            viewPrototype.checkQtyKeyPress = function(event) {
+                return CCRZ.util.isValidNumericInput(event);
+            }
+
+            viewPrototype.checkQTYValue = function (event) {
+                var qtyValue = parseInt(event.target.value);
+                console.log("qtyValue: ", qtyValue);
+                $(".addItem").attr('disabled', false);
+                if (!qtyValue || qtyValue <= 0) {
+                    $(".addItem").attr('disabled', true);
+                }
+            }
+
+            viewPrototype.addItem = function () {
+                let cartId = CCRZ.pagevars.currentCartID;
+                let sku = this.model.attributes.product.prodBean.SKU;
+                // let qty = parseFloat($('#qty').val());
+                let qty = parseFloat($('.gp_attr_qty').val());
+                // let price = this.model.attributes.product.prodBean.price;
+                //let price = this.model.attributes.product.price;
+                // Comment Above Code & Get List Proce From On Load & On Change UOM By Sameer Mahadik On(7-13-2021)
+                let price = productListPrice;
+                let sfid = this.model.attributes.product.prodBean.sfid;
+                let priceUpdate = this.model.attributes.product.prodBean.priceUpdate;
+                let uom = this.model.attributes.product.prodBean.unitOfMeasure;
+                let priceAgreement = this.model.attributes.product.prodBean.priceAgreement;
+                let typeMark = $('#typeMark-textarea').val();
+                $('#typeMark-textarea').val(null);
+                $('#typeMark-textarea').keyup();
+                let yourPrice = $("#skuYourPrice").text().trim();
+
+                console.log("Price : ", price);
+                // Pass your price in add to cart By Sameer(5-7-2021)
+                if (yourPrice !== "Contact Your Agent") {
+                    // yourPrice = yourPrice.substring(1, yourPrice.length);
+                    yourPrice = yourPrice.split("$").pop();
+                    yourPrice = yourPrice.replace(/,/g, "");
+                    if ($.isNumeric(yourPrice)) {
+                        price = yourPrice
+                    }
+                }
+                console.log("Final Add To Cart Price : ", price);
+
+                if (true) {
+                    //this.processAddItem(sku, qty, null, null, null, null);
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'ProductListActions'});
+                    //remoteCall.invokeCtx('addExtPricedItem',
+                    //$("header").before("<div class='customLoader'></div>");//custom
+                    $("header").before("<div id='overlay' class='deskLayout'><div class='customLoader'></div></div>");//line added for custom loader
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'addExtPricedItem',
+                        cartId, sku, sfid, qty, price, typeMark, uom,
+                        function (res, err) {
+                            console.log(res, err);
+                            if (res.success) {
+                                var cartId = CCRZ.pagevars.currentCartID;
+                                CCRZ.pubSub.trigger('cartChange', cartId);
+                                setTimeout(function () {
+                                    $("#overlay").remove();
+                                    $(".modal-backdrop").remove();
+                                }, 3000);
+                                console.log('success');
+                            } else {
+                                console.error('failed');
+                                $("#overlay").remove();
+                            }
+                        }, {
+                            nmsp: false,
+                            escape: false,
+                            timeout: 120000
+                        });
+
+                } else {
+                    this.processAddItem(sku, qty, null, null, null, null);
+                }
+            }
+
+            viewPrototype.showinventoryModal = function () {
+                var productId = this.model.attributes.product.prodBean.sfid;
+                var productSKU = this.model.attributes.product.prodBean.SKU;
+                var productTitle = this.model.attributes.product.prodBean.name;
+                var ECommItemName = CCRZ.productDetailModel.attributes.product.prodBean.ECommItemName;
+                console.log("ECommItemName",ECommItemName);
+                var ids = JSON.stringify([this.model.attributes.product.prodBean.sfid]);
+                var skus = JSON.stringify([this.model.attributes.product.prodBean.SKU]);
+                var systemDate = new Intl.DateTimeFormat('en-us', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: 'numeric',
+                    minute: 'numeric'
+                }).format(new Date());
+
+                var agentID = '';
+                var custID = CCRZ.effSelectorView.dataSet.workingEffAccount.sfid;
+
+                if (CCRZ.effSelectorView.dataSet.agent !== undefined) {
+                    agentID = CCRZ.effSelectorView.dataSet.agent.sfid;
+                }
+
+                let modalTemplate = CCRZ.util.template('InventoryDetail-Desktop');
+                var _self = this;
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'InventoryController'});
+
+                // Show Loader
+                $("header").before('<div class="customLoader"></div>');
+
+                if (gloablInvData == null) {
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'getInventoryAvailability', skus, ids, agentID, custID, function (res, err) {
+                        // Remove Loader
+                        $(".customLoader").remove();
+
+                        if (res != null && res.data != null) {
+                            _self.data = {
+                                productSKU: productSKU,
+                                inv: res.data,
+                                productTitle: productTitle,
+                                sysDate: systemDate,
+                                ECommItemName: ECommItemName
+                            };
+                        }
+                        //console.log(modalTemplate);
+                        $('#productAvailabilityModalParent').html(modalTemplate(_self.data));
+                        $('#productAvailabilityModal').modal({backdrop: true, show: true}); //show modal
+                    }, {
+                        nmsp: false,
+                        escape: false,
+                        timeout: 120000
+                    });
+                } else {
+                    // Remove Loader
+                    $(".customLoader").remove();
+                    _self.data = {
+                        productSKU: productSKU,
+                        inv: gloablInvData,
+                        productTitle: productTitle,
+                        sysDate: systemDate,
+                        ECommItemName: ECommItemName
+                    };
+                    $('#productAvailabilityModalParent').html(modalTemplate(_self.data));
+                    $('#productAvailabilityModal').modal({backdrop: true, show: true}); //show modal
+                }
+            }
+        });
+    </script>
+
+    <script>
+
+        var viewTmp = null;
+
+        function fillSoldToSearchTextCommissionWidget() {
+            var acctName = $(event.target).text();
+            var acctId = $(event.target).attr("data-id");
+            $(".soldToSearchTextCommissionWidget").val(acctName);
+            $("#selectedSoldToAccountId").val(acctId);
+            $(".calcbtn").removeClass('btndimm');
+        }
+
+
+        function fillSelectedPricingUOM() {
+            var itemId = $("#pricinguoms").val();
+            var fields = itemId.split('~');
+            $("#selectedCartItemId").val(fields[0]);
+            $("#selectedCartItemUom").val(fields[2]);
+            $("#selectedCartItemQty").val(fields[1]);
+        }
+
+        function fillChangeQuantity() {
+
+        }
+
+
+        function confirmCommissionCalcRequestedPrice() {
+            var requestedPrice = parseFloat($("#range_price_disp").text());
+            var catalogno = $("#catalognumberval").text();
+            var currencyISOCode = CCRZ.productDetailModel.attributes.product.prodBean.sfdcCurrencyISOCode;
+            var rp = new Intl.NumberFormat('en-US', {style: 'currency', currency: currencyISOCode}).format(requestedPrice.toFixed(2));
+
+            // var r = confirm("Are you sure you want apply " + rp + " for " + catalogno + " ?");
+            // if (r === false) {
+            //     return false;
+            // }
+
+            $('#messageconfirmation').text("Are you sure you want apply " + rp + " for " + catalogno + " ?");
+            // $('#commissionWidgetModal2').modal({
+            //     show: false
+            // });
+            $('#commissionWidgetModal2').modal('hide');
+            $('#commissionWidgetModal2confirm').modal({
+                backdrop: 'static',
+                show: true
+            });
+        }
+
+        function cancelCommissionCalcRequestedPrice() {
+            $('#commissionWidgetModal2').modal('show');
+        }
+
+        function applyCommissionCalcRequestedPrice() {
+            $('#commissionWidgetModal2confirm').modal('hide');
+            //$('#commissionWidgetModal2').modal('show');
+            CCRZ.pubSub.trigger("applyCommissionCalcPrice", event);
+        }
+
+
+    </script>
+
+    <style>
+        .inventory.cc_inventory {
+            display: none !important;
+        }
+
+        .applyagreementFont {
+            font-size: 12px;
+            color: #000 !important;
+        }
+
+        .contactAgentFont {
+            font-size: 12px;
+            color: #000 !important;
+        }
+
+        .cc_uom .cc_value {
+            display: none;
+        }
+
+        .panel-heading.cc_heading {
+            display: none;
+        }
+
+        p.gp_attribute_extprice {
+            margin-top: 15px !important;
+        }
+
+        p.gp_attribute_uomdef {
+            margin-top: 15px !important;
+        }
+
+        .price_block.cc_price_block {
+            display: none;
+        }
+
+        .typemark-button {
+font-size: 11px;
+margin-right: 10px;
+padding: 9px 0 7px;
+border: 0;
+outline: 0;
+background: none;
+color: #5F82B6;
+font-weight: bold;
+}
+        .typemark-button:hover {
+            color: #F16850;
+            text-decoration: underline;
+        }
+
+        textarea.typemark {
+            resize: none;
+            width: 9ch;
+            height: 20px;
+            padding: 0;
+        }
+
+        .nvRow.nvGroupRow.cc_nv_group_row {
+            float: left;
+            width: 100%;
+        }
+        
+        .showcommissionWidgetModalButton {
+float: right;
+padding: 9px 0;
+}
+
+    </style>
+</apex:page>

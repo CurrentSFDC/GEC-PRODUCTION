@@ -1,0 +1,262 @@
+<template>
+    <div class="slds-media__body">
+        <div class="slds-page-header__name">
+            <div class="slds-page-header__name-title">
+                <h1>
+                    <span class="slds-page-header__title slds-truncate" title="Connect Platform Support">Connect Platform Support</span>
+                </h1>
+                <text class="message">Note: While progressing through Connect Platform Support, please DO NOT use the Browser Back button. Instead, use the Back/Next buttons on bottom of the page</text>
+
+            </div>
+        </div>
+    </div>
+    <br>
+    <lightning-progress-indicator
+        current-step={currentStep}
+        type="path"
+        variant="base"
+    >
+        <lightning-progress-step
+            label="1. Requestor Information"
+            value="1"
+        ></lightning-progress-step>
+        <lightning-progress-step
+            label="2. Review"
+            value="2">
+        </lightning-progress-step>
+        <lightning-progress-step
+            label="3. Confirmation"
+            value="3">
+        </lightning-progress-step>
+
+    </lightning-progress-indicator> <br>
+    <lightning-messages> </lightning-messages>
+
+    <!--STEP ONE-->
+    <div class="stepOne">
+        <div class="slds-box"> 
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-small-size_1-of-1 slds-size_4-of-8">
+                    <h3 class="slds-section-title--divider">Requestor Information</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <!--<div class="slds-grid">
+                            <div class="slds-col">-->                                                                
+                                <lightning-input
+                                    name="requestorName" 
+                                    type="text" 
+                                    placeholder="Name..." 
+                                    label="Requestor Name"
+                                    value={reqName}
+                                    required
+                                    disabled                                    
+                                    onchange={handleChange}
+                                    class="rn validValue">
+                                </lightning-input>
+                                <lightning-input
+                                    name="requestorEmail" 
+                                    type="email" 
+                                    placeholder="test@example.com" 
+                                    label="Requestor Email"
+                                    value={reqEmail}
+                                    minlength="5"
+                                     message-when-too-short="Your email address must be more 5 characters."
+                                     required
+                                     disabled
+                                    class="em validValue">
+                                </lightning-input>
+                                <lightning-input 
+                                    type="tel" 
+                                    placeholder="(xxx) xxx-xxxx" 
+                                    label="Requestor Phone"  
+                                    pattern="[0-9()]{5} [0-9]{3}-[0-9]{4}"                                     
+                                    value={reqPhone}
+                                    required
+                                    disabled                                    
+                                    class="rp validValue">
+                                </lightning-input>
+                            <!--</div>
+                        </div>-->
+                    </div>
+                </div>
+                <div class="slds-col slds-small-size_1-of-1 slds-size_4-of-8">
+                    <h3 class="slds-section-title--divider">Request Details</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <!--<div class="slds-grid">
+                            <div class="slds-col"> -->                                                               
+                                <lightning-record-edit-form object-api-name="Case"  >
+                                     <!--lightning-input-field required label="Agency Name" field-name='AccountId'  value={soldToAccount} onchange={handleChangeAcc} class="sta"></lightning-input-field-->
+                                     <c-account-search-custom  required object-api-name="account" icon-name="standard:account"  
+                                     default-acc-value={accName} filter-field-val ={contactID}  variant="label-hidden" onaccountselection={handleChangeAcc}  class="sta"></c-account-search-custom > 
+                                 
+                                </lightning-record-edit-form><br>
+                                <!--<div class="slds-p-around_medium">
+                                    <h2>Page Link</h2>
+                                <p><lightning-formatted-url value="https://dev-gecurrent.cs92.force.com/DefaultStore/ccrz__ProductList" target="_blank"></lightning-formatted-url></p>
+                                </div>-->
+                                <!--<lightning-card title = "Page Link">-->
+                                    <h2>Request Initiated from: </h2>
+                                    <div class="slds-p-around_medium ">
+                                        <p><text>{sfdcOrgURL}</text></p>                                    </div>
+                                <!--</lightning-card>-->
+                                <h2>Please Select a Category to write your Question</h2>
+                                <lightning-combobox 
+                                    name="action"                                    
+                                    label = "Categories of Questions"
+                                    value={values}
+                                    placeholder="-Select-"
+                                    options={questionCatOption}
+                                    required
+                                    class = "aba validValue"
+                                    onchange={handlePick} >
+                                </lightning-combobox >
+                                <lightning-combobox 
+                                    name="action"                                    
+                                    label = "Sub Categories of Questions"
+                                    value={subValues}
+                                    placeholder="-Select-"
+                                    options={subCatOption}
+                                    required
+                                    class = "asa validValue">
+                                </lightning-combobox >
+                                                               
+                                <template if:true={questions}>
+                                    <lightning-textarea type="textarea" 
+                                                    label="Questions"  
+                                                    required                                                        
+                                                    class="cd validValue">
+                                    </lightning-textarea>  
+                                </template>                          
+                           <!-- </div>
+                        </div> -->
+                    </div>
+                </div> 
+            </div><br>  
+                <div class="slds-col slds-small-size_1-of-1 slds-size_8-of-8">
+                    <h3 class="slds-section-title--divider">Documentation</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid slds-wrap">
+                            <div class="slds-col slds-small-size_1-of-1 slds-size_2-of-8">
+                                <lightning-file-upload
+                                    label="Attach Files"
+                                    class="fileupload"
+                                    name="uploadFile"
+                                    accept={acceptedFormats}  
+                                    onuploadfinished={handleUploadFinished} multiple>
+                                </lightning-file-upload>
+                                <h4>Accepted Formats and Max file size: <lightning-helptext content={acceptedFormats}></lightning-helptext></h4>
+                            </div>
+                            <div class="slds-col slds-border_left slds-small-size_1-of-1 slds-size_6-of-8">
+                                    <div class="slds-p-left_medium">
+                                        <h2 class="slds-section-title--divider">Uploaded Files</h2>
+                                        <template if:true={files}>
+                                            <!-- <lightning-datatable data={files} columns={columns} key-field="Id">
+                                            </lightning-datatable> -->
+                                            <c-file-list files={files} onfiledelete={handleActionFinished}></c-file-list>
+                                        </template>
+                                    </div>
+                            </div>
+                        </div>    
+                    </div>
+                </div>                                        
+        <div class="slds-align_absolute-center">
+            <lightning-button
+                class="slds-m-top_small"
+                label="Next"
+                disabled={stepOneButton}
+                onclick={goToStepTwo}
+                variant="brand" 
+            ></lightning-button>
+        </div>
+        </div>
+    </div>   
+    <!--END OF STEP ONE-->    
+    <!--STEP TWO-->
+    <div class="stepTwo slds-hide">
+        <template if:true={isSpinner}>
+            <lightning-spinner class="spins" alternative-text="Loading" variant="brand"></lightning-spinner>
+        </template>
+        <div class="slds-box">
+            <div class="slds-text-title_caps">REVIEW</div> <br> 
+        
+    
+            <div class="slds-grid slds-gutters">
+
+                <div class="slds-col slds-size_4-of-8">
+                    <h3 class="slds-section-title--divider">Requestor Details</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <b>Requestor Name: </b>{reqName}<br>
+                                <b>Requestor Email: </b>{reqEmail}<br>
+                                <b>Requestor Phone: </b>{reqPhone}<br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_4-of-8">
+                    <h3 class="slds-section-title--divider">Agency & User Questions</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <b>Account Name: </b>{accName}<br>
+                                <b>Question Category: </b>{questionCat}<br>
+                                <b>Question Sub Category: </b>{quesSubCategory}<br>
+                                <b>User Question: </b>{quest}<br> 
+                                <b>Request Initiated from Page : </b>{sfdcOrgURL}                              
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>        
+    
+        <div class="slds-align_absolute-center">
+            <lightning-button-group>
+                <lightning-button
+                    class="slds-m-top_small"
+                    label="Back"
+                    onclick={goBackToStepOne}
+                ></lightning-button>
+                <lightning-button
+                    class="slds-m-top_small"
+                    label= {toggleSubmitLabel}
+                    type="submit"
+                    variant="brand"
+                    onclick={handleSave}
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+    </div>
+    <!--END OF STEP TWO-->
+    <!--STEP THREE-->
+    <div class="stepThree slds-hide">
+        <div class="slds-col slds-size_8-of-8">
+        <h3 class="slds-section-title--divider">Confirmation Page</h3>
+            <div class="slds-box slds-theme_shade border confirmation">
+                <h2><b>THANK YOU FOR YOUR SUBMISSION! </b><br/><br/>
+
+                    CASE NUMBER FOR YOUR REQUEST:  {caseNumberNew} </h2><br>     
+                    
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+                            <lightning-button variant="brand"
+                                    label="Home"
+                                    title="Home"
+                                    onclick={goHome}>
+                                </lightning-button>
+                            <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                    variant="brand-outline"
+                                    onclick={goToCase}
+                                    label="Go To Case"
+                                    title="Go To Case">
+                                </lightning-button>
+                        
+                        </div>
+                    </div>
+            </div> 
+        </div>           
+    </div> 
+    
+    <!--END OF STEP THREE-->
+</template>

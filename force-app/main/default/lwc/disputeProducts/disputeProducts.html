@@ -1,0 +1,9 @@
+<template>
+    <lightning-spinner if:true={isLoading} variant="brand"></lightning-spinner>
+    <lightning-datatable
+    key-field="id"
+    columns={columns}
+    data={products}
+    hide-checkbox-column="true"
+    onrowaction={handleActions}></lightning-datatable>
+</template>

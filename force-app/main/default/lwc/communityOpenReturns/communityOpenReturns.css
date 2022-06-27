@@ -1,0 +1,22 @@
+/* .search-inputs .slds-col {
+    height: 6rem;
+}
+
+.search-inputs .slds-button {
+    width: 8rem;
+} */
+
+.table-container {
+    height: 500px;
+    max-height: 100%;
+}
+
+.slds-input{
+    height: 2rem;
+    font-size: 1.5em;
+}
+
+.status{
+    height: 3rem;
+    position: relative;
+}

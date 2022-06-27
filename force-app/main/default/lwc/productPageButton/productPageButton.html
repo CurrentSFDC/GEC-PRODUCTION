@@ -1,0 +1,21 @@
+<template>
+    <div class="wrapper">
+        <!--c-expedite-order-prod-lwc orderId={saveExpedite}></c-expedite-order-prod-lwc-->
+                                             
+    
+        <div class="slds-m-top_medium slds-m-bottom_x-large">
+            
+            <!-- Simple -->
+            <div class="slds-p-around_medium lgc-bg">
+                <lightning-button-menu alternative-text="Show menu" variant="success" label="Submit Request" onselect={handleOnselect}>
+                    <lightning-menu-item value="MenuItemOne" label=" Pricing Request"  onclick={redirectPricingRequest}></lightning-menu-item>
+                    <lightning-menu-item value="MenuItemTwo" label=" New Spec Registration"  onclick={redirectNewSpec}></lightning-menu-item>
+                    <lightning-menu-item value="MenuItemThree" label=" Marketing Collateral"  onclick={redirectMarketing}></lightning-menu-item>
+                    <lightning-menu-item value="MenuItemFour" label=" When Can I Get"  onclick={redirectWhen}></lightning-menu-item>
+                    <lightning-menu-item value="MenuItemFive" label=" Lighting design"  onclick={redirectLightning}></lightning-menu-item>
+
+               </lightning-button-menu>
+            </div>
+        </div>
+    </div>
+</template>

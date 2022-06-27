@@ -1,0 +1,748 @@
+<apex:page standardController="Opportunity" Extensions="GE_LGT_ProductsSearch" action="{!onLoadPage_Products}" readOnly="False"  docType="html-5.0">     
+    <!--Rashmitha Changed the API vesion from 30 to 45 on 5-Mar-2019 as per 1447 request-->
+    
+    
+    <apex:form > 
+ 
+
+    <style type="text/css">
+                .italicText { font-style: bold; }
+                
+    </style>
+            
+       <style>
+        .vfHelpText a            {position:relative;}
+        .vfHelpText a span       {display: none;}
+        .vfHelpText a:hover span {display: block;
+                                  position:absolute;
+                                  top:1.25em;
+                                  padding:5px 5px;
+                                  left:5em; width:60em;
+                                  z-index:100;
+                                  border:2px solid blue;
+                                  background-color:#FFFFFF;
+                                  color:black;
+                                 }
+    </style>
+    
+    <script>
+    var newWin=null;
+    function openLookupPopup(id,name,prodHierarchy)
+    {
+        var url="/apex/MaterialMasterLookupPopup?skuID=" + id + "&skuName=" + name + "&prodHierarchy=" + prodHierarchy;
+        console.log(url);
+        newWin=window.open(url, 'Popup','height=500,width=600,left=100,top=100,resizable=no,scrollbars=yes,toolbar=no,status=no');
+        if (window.focus) 
+        {
+            newWin.focus();
+        }
+            
+        return false;
+    }
+                  
+    function closeLookupPopup()
+    {
+       if (null!=newWin)
+       {
+          newWin.close();
+       }  
+    }
+    </script>
+      
+       <center><apex:commandButton value="Return To Opportunity" action="{!cancelprod}" /></center>      
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        <apex:outputPanel rendered="{!IF(syncedQuoteFlag,TRUE,FALSE)}">
+        <center>
+         <p style="border-style:solid;/* border-color:blue; */width: 1000px;height: 50px;text-combine-upright: all;font-size: 14px;background-color: yellow;">
+                <font color="black"><b>Warning: Once a Quote has been synced to this opportunity via OSR or manual sync process, you will need to work directly with the Pricing Team to make modifications to the Price Agreement. Any changes made without working through the pricing team will not be reflected the following day, since SAP is the single source of truth.</b></font>
+        </p> 
+        </center>
+        </apex:outputPanel>
+        
+        <apex:pageBlock title="A. Upload Opportunity Products">
+                        <apex:outputLink value="{!URLFOR('/servlet/servlet.FileDownload?file=0153j00000AlVVq')}">Mass Product Upload Template</apex:outputLink> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                       
+                        <apex:inputFile value="{!contentFile}" filename="{!csvfile}" onmouseout="f();"/> 
+                        <apex:commandButton action="{!ReadFile}" value="Upload" style="width:70px;" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandlink onClick="window.open('https://gecurrent.my.salesforce.com/00O3j000007lfaZ');" value="Report of all active products"/>
+                        <apex:pagemessages rendered="{!check1}" escape="False"/>
+        </apex:pageBlock> 
+            <table>
+            <tr><td><li><b>Only upload a maximum of 200 records at a time</b></li></td></tr>
+            <tr><td><li><b>Remove all duplicates from file (applicable on SKU or CATlogic uploads)</b></li></td></tr>            
+            <tr><td><li><b>Files being uploaded should be saved as CSV (Comma delimited) (*.csv)</b></li></td></tr>
+            <tr><td><li><b>Keep the text format as General; do not use numbers or currency formatting for Sales Price column</b></li></td></tr>
+            
+            </table>
+            
+        <apex:pageBlock Title="B.Product Search" >
+            <table > 
+             <tr>
+             <th><apex:outputLabel value="1.Search by SKU/CAT Logic/Description" style="font-weight: bold"/>  </th><th></th>
+             <th><apex:outputLabel value="2.Search by Product Name/ Product Family" style="font-weight: bold"/> </th><th></th> 
+             </tr><br/>
+             <tr><br/>
+             <td><input id="Products1"  onkeypress="return noenter(event);"/><input type="button" value="Search" onclick="searchbyPH();"/></td>
+             <td><p><font size="2" color="black">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p></td>
+             <td><input id="Products"  onkeypress="return noenter(event);"/><input type="button" value="Search" onclick="search();"/></td> 
+             </tr>
+             </table><br/>
+             <b>3.Search by filtering</b> <br/>
+            <apex:actionRegion >
+             <table>
+             <tr>
+             <td>
+             <apex:outputPanel id="dropdown">
+                <apex:selectList size="1" value="{!selectedValueAtL1}" id="dd1" style="width:200px">
+                    <apex:selectOptions value="{!level1}"/>
+                    <apex:actionSupport action="{!setLevel2Value}" event="onchange" reRender="dd2,dd3,dd4" status="loadingStatus"/>
+                </apex:selectList>
+            </apex:outputPanel>
+             </td>
+             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             <td>
+            <apex:outputPanel id="dropdowns" >
+                <apex:outputPanel id="dd2">
+                    <apex:selectList size="1" value="{!selectedValueAtL2}" style="width:200px">
+                        <apex:selectOptions value="{!level2}"/>
+                            <apex:actionSupport action="{!setLevel3Value}" event="onchange" reRender="dd3,dd4" status="loadingStatus"/>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:outputPanel>
+             </td>
+             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             <td>
+            <apex:outputPanel id="dropdowns1">
+                <apex:outputPanel id="dd3">
+                    <apex:selectList size="1" value="{!selectedValueAtL3}" style="width:200px">
+                        <apex:selectOptions value="{!level3}"/>
+                        <apex:actionSupport action="{!setLevel4Value}" event="onchange" reRender="dd4" status="loadingStatus"/>
+                    </apex:selectList>
+                </apex:outputPanel>
+            </apex:outputPanel>
+            </td>
+             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <td>
+            <apex:outputPanel id="dropdowns2">
+                <apex:outputPanel id="dd4">
+                    <apex:selectList size="1" value="{!selectedValueAtL4}" style="width:200px">
+                        <apex:selectOptions value="{!level4}"/>
+                    </apex:selectList>
+            </apex:outputPanel>
+            </apex:outputPanel>
+            </td>           
+             </tr>
+            <tr><td><input type="button" value="Search " onclick="searchp();"/></td></tr>
+            </table>
+            </apex:actionRegion>
+                <apex:actionFunction name="searchp" action="{!searchMMByLevel4}"/>
+                <apex:actionFunction name="searchStr" action="{!searchProduct}"/>        
+                <apex:actionFunction name="searchStrPH" action="{!searchProductBySAPMatNumber}"  />
+                    <apex:inputhidden id="searchStr" value="{!searchStr}"/>
+                    <apex:inputhidden id="searchStr1" value="{!keyword}"/>
+        </apex:pageBlock>
+        
+        <apex:pageBlock title="C. View Recently Searched Products" >
+            <apex:pageblockSection title="View/Hide all" id="pgBlockSecRecent" >
+                <apex:pageBlockTable value="{!Opptyline1}" var="olp" id="pnlProds"  >
+                    <apex:column headerValue="Select" >
+                        <apex:inputField value="{!olp.Product2.Isactive}" />
+                    </apex:column>
+                    <apex:column headerValue="Level 1(Product line)" styleclass="normalClass">{!olp.Product2.Hierarchy_Level_1_Description__c}</apex:column> 
+                    <apex:column headerValue="Level 2(Product Group)" styleclass="normalClass">{!olp.Product2.Hierarchy_Level_2_Description__c}</apex:column> 
+                    <apex:column headerValue="Level 3(Product Family)" styleclass="normalClass">{!olp.Product2.Hierarchy_Level_3_Description__c}</apex:column>    
+                </apex:pageBlockTable>
+            </apex:pageblockSection>
+                <apex:commandButton value="Add" action="{!addLines1}"/> 
+        </apex:pageBlock>
+                
+        <apex:pageBlock title="D. Product Results Selection " id="psrselection">
+        <apex:pagemessages rendered="{!checkResults}"/>
+             <apex:pageBlockSection columns="1" rendered="{!falgtoshowproductsearchlist}" >
+                <apex:outputPanel id="pnlProds" rendered="{!check}">
+                    <apex:pageBlockTable value="{!productSearchList}" var="s" cellpadding="10" width="10"  >      
+                          <apex:column headerValue="Select" styleclass="normalClass">
+                          <apex:inputfield value="{!s.IsActive}" id="prdcheck"/>
+                          </apex:column>
+                          <apex:column headerValue="Product Line" styleclass="normalClass">{!s.Hierarchy_Level_1_Description__c}</apex:column> 
+                          <apex:column headerValue="Product Group" styleclass="normalClass"> {!s.Hierarchy_Level_2_Description__c} </apex:column>
+                          <apex:column headerValue="Product Family" styleclass="normalClass">{!s.Hierarchy_Level_3_Description__c}</apex:column>
+                          <apex:column headerValue="Product Name" styleclass="normalClass"> {!s.Hierarchy_Level_4_Description__c} </apex:column>
+                    </apex:pageBlockTable> 
+                            <input type="button" value="Add " onclick="addLinesforproductresultscript();"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="First Page" action="{!firstcmd}" disabled="{! inte == 0}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Previous Page" action="{!prevcmd}" disabled="{! inte == 0}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Next Page" action="{!nextcmd}" disabled="{! OR(inte == integ, integ <0)}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Last Page" action="{!lastcmd}" disabled="{! OR(inte == integ,integ <0)}"/>
+                            <apex:actionFunction name="addProdresults" action="{!addLines}"  />
+                </apex:outputPanel>
+             </apex:pageBlockSection> 
+                <apex:actionRegion >
+              <apex:pageBlockSection columns="1" rendered="{!falgtoshowMMobjectsearchlist}">
+                <apex:outputPanel id="pnlProds1" rendered="{!check}">
+                    <apex:pageBlockTable value="{!matMasListSearchresult}" var="s" cellpadding="10" width="10"  >      
+                          <apex:column headerValue="Select" styleclass="normalClass">
+                          <apex:inputfield value="{!s.Is_Active_Internal__c}" id="skucheck" />
+                          </apex:column>
+                          <apex:column headerValue="Product Line" styleclass="normalClass">{!MID(s.Level_1__c,FIND("-", s.Level_1__c) + 1,LEN(s.Level_1__c) - FIND("-", s.Level_1__c) - 2)}</apex:column> 
+                          <apex:column headerValue="Product Group" styleclass="normalClass"> {!MID(s.Level_2__c,FIND("-", s.Level_2__c) + 1,LEN(s.Level_2__c) - FIND("-", s.Level_2__c) - 2)} </apex:column>
+                          <apex:column headerValue="Product Family" styleclass="normalClass">{!MID(s.Level_3__c,FIND("-", s.Level_3__c) + 1,LEN(s.Level_3__c) - FIND("-", s.Level_3__c) - 2)}</apex:column>
+                          <apex:column headerValue="Product Name" styleclass="normalClass"> {!MID(s.Level_4__c,FIND("-", s.Level_4__c) + 1,LEN(s.Level_4__c) - FIND("-", s.Level_4__c) - 2)} </apex:column>
+                          <apex:column value="{!s.GE_LGT_EM_SAP_MaterialNumber__c}" headerValue="SAP MaterialNumber" styleclass="normalClass"/>
+                          <apex:column value="{!s.GE_LGT_EM_MaterialDescription__c}" headerValue="SAP MaterialDescription" styleclass="normalClass"/>
+                          <apex:column value="{!s.Material_Type__c}" headerValue="Material Type" styleclass="normalClass"/>
+                    </apex:pageBlockTable>   
+                                <input type="button" value="Add " onclick="addLinesforMMsearchresultsscript();"/>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Previous Page" action="{!previous}" reRender="pnlProds1" status="loadingStatus" disabled="{!prev}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Next Page" action="{!next}" reRender="pnlProds1" status="loadingStatus"  disabled="{!nxt}" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:actionFunction name="addmmbyresults" action="{!addLinesforMMsearchresults}"  /> 
+                </apex:outputPanel>   
+             </apex:pageBlockSection>   
+        </apex:actionRegion>             
+        </apex:pageBlock>
+    </apex:form>      
+    <apex:form >
+        <apex:outputpanel id="pnlLines">
+            <apex:pageBlock title="E. Configure Product Line Items" id="cpli">
+                <apex:outputPanel id="be1">   
+                <input type="button" Class="btn" value="Save all Products"  onclick="saveProdSchedules();" status="loadingStatus"/>     
+                <apex:actionFunction name="saveOppSchedules" action="{!Saveoli}" reRender="pnlLines,schedules,{!$Component.j_id0.j_id1.psrselection}" status="loadingStatus"/>       
+                         &nbsp;&nbsp;&nbsp;&nbsp;<input type="button" Class="btn" value="Delete Selected Product(s)"  onclick="myFunction();" reRender="clearMsg" status="loadingStatus"/>
+                 <apex:actionFunction name="deloli" action="{!deloli}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <!--&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Save All & Go To Opportunity" action="{!savegtooppty}"/>&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Cancel & Go To Opportunity" action="{!cancelprod}" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 &nbsp;&nbsp;-->
+                &nbsp;&nbsp;&nbsp;&nbsp;<input type="button" Class="btn" value="Save All & Go To Opportunity" onclick="saveAndBackToOpptyFun();"/>&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Cancel & Go To Opportunity" action="{!cancelprod}" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 &nbsp;&nbsp;
+                
+                </apex:outputpanel><br/>
+                <apex:variable var="i" value="{!0}"/>
+                <apex:pageBlockSection id="pbSection" >
+                <apex:variable var="i" value="{!1}"/>
+                <div id="pbTable">
+                    <apex:pageBlockTable value="{!lstwrapper}" var="ls" id="idpbt1">   
+                             <apex:column headerValue="S.NO"> 
+                              {!i}
+                              <apex:variable var="i" value="{!i+1}"/>
+                              </apex:column>
+                              <apex:column >  
+                              <apex:facet name="header">
+                              <apex:inputCheckbox onclick="selectAllCheckboxes(this,'idcheck');" title="To delete all products, click the checkbox to select all, then press the 'Delete Selected Product(s)' button to complete the deletion. To delete only selected products, click the checkbox next to each product individually, then press the 'Delete Selected Product(s)' button to complete the deletion" > </apex:inputCheckbox>
+                              </apex:facet>
+                              <apex:inputCheckbox value="{!ls.b}" id="idcheck"/>
+                              </apex:column>
+                              <apex:column headerValue="Product Family" width="20%"> <apex:outputtext value="{!IF(ls.oli.product2.Hierarchy_Level_3_Description__c=='',ls.oli.GE_LGT_Level3__c,ls.oli.product2.Hierarchy_Level_3_Description__c)}"/></apex:column>
+                              <!--<apex:column headerValue="Product Name"><apex:outputtext value="{!IF(ls.oli.product2.name == '',MID(ls.oli.GE_LGT_Product_Name__c,FIND("-", ls.oli.GE_LGT_Product_Name__c) + 1,LEN(ls.oli.GE_LGT_Product_Name__c) - FIND("-", ls.oli.GE_LGT_Product_Name__c) - 2),MID(ls.oli.product2.name,FIND("-", ls.oli.product2.name) + 1,LEN(ls.oli.product2.name) - FIND("-", ls.oli.product2.name) - 2))}"/></apex:column>-->
+                              <apex:column headerValue="Product Name"><apex:outputtext value="{!IF(ls.oli.product2.Hierarchy_Level_4_Description__c=='',ls.oli.GE_LGT_Product_Name__c,ls.oli.product2.Hierarchy_Level_4_Description__c)}"/></apex:column>
+                              <apex:column headerValue="CAT Logic/Description" width="20%"> 
+                                  <apex:inputfield value="{!ls.oli.Description}" id="Desc"/>
+                        </apex:column>
+                               <apex:column headerValue="Product Code/SKU/Material #"><span class="lookupInput bEditBlock"> <apex:inputText size="20" value="{!ls.oli.SKUNumber__c}" id="targetName" onFocus="this.blur()" disabled="false"/> <a href="#" onclick="openLookupPopup('{!$Component.targetId}','{!$Component.targetName}','{!ls.oli.Product_Hierarchy_Code__c}'); return false"><img class="lookupIcon" src="/s.gif" /></a></span>
+                                    <apex:inputHidden value="{!ls.oli.SKU_Number__c}" id="targetId"/>   
+                               </apex:column>  
+                               <apex:column headerValue="Quantity" >
+                                   <apex:inputfield onblur="updatePriceonQuantityChange(this.id);" value="{!ls.oli.quantity}" id="idquantity" />
+                              </apex:column>
+                              <apex:column headerValue="Unit of measure" rendered="{!if($Profile.Name =='System Administrator'||$Profile.Name =='EUROPE Current Super User' || $Profile.Name =='EUROPE Current Sales Leaders' || $Profile.Name =='GE_LGT_Pricing_EMEA' || $Profile.Name =='EUROPE Current Operations' || $Profile.Name =='GE_LGT_Marketing_EMEA' ||  $Profile.Name =='GE_LGT_Installed_Base_User_EMEA' ||  $Profile.Name =='EUROPE Current Sales' ||$Profile.Name =='GE_LGT_EMEA' ||$Profile.Name =='GE_LGT_Sales&Service_EMEA',TRUE,FALSE)}" > <apex:inputfield style="width:90%" value="{!ls.oli.Unit_of_measure__c}"  /></apex:column>
+                              <apex:column headerValue="Sales Price per Unit" width="20%"> <apex:inputfield style="width:100%" onblur="updatePriceonUnitPriceChange(this.id);" value="{!ls.oli.UnitPrice}"  required="true" id="idunitprice"/></apex:column>
+                              <apex:column headervalue="Revenue">
+                                  <apex:inputText value="{!ls.totalPrice}" id="idrevenue" onfocus="funmkeadonly(this.id);"/>
+                        </apex:column>
+                              //Asia Product stage added by Andras
+                             
+                    </apex:pageBlockTable>
+                </div>
+            </apex:pageBlockSection>
+             <apex:outputPanel id="be">
+                     <input type="button" Class="btn" value="Save all Products"  onclick="saveProdSchedules();" reRender="clearMsg" status="loadingStatus"/> 
+                         &nbsp;&nbsp;&nbsp;&nbsp;<input type="button" Class="btn" value="Delete Selected Product(s)"  onclick="myFunction();" reRender="clearMsg" status="loadingStatus"/>
+                    <apex:actionFunction name="deloli" action="{!deloli}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+           <!--&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Save All & Go To Opportunity" action="{!savegtooppty}"/>&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Cancel & Go To Opportunity" action="{!cancelprod}" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 &nbsp;&nbsp;-->
+                        &nbsp;&nbsp;&nbsp;&nbsp;<input type="button" Class="btn" value="Save All & Go To Opportunity" onclick="saveAndBackToOpptyFun();"/>&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Cancel & Go To Opportunity" action="{!cancelprod}" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                 &nbsp;&nbsp;
+                        </apex:outputpanel><br/>
+            <apex:actionFunction name="saveAndBackToOppty" action="{!savegtooppty}" status="loadingStatus"/> 
+            <apex:outputPanel id="clearMsg">
+                <apex:pageMessage summary="Records deleted Successfully" severity="info" strength="3"  rendered="{!d}"/>
+                <apex:pageMessage summary="Records inserted successfully" severity="info" strength="3"  rendered="{!flagrecordupsert}"/>  
+                <apex:pagemessages rendered="{!checksave1}"/>
+            </apex:outputPanel>            
+      </apex:pageBlock>
+        <apex:outputPanel id="be"></apex:outputpanel>
+      </apex:outputpanel>
+
+       <apex:actionStatus id="loadingStatus">
+                        <apex:facet name="start">
+                            <div id="bgBlurStatus" class="black_overlay" style="z-index:101; width: 100%; height: 100%; display: block; position:fixed; top:250px; left:500px;">
+                                <div  role="dialog" class="white_content_status" aria-live="assertive" style=" width: 300px; min-height: 150px; display: block; position: fixed;  overflow: hidden; vertical-align: middle; text-align: center; background-color:white;">
+                                    <br/><br/>
+                                    <img src="/img/loading.gif" style="vertical-align: middle;"/>
+                                        <br /><h2> <font color="Blue">Please wait...</font></h2>
+                                </div>
+                            </div>
+                        </apex:facet>
+        </apex:actionStatus>
+      
+    </apex:form>
+      
+      <script src="//code.jquery.com/jquery-1.8.2.js"></script>
+      <script src="//code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css"/>
+      <script type="text/javascript">
+       var syncVar = "{!syncedQuoteFlag}" 
+       function saveAndBackToOpptyFun()
+       {
+            if(syncVar=='true')
+            {
+                alert('Warning: Once a Quote has been synced to this opportunity via OSR or manual sync process, you will need to work directly with the Pricing Team to make modifications to the Price Agreement. Any changes made without working through the pricing team will not be reflected the following day, since SAP is the single source of truth.');
+            }
+            saveAndBackToOppty();
+       }
+      
+      function noenter(ev)  {
+        if (window.event && window.event.keyCode == 13 || ev.which == 13) {
+            search();
+            searchbyPH();
+            return false;
+         } else {
+              return true;
+         }
+     }
+      
+      function f(){
+
+      document.getElementById('j_id0:j_id1:j_id7:idtextt').value = document.getElementById('j_id0:j_id1:j_id7:j_id15').value; 
+      }
+      var j$ = jQuery.noConflict();
+      var productsavailable = {!JSONString};
+      j$(document).ready(function(){
+            j$("#Products").autocomplete({
+                source : productsavailable 
+            });
+        });
+     var matmasdetails = {!JSONString1};
+      document.getElementById('Products1').value = document.getElementById('j_id0:j_id1:j_id46:searchStr1').value; 
+      document.getElementById('Products').value = document.getElementById('j_id0:j_id1:j_id46:searchStr').value; 
+      j$(document).ready(function(){
+            j$("#Products1").autocomplete({
+                source : matmasdetails 
+            });
+        });
+
+
+    function search() {
+        document.getElementById('j_id0:j_id1:j_id46:searchStr').value =  document.getElementById('Products').value;
+        searchStr();
+    }
+    function searchbyPH() 
+    {
+        document.getElementById('j_id0:j_id1:j_id46:searchStr1').value =  document.getElementById('Products1').value;
+        searchStrPH();
+    }
+/////////////////////////
+var obj = document.getElementById('img_j_id0:j_id1:j_id71:pgBlockSecRecent');
+var event = new MouseEvent('click', {
+    'view': window,
+    'bubbles': true,
+    'cancelable': true
+  });
+  obj.dispatchEvent(event);
+
+  ///////////////////////////
+    </script>
+    <script>
+function myFunction() {
+    var txt;
+    var t = '{!opp.stagename}';
+    var pole = '{!opp.Owner_Pole_Opp__c}';
+    var CompLineSize = '{!lstwrapper.size}'
+   
+        if(t == 'S4 Negotiate'||t == 'S5 Close'||t == 'S3 Solve'||t == 'PO Received')
+            {
+                var n = 0;
+                    for(var i = 0;i< CompLineSize;i++) 
+                    {
+                       if(document.getElementById('j_id0:j_id148:cpli:pbSection:idpbt1:' + i + ':' + 'idcheck').checked)
+                       {
+                         n++;
+                         
+                       }
+                    }
+                    if(CompLineSize == n && pole=='North America')
+                    {
+                        var c =confirm('If you choose to delete all product your opportunity will revert to Stage S2. Do you want to continue Ok, Cancel');
+                        if(c == true){
+                        deloli();
+                        }
+                        
+                    }
+                    else
+                    {
+                    deloli();
+                      
+                    }
+     }
+      else 
+     {
+          deloli();
+     }
+     
+   
+  }  
+
+function UploadDocument(){
+    ReadFile();
+}
+
+
+ 
+ 
+function setFocus()
+{
+         var theControllerValue = '{!b}';
+         var theControllerValue1 = '{!d}';
+        if((theControllerValue || theControllerValue)!='false')
+        {
+       document.getElementById('j_id0:j_id93:cpli:j_id143:j_id144:j_id146').scrollIntoView();
+       document.getElementById('j_id0:j_id93:be').scrollIntoView();
+       }
+       else{
+       document.getElementById('j_id0:j_id93:cpli:j_id157:j_id158:j_id159:0:j_id160:j_id161:j_id163').scrollIntoView();
+       
+       }
+}
+var theControllerValue2 = '{!addb}';
+if(theControllerValue2!='false')
+        {
+       document.getElementById('j_id0:j_id93:be').scrollIntoView();
+       }
+    
+    function funmkeadonly(revid){
+    document.getElementById(revid).readOnly = true;
+    }
+    function updatePriceonQuantityChange(vqid){
+    vqvalue = document.getElementById(vqid).value;
+    vuid = vqid.replace("idquantity","idunitprice");
+    vrevid = vqid.replace("idquantity","idrevenue");
+    vuvalue = document.getElementById(vuid).value;
+    vrevvalue = document.getElementById(vrevid).value;
+     userlocale = '{!userlocale}'
+   if(userlocale == 'ru_RU'){
+   vuvalue = Number(vuvalue.replace(/[\s]/g,"").replace(/,/g,""));
+    vqvalue= Number(vqvalue.replace(/[\s]/g,"").replace(/,/g,""));
+   }
+   else{
+    vuvalue = Number(vuvalue.replace(/,/g,""));
+    vqvalue = Number(vqvalue.replace(/,/g,""));
+    }
+    document.getElementById(vrevid).value = Number(vqvalue) * Number(vuvalue);
+}
+function updatePriceonUnitPriceChange(vupid){
+    vqvalue = document.getElementById(vupid).value;
+    vuid = vupid.replace("idunitprice","idquantity");
+    vrevid = vupid.replace("idunitprice","idrevenue");
+    vuvalue = document.getElementById(vuid).value;
+    vrevvalue = document.getElementById(vrevid).value;
+    userlocale = '{!userlocale}'
+   if(userlocale == 'ru_RU'){
+   vuvalue = Number(vuvalue.replace(/[\s]/g,"").replace(/,/g,""));
+    vqvalue = Number(vqvalue.replace(/[\s]/g,"").replace(/,/g,""));
+   }
+   else{
+    
+    vuvalue = Number(vuvalue.replace(/,/g,""));
+    vqvalue = Number(vqvalue.replace(/,/g,""));
+    }
+    document.getElementById(vrevid).value = Number(vqvalue) * Number(vuvalue);
+}  
+function funmkeadonly1(revid1){
+document.getElementById(revid1).readOnly = true;
+}
+function updatePriceonQuantityChange1(vqid1){
+
+vrevid1 = vqid1.replace("idquantity1","idrevenue2");
+vqid11 = vqid1.replace("idquantity1","idquantity11");
+vsales1 = vqid1.replace("idquantity1","idsalesprice11");
+vqvalue1 = document.getElementById(vqid1).value;
+
+vrevvalue1 = document.getElementById(vrevid1).value;
+vqvalue11 = document.getElementById(vqid11).value;
+vsales11 = document.getElementById(vsales1).value;
+userlocale = '{!userlocale}'
+if(userlocale == 'ru_RU'){
+vrevvalue1 = Number(vrevvalue1.replace(/[\s]/g,"").replace(/,/g,"."));
+vqvalue11 =Number(vqvalue11.replace(/[\s]/g,"").replace(/,/g,"."));
+vsales11 = Number(vsales11.replace(/[\s]/g,"").replace(/,/g,"."));
+vqvalue1 = Number(vqvalue1.replace(/[\s]/g,"").replace(/,/g,"."));
+}
+else{
+vrevvalue1 = Number(vrevvalue1.replace(/,/g,""));
+vsales11 = Number(vsales11.replace(/,/g,""));
+vqvalue11 = Number(vqvalue11.replace(/,/g,""));
+vqvalue1 = Number(vqvalue1.replace(/,/g,""));
+}
+var di = ((Number(vqvalue1)-Number(vqvalue11))*Number(vsales11))+Number(vrevvalue1);
+
+document.getElementById(vrevid1).value = di;
+document.getElementById(vqid11).value = document.getElementById(vqid1).value;
+}     
+function myFunction1() {
+
+    var txt;
+    var r = confirm("Do you want Continue with delete  ProductSchedules");
+    var t = '{!opp.stagename}';
+    var CompLineSize = '{!lstwrapper.size}'
+    if (r == true) {
+    if(t == 'S4 Negotiate' || t == 'S5 Close')
+            {
+                var n = false;
+                    for(var i = 0;i< CompLineSize;i++) 
+                    {
+                       if(document.getElementById('j_id0:j_id148:cpli:pbSection:idpbt1:' + i + ':' + 'idcheck').checked)
+                       {
+                        n = true;
+                         
+                       }
+                    }
+                    if(n == true)
+                    {
+                       var msgsn = 'Opportunity is at Stage:'+'{!opp.stagename}'+'. If you delete the schedule(s), your Opportunity stage will step back to Stage 3 Solve. If you want to update please click on Update Stage&Delete Schedules button, otherwise cancel.';
+                       var $g = jQuery.noConflict(); 
+                   $g(function() { 
+                     
+                      var newDiv = $g(document.createElement('div')); 
+                      var my_css_class = { color : '#ff4d4d' };
+                       newDiv.html(msgsn);
+                       newDiv.prepend('<img id="theImg" src="http://free-121d5f44d20-121d603d1c5-121ee2b8103.force.com/img/msg_icons/error24.png" />');
+                     newDiv.css(my_css_class);
+                        newDiv.dialog({ 
+                        title: "Error",
+                         width: 500,
+                         height: 200,
+                        autoOpen: true, 
+                         modal: true, 
+                    buttons: { 
+                    "Update Stage&Delete Schedules": function(){
+                      delolisch();
+                     $g(this).dialog("close");
+                    },
+                "Close": function() { 
+                $g(this).dialog("close"); 
+            } 
+        } 
+         
+    }); 
+});
+                    }
+                    else
+                    {
+                       delolisch();
+                    }
+     }
+     else {
+         delolisch();
+     }
+    } else {
+        return false;
+    }
+}
+function onetimeshipment(onetime) {
+    var o =onetime;
+   
+    var ot = document.getElementById(onetime).value;
+    vnoi = o.replace("Intallperiod","Noins");
+    var n2 = document.getElementById(vnoi).value;
+    n3 = Number(n2.replace(",",""));
+    
+    if(ot =='One Time Shipment'){
+    document.getElementById(vnoi).value =1;
+    
+    }
+    else if((ot == 'Quarterly' || ot == 'Monthly') && (Number(n3) < 2)){
+  
+    alert('Number of Installment should be more than 1');
+    }
+   
+   
+    
+}
+
+function Numberofinstallment(noi1) {
+    var n =noi1;
+   
+    var nt = document.getElementById(noi1).value;
+    nt1 = Number(nt.replace(",",""));
+    vnoi = n.replace("Noins","Intallperiod");
+    var n1 = document.getElementById(vnoi).value;
+   
+    if(nt =='1'){
+    document.getElementById(vnoi).value = "One Time Shipment";
+   
+    }
+    else if((Number(nt1) > 1) && (n1 == 'One Time Shipment'|| n1 == 'None')){
+
+    alert('Please change Installment Period');
+    }
+    
+    
+    }
+    
+   function selectAllCheckboxes(obj,receivedInputID){
+            var inputCheckBox = document.getElementsByTagName("input");                  
+            for(var i=0; i<inputCheckBox.length; i++){          
+                if(inputCheckBox[i].id.indexOf(receivedInputID)!=-1){                                     
+                    inputCheckBox[i].checked = obj.checked;
+                }
+            }
+        }
+    function avoidNegative()
+    {
+        if(document.getElementById('j_id0:j_id146:cpli:j_id148:MassQuantity').value<0)
+        {
+            alert('Quantity can not be negative');
+        }
+        else
+        {
+            popualateMassSchedule();
+        }
+    }
+    function saveProdSchedules()
+    {
+        if(syncVar=='true')
+        {    
+            alert('Warning: Once a Quote has been synced to this opportunity via OSR or manual sync process, you will need to work directly with the Pricing Team to make modifications to the Price Agreement. Any changes made without working through the pricing team will not be reflected the following day, since SAP is the single source of truth.');
+        }
+        var CompLineSize;
+        flag=false;
+        flagisna='{!IsNAprofiles}'
+        CompLineSize = '{!lstwrapper.size}';
+        if(CompLineSize!=0)
+        {
+            for(var i=0;i<CompLineSize;i++) 
+            {
+               if(document.getElementById('j_id0:j_id148:cpli:pbSection:idpbt1:' + i + ':' + 'idquantity').value<0)
+               {
+                 flag=true;
+                 alert('Quantity cannot be negative');
+                 
+               }
+               var v1 = document.getElementById('j_id0:j_id148:cpli:pbSection:idpbt1:' + i + ':' + 'idquantity').value;
+               v2 = Number(v1.replace(/,/g,""));
+               if(v2 % 1 != 0)
+               {
+                 flag=true;
+                 alert('Quantity cannot be decimal');
+                 
+               }
+               if(document.getElementById('j_id0:j_id148:cpli:pbSection:idpbt1:' + i + ':' + 'idunitprice').value<0)
+               {
+                 flag=true;
+                 alert('Unit cannot be negative');
+                 
+               }
+               
+               if(flagisna == true){
+                
+               if(document.getElementById('j_id0:j_id148:cpli:pbSection:idpbt1:' + i + ':' + 'Noins').value>99 )
+               {
+               
+                 flag=true;
+                 alert('Number of installments cannot be more 2 digits');
+                 
+               }
+               }
+            }
+             
+            if(flag==false)
+            {
+                saveOppSchedules();
+                document.getElementById('Products1').value = null;
+                document.getElementById('Products').value = null;
+            }
+        }
+    }  
+function  addLinesforMMsearchresultsscript(){
+    CompLineSize = '{!matMasListSearchresult.size}';
+    if(CompLineSize!=0)
+        {
+        var n = false;
+            for(var i=0;i<CompLineSize;i++) 
+            {
+               if(document.getElementById('j_id0:j_id1:psrselection:j_id128:j_id129:' + i + ':' + 'skucheck').checked)
+               {
+                 n=true;
+                 
+               if(n==true)
+               {
+               break;
+               }
+                
+               }
+            }
+            if(n == false ){
+            alert('Atleast select one product in the result section');
+            }
+            else if(n == true){
+            addmmbyresults();
+            }
+    }
+    }
+    function  addLinesforproductresultscript(){
+    CompLineSize = '{!productSearchList.size}';
+    if(CompLineSize!=0)
+        {
+        var n = false;
+            for(var i=0;i<CompLineSize;i++) 
+            {
+               if(document.getElementById('j_id0:j_id1:psrselection:j_id107:j_id108:' + i + ':' + 'prdcheck').checked)
+               {
+                 n=true;
+                 
+                
+               }
+            }
+            if(n == false ){
+            alert('Atleast select one product in the result section');
+            }
+            else if(n == true){
+            addProdresults();
+            }
+    }
+    }   
+    function savescheduleslastsection(){
+    CompLineSize = '{!lstwrapper.size}';
+    flag1=false;
+    if(CompLineSize!=0)
+        {
+         for(var i=0;i<CompLineSize;i++) 
+            {
+                if(document.getElementById('j_id0:j_id146:j_id312:j_id322:1:j_id323:j_id324:' + i + ':' + 'idquantity1').value<=0)
+                   {
+                     flag1=true;
+                     alert('Quantity cannot be negative or 0');
+                     
+                   }
+                if(flag1==false)
+                    {
+                        saveOppSchedules1();
+                        
+                    }
+            }
+        }
+    }
+    
+</script>
+        <style type="text/css">
+        #pbTable{padding-right: 314px;}
+.dateFormat{
+visibility:hidden;
+}
+.normalClass {
+    background-color:#bfbfbf;
+    }
+   .normalClass1{ 
+  .pbHeader{
+color:red;
+width:10%;
+font-size:250%;
+}
+}
+</style>
+<c:TLS_NiceWarningJquery />
+</apex:page>

@@ -1,0 +1,225 @@
+<template>
+    <lightning-spinner if:true={isLoading} variant="brand"></lightning-spinner>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_1-of-1 slds-p-around_large slds-text-align_right">
+            <!-- <span>
+                <lightning-button-menu alternative-text="Show menu" variant="success" label="Agreement Document">
+                    <lightning-menu-item value="MenuItemPdf" label="Pdf"></lightning-menu-item>
+                    <lightning-menu-item value="MenuItemCSV" label="CSV"></lightning-menu-item>
+                </lightning-button-menu>
+            </span> -->
+            <span class="slds-m-left_medium">
+                <lightning-button-menu alternative-text="Show menu" variant="success" label="Actions" onselect={handleActions}>
+                    <lightning-menu-item if:true={allowModify} value="modify" label="Modify"></lightning-menu-item>
+                    <lightning-menu-item if:true={allowCTO} value="convert-to-order" label="Convert To Order"></lightning-menu-item>
+                    <lightning-menu-item if:true={allowPdfDownload} value="download-pdf" label="Download PDF"></lightning-menu-item>
+                    <lightning-menu-item if:true={allowCsvDownload} value="download-csv" label="Download CSV"></lightning-menu-item>
+                </lightning-button-menu>
+            </span>
+        </div>
+    </div>
+    <div class="slds-grid slds-wrap slds-p-around_large">
+        <div class="slds-col slds-size_4-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Current Agreement No.</span>
+            <span class="pa-heading-value">{agreementDetails.Agreement_No__c}</span>
+        </div>
+        <div class="slds-col slds-size_4-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12" if:true={isCustomerAssigned}>
+            <span class="slds-form-element__label pa-heading-label">Account No.</span>
+            <span if:false={mutipleCustomers} class="pa-heading-value">{agreementDetails.Bill_To_Customer_No__c}</span>
+            <span if:true={mutipleCustomers} class="pa-heading-value">
+                <a href="javascript:void(0)" onclick={downloadCustomerList} title="Dowload Customer List">{agreementDetails.Customer_Name__c}</a>
+            </span>
+        </div>
+        <div class="slds-col slds-size_4-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12" if:true={isCustomerAssigned}>
+            <span class="slds-form-element__label pa-heading-label">Account Name</span>
+            <span if:false={mutipleCustomers} class="pa-heading-value">{agreementDetails.Customer_Name__c}</span>
+            <span if:true={mutipleCustomers} class="pa-heading-value">
+                <a href="javascript:void(0)" onclick={downloadCustomerList} title="Dowload Customer List">{agreementDetails.Customer_Name__c}</a>
+            </span>
+        </div>
+        <div class="slds-col slds-size_8-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-around_xx-small" if:false={isCustomerAssigned}>
+            <span class="assigned-msg">
+                Account must be assigned before the agreement can be used.
+                <abbr>Contact your Pricing representative to assign an account.</abbr>
+            </span>
+        </div>
+        <div class="slds-col slds-size_4-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Total Value</span>
+            <span class="pa-heading-value">
+                <lightning-formatted-number value={agreementDetails.Grand_Total__c} format-style="currency" currency-code={agreementDetails.CurrencyIsoCode} maximum-fraction-digits="2"></lightning-formatted-number>
+            </span>
+        </div>
+        <div class="slds-col slds-size_4-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Valid From Date</span>
+            <span class="pa-heading-value">
+                <lightning-formatted-date-time
+                    value={agreementDetails.Valid_From__c}
+                    year="numeric"
+                    month="numeric"
+                    day="numeric">
+                </lightning-formatted-date-time>
+            </span>
+        </div>
+        <div class="slds-col slds-size_4-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Valid To Date</span>
+            <span class="pa-heading-value">
+                <lightning-formatted-date-time
+                    value={agreementDetails.Expiration_Date__c}
+                    year="numeric"
+                    month="numeric"
+                    day="numeric">
+                </lightning-formatted-date-time>
+            </span>
+        </div>
+    </div>
+
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_12-of-12 slds-p-around_medium">
+            <lightning-tabset active-tab-value="details">
+                <lightning-tab label="Details" value="details">
+                    <div class="slds-grid slds-wrap slds-p-horizontal_small">
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Agreement No.</span>
+                            <span class="pa-heading-value">{agreementDetails.Agreement_No__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Agreement name</span>
+                            <span class="pa-heading-value">{agreementDetails.Description__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Agreement Type</span>
+                            <span class="pa-heading-value">{getAgreementFullName}</span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Project name</span>
+                            <span class="pa-heading-value">{agreementDetails.Extended_Description__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Valid From</span>
+                            <span class="pa-heading-value">
+                                <lightning-formatted-date-time
+                                    value={agreementDetails.Valid_From__c}
+                                    year="numeric"
+                                    month="numeric"
+                                    day="numeric">
+                                </lightning-formatted-date-time>
+                            </span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Project Description</span>
+                            <span class="pa-heading-value">{agreementDetails.Extended_Description__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Valid To</span>
+                            <span class="pa-heading-value">
+                                <lightning-formatted-date-time
+                                    value={agreementDetails.Expiration_Date__c}
+                                    year="numeric"
+                                    month="numeric"
+                                    day="numeric">
+                                </lightning-formatted-date-time>
+                            </span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Agreement Status</span>
+                            <span class="pa-heading-value">{agreementDetails.Release_Status__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Agency Name</span>
+                            <span class="pa-heading-value">{agreementDetails.Agent_Name__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_6-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label"><b>Total Agreement Amount</b></span>
+                            <span class="pa-heading-value">
+                                <b><lightning-formatted-number value={agreementDetails.Grand_Total__c} format-style="currency" currency-code={agreementDetails.CurrencyIsoCode} maximum-fraction-digits="2"></lightning-formatted-number></b>
+                            </span>
+                        </div>
+                        <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Agency Code</span>
+                            <span class="pa-heading-value">{agreementDetails.Agent_Number__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                            <span class="slds-form-element__label pa-heading-label">Agency Address</span>
+                            <span class="pa-heading-value">
+                                <lightning-formatted-text value={agreementDetails.AgentAddress}></lightning-formatted-text>
+                            </span>
+                        </div>
+                    </div>
+                </lightning-tab>
+                <lightning-tab label="Line Items" value="line-items" if:true={showLineItems}>
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col slds-size_12-of-12">
+                            <lightning-accordion allow-multiple-sections-open>
+                                <template for:each={agreementItems} for:item="item">
+                                    <lightning-accordion-section name={item.AgreementLineNo} label={item.RowLineTitle} key={item.AgreementLineNo} class={item.activeclass} >
+                                        <div class="slds-grid slds-wrap slds-p-around_small">
+                                            <div class="slds-col slds-size_6-of-12">
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Agreement Line No.:</span>
+                                                    <span class="pa-line-value">{item.AgreementLineNo}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Catalog No.:</span>
+                                                    <span class="pa-line-value">{item.Item_Description__c}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">SKU:</span>
+                                                    <!--<span class="pa-line-value">{item.Material_No__c}</span>-->
+                                                    <span class="pa-line-value">{item.Material_No__c}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Unit Of Measure:</span>
+                                                    <span class="pa-line-value">{item.UOM__c}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Line Valid From:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-date-time
+                                                            value={item.ValidFrom__c}
+                                                            year="numeric"
+                                                            month="numeric"
+                                                            day="numeric">
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Line Valid To:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-date-time
+                                                            value={item.ValidTo__c}
+                                                            year="numeric"
+                                                            month="numeric"
+                                                            day="numeric">
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="slds-col slds-size_6-of-12">
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Quantity:</span>
+                                                    <span class="pa-line-value">{item.Quantity__c}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Unit Pricing:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-number value={item.Sales_Price__c} format-style="currency" currency-code={agreementDetails.CurrencyIsoCode} maximum-fraction-digits="2"></lightning-formatted-number>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label"><b>Extended Price:</b></span>
+                                                    <span class="pa-line-value">
+                                                        <b><lightning-formatted-number value={item.ExtendedPrice} format-style="currency" currency-code={agreementDetails.CurrencyIsoCode} maximum-fraction-digits="2"></lightning-formatted-number></b>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </lightning-accordion-section>
+                                </template>
+                            </lightning-accordion>
+                        </div>    
+                    </div>
+                </lightning-tab>
+            </lightning-tabset>
+        </div>    
+    </div>    
+</template>

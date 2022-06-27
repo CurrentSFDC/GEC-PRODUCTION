@@ -1,0 +1,7 @@
+<apex:page standardController="Agent__c" extensions="ErrorMessageController" >
+    <apex:form >
+        <apex:outputPanel id="MsgSection" rendered="true">
+            <apex:outputLabel style="color:RED;" value="{!message}"/>
+        </apex:outputPanel>
+    </apex:form>  
+</apex:page>

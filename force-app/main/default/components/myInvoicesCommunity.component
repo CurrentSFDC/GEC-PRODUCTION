@@ -1,0 +1,40 @@
+<apex:component layout="none">
+    <script id="myInvoicesCommunity" type="text/template">
+        <h2 class="title">{{pageLabelMap 'MyAccount_MyOrdersCommunity'}}</h2>
+        <div class="alert alert-error messagingSection-orderhistory-Error" style="display: none"></div>
+        <div class="alert alert-info messagingSection-orderhistory-Info" style="display: none"></div>
+        <div class="main_content_large_right_container"></div>
+    </script>
+
+    <script>
+        CCRZ.MyAccount = _.extend(CCRZ.MyAccount || {}, {
+            SubscibeMyInvoicesCommunity: {
+                register: function (registrar) {
+                    registrar.registerNewView('myInvoicesCommunity', CCRZ.
+                        processPageLabelMap('MyAccount_MyInvoicesCommunity'), new CCRZ.views.
+                        SubscibeMyInvoicesCommunity());
+                }
+            }
+        });
+        jQuery(function ($) {
+            CCRZ.views.SubscibeMyInvoicesCommunity = CCRZ.CloudCrazeView.extend({
+                templatePhone: CCRZ.util.template('myInvoicesCommunity'),
+
+                templateDesktop: CCRZ.util.template('myInvoicesCommunity'), managedSubView: true,
+                viewName: "myInvoicesCommunity",
+                initSetup: function (callback) {
+                    var urlSplit = (window.location.href).split('.com');
+                    var url = urlSplit[0] + '.com/Agents/s/invoiceselection'; // change to Invoice Header community page
+                    window.location.replace(url);
+                    //callback();
+                },
+                renderPhone: function () {
+                    this.$el.html(this.templatePhone(this));
+                },
+                renderDesktop: function () {
+                    this.$el.html(this.templateDesktop(this));
+                }
+            });
+        });
+    </script>
+</apex:component>

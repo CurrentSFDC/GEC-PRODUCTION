@@ -1,0 +1,44 @@
+<template>
+    
+    <template if:true={impersonate}>
+        <div class="slds-p-around_small lgc-bg">
+            <img src={userPhoto}> &nbsp;
+            <!--<lightning-avatar variant="circle" src={userPhoto} fallback-icon-name="standard:person_account" title="Impersonated User" alternative-text="Account User" ></lightning-avatar>-->
+           <div class="profileMenu"><text>{contactName}</text></div>
+            <lightning-button-menu alternative-text="Show menu" variant="bare" menu-alignment="right"> 
+                <!--<lightning-menu-item value="MenuItemOne" label="Signed in As User"></lightning-menu-item>-->
+                <lightning-badge icon-name="utility:people" variant="destructive" label="Impersonating User" class="my-badge-color"></lightning-badge>
+                <lightning-menu-divider></lightning-menu-divider>
+
+                <lightning-menu-item value="MenuItemOne" label="Home" onclick={goHome} prefix-icon-name="utility:home"></lightning-menu-item>
+                
+                <lightning-menu-divider></lightning-menu-divider>
+                <lightning-menu-item value="MenuItemThree" label="My Profile" onclick={goProfile} prefix-icon-name="action:user"></lightning-menu-item>
+                <lightning-menu-item value="MenuItemTwo" label="My Settings" onclick={goSettings} prefix-icon-name="utility:settings"></lightning-menu-item>
+
+                <lightning-menu-divider></lightning-menu-divider>
+                <lightning-menu-item value="MenuItemFour" label="Logout of Impersonate" onclick={handleLogout} prefix-icon-name="utility:logout"></lightning-menu-item>
+            </lightning-button-menu>
+        </div>
+    </template>
+
+    <template if:false={impersonate}>
+        <div class="slds-p-around_small lgc-bg ">
+            <img src={userPhoto}> &nbsp;
+            <!--<lightning-avatar variant="circle" src={userPhoto} fallback-icon-name="standard:person_account" title="Impersonated User" alternative-text="Account User" ></lightning-avatar>-->
+            <div class="profileMenu"><text>{contactName}</text></div>
+            <lightning-button-menu alternative-text="Show menu" variant="bare" menu-alignment="right"> 
+                
+                <lightning-menu-item value="MenuItemOne" label="Home" onclick={goHome} prefix-icon-name="utility:home"></lightning-menu-item>
+                
+                <lightning-menu-divider></lightning-menu-divider>
+                <lightning-menu-item value="MenuItemThree" label="My Profile" onclick={goProfile} prefix-icon-name="action:user"></lightning-menu-item>
+                <lightning-menu-item value="MenuItemTwo" label="My Settings" onclick={goSettings} prefix-icon-name="utility:settings"></lightning-menu-item>
+
+                <lightning-menu-divider></lightning-menu-divider>
+                <lightning-menu-item value="MenuItemFour" label="Logout" onclick={handleNormalLogout} prefix-icon-name="utility:logout"></lightning-menu-item>
+            </lightning-button-menu>
+        </div>
+    </template>
+
+</template>

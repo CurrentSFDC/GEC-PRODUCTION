@@ -1,0 +1,12 @@
+<apex:page standardController="Opportunity_Support_Request__c">
+
+    <font family-name="times">
+    An agreement to demonstrate our software capabilities by enabling and tracking specific efficiency and productivity outcomes.<br/>
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - The customer agrees to pay<br/>
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Strategic and achievable outcomes with target attainment dates are defined and agreed upon<br/>
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Outcome attainment triggers agreement to scale<br/>
+    Projects with lighting controls only are not considered pilots.<br/><br/>
+    </font>
+    <font color="red">NOTE: Attach a completed Relationship Map and completed Outcome Map before saving</font>
+
+</apex:page>

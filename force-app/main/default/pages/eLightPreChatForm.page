@@ -1,0 +1,124 @@
+<apex:page showHeader="false">
+
+<!-- This script takes the endpoint URL parameter passed from the deployment page and makes it the action for the form -->
+<script type='text/javascript'> 
+(function() { 
+function handlePageLoad() { 
+var endpointMatcher = new RegExp("[\\?\\&]endpoint=([^&#]*)"); 
+document.getElementById('prechatForm').setAttribute('action',
+decodeURIComponent(endpointMatcher.exec(document.location.search)[1].replace("javascript:", "")));
+} if (window.addEventListener) { 
+window.addEventListener('load', handlePageLoad, false); 
+} else { window.attachEvent('onload', handlePageLoad, false);   
+}})(); 
+</script>
+  
+<center>
+
+<!-- Form that gathers information from the chat visitor and sets the values to Live Agent Custom Details used later in the example -->
+<form method='post' id='prechatForm'>
+    <img SRC="{!$Resource.LiveChatImage}"></img>
+    <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:5px;"><i><font color="red">* = required fields</font></i></div>
+            
+            
+            <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:10px;"> 
+             
+     <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:10px;">
+         First name:<font color="red">*</font> <input type='text' name='liveagent.prechat:ContactFirstName' id='firstName' size="28px" required="true"/>
+    </div>
+         <br />
+     <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:10px;">
+    Last name:<font color="red">*</font> <input type='text' name='liveagent.prechat:ContactLastName' id='lastName' size="28px" required="true"/>
+    </div>
+         <br />
+     <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:10px;" >
+    Email:<font color="red">*</font> <input type='text' name='liveagent.prechat:ContactEmail' id='email' size="32px" required="true"/>
+    </div>
+         <br />
+    
+    <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:4px;">
+                    Reson for Enquiry:<font color="red">*</font> <select name="liveagent.prechat.buttons" required="true" style="width:193px">
+                    Values are LiveChatButton IDs.  
+                    <option value="5730Z000000XZFu,5730Z000000XZFs">Orders</option>
+                    <option value="5730Z000000XZFv,5730Z000000XZFs">Price Agreements</option>
+                    <option value="5730Z000000XZFu,5730Z000000XZFs">Returns</option> 
+                    <option value="5730Z000000XZFr,5730Z000000XZFs">Claim Backs</option>
+                    <option value="5730Z000000XZFw,5730Z000000XZFs">User Access</option> 
+                    <option value="5730Z000000XZFw,5730Z000000XZFs">General Inquiries</option>
+                    </select>   
+                </div>
+                <br/>  
+                <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:4px;">
+                 Additional Details:<font color="red">*</font> 
+                   
+                        <textarea name="liveagent.prechat:caseSubject" maxlength="255" rows="3" style="width:48%;" required="true"></textarea>
+                    </div>
+                </div>
+              
+                     <br />
+    
+<!-- Hidden fields used to set additional custom details -->
+    <input type="hidden" name="liveagent.prechat:CaseStatus" value="New" /><br />
+    <input type="hidden" name="liveagent.prechat:caseDescription" value="caseSubject" />
+    
+    
+    <!-- This example assumes that "Chat" was added as picklist value to the Case Origin field -->
+    <input type="hidden" name="liveagent.prechat:CaseOrigin" value="Live Agent Chat From eLight" /><br />   
+    <input type="hidden" name="liveagent.prechat:triggerAutoResponseEmail" value="true" />
+   
+    <!-- This example will set the Case Record Type to a specific value for the record type configured on the org. Lookup the case record type's id on your org and set it here -->
+    <input type="hidden" name="liveagent.prechat:CaseRecordType" value="012i0000001Dv14" />
+    
+    
+    <!-- Used to set the visitor's name for the agent in the Console 
+    <input type="hidden" name="liveagent.prechat.name" id="prechat_field_name" />-->
+
+<!-- map: Use the data from prechat form to map it to the Salesforce record's fields -->
+<input type="hidden" name="liveagent.prechat.findorcreate.map:Contact" value="FirstName,ContactFirstName;LastName,ContactLastName;Email,ContactEmail" />
+
+<input type="hidden" name="liveagent.prechat.findorcreate.map:Case" value="Subject,caseSubject;Status,CaseStatus;Origin,CaseOrigin;RecordTypeId,CaseRecordType;Description,caseSubject;SuppliedEmail,ContactEmail;triggerAutoResponseEmail,triggerAutoResponseEmail" />
+
+<!-- doFind, doCreate and isExactMatch example for a Contact: 
+    Find a contact whose Email exactly matches the value provided by the customer in the form 
+    If there's no match, then create a Contact record and set it's First Name, Last Name, Email to the values provided by the customer -->
+<input type="hidden" name="liveagent.prechat.findorcreate.map.doFind:Contact" value="Email,true" />
+<input type="hidden" name="liveagent.prechat.findorcreate.map.isExactMatch:Contact" value="Email,true" />
+<!--<input type="hidden" name="liveagent.prechat.findorcreate.map.doCreate:Contact" value="FirstName,true;LastName,true;Email,true" /> -->
+
+<!-- doCreate example for a Case: create a case to attach to the chat, set the Case Subject to the value provided by the customer and set the case's Status and Origin fields -->
+<input type="hidden" name="liveagent.prechat.findorcreate.map.doCreate:Case" value="Subject,true;Status,true;Origin,true;RecordTypeId,true;Description,true;SuppliedEmail,true;triggerAutoResponseEmail,true" />
+
+<!-- linkToEntity: Set the record Contact record, found/created above, as the Contact on the Case that's created --> 
+<input type="hidden" name="liveagent.prechat.findorcreate.linkToEntity:Contact" value="Case,ContactId" />
+ 
+<!-- showOnCreate: Open the Contact and Case records as sub-tabs to the chat for the agent in the Console -->
+<!-- <input type="hidden" name="liveagent.prechat.findorcreate.showOnCreate:Contact" value="true" /> -->
+<input type="hidden" name="liveagent.prechat.findorcreate.showOnCreate:Case" value="true" />
+
+<!-- saveToTranscript: Associates the records found / created, i.e. Contact and Case, to the Live Chat Transcript record. --> 
+<input type="hidden" name="liveagent.prechat.findorcreate.saveToTranscript:Contact" value="ContactId" />
+<input type="hidden" name="liveagent.prechat.findorcreate.saveToTranscript:Case" value="CaseId" />
+
+ <!-- displayToAgent: Hides the case record type from the agent --> 
+<input type="hidden" name="liveagent.prechat.findorcreate.displayToAgent:CaseRecordType" value="false" />
+
+<!-- searchKnowledge: Searches knowledge article based on the text, this assumes that Knowledge is setup -->
+<input type="hidden" name="liveagent.prechat.knowledgeSearch:CaseSubject" value="true" />
+     
+<input type='submit' value='Chat Now' id='prechat_submit' onclick="setName()"/>
+
+<!-- Set the visitor's name for the agent in the Console to first and last name provided by the customer -->
+<script type="text/javascript">
+   function setName() {
+    document.getElementById("prechat_field_name").value =  
+        document.getElementById("firstName").value + " " + document.getElementById("lastName").value;
+    }
+</script>
+
+<style type="text/css">
+p {font-weight: bolder }
+</style>
+
+</form>
+    </center>
+</apex:page>

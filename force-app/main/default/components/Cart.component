@@ -1,0 +1,1293 @@
+<apex:component >
+    <style type="text/css">
+        .chargeNotification {color:red;}
+        .customPriceDisplayNew {min-width: 50px;}
+        .cc_order_quantity {float:right}
+    </style>
+
+    <script id="Cart-AttributeItems" type="text/template">
+    <div class="table-responsive">
+        <table class="cart_figures table table-striped table-condensed cc_table cc_included_items">
+            <thead class="cc_table_header">
+            <th class="cc_name">{{pageLabelMap 'CartInc_SKU'}}</th>
+            {{#each this.topAttributes}}
+            <th class="cc_attribute_name">{{{this.displayName}}}</th>
+            {{/each}}
+            <th class="cc_attribute_qty">{{pageLabelMap 'CartInc_AttributeQuantity'}}</th>
+            <th class="cc_total">{{pageLabelMap 'CartInc_Price'}}</th>
+            <th class="cc_total">{{pageLabelMap 'CartInc_Total'}}</th>
+            <th class="cc_remove"></th>
+            </thead>
+            <tbody>
+            {{#each this.minorLines}}
+            <tr>
+                <td class="text-nowrap">
+                    {{#if extSKU}}
+                    {{extSKU}}
+                    {{else}}
+                    {{mockProduct.sku}}
+                    {{/if}}
+                </td>
+                {{#if primaryAttr}}
+                <td><span class="cc_attr_display">{{{primaryAttr.displayName}}}</span></td>
+                {{/if}}
+                {{#if secondaryAttr}}
+                <td><span class="cc_attr_display">{{{secondaryAttr.displayName}}}</span></td>
+                {{/if}}
+                {{#if tertiaryAttr}}
+                <td><span class="cc_attr_display">{{{tertiaryAttr.displayName}}}</span></td>
+                {{/if}}
+                <td>
+                    <div class="plus_minus cc_plus-minus gp_quantity_block" data-id="{{sfid}}">
+                        <!-- {{#ifEquals pricingType 'external'}} -->
+                        {{#ifEquals pricingType 'dummy'}}
+                        <div class="row cc_qty_control_row">
+                            {{#if primaryAttr}}
+                            <div class="col-md-12">
+                            {{else}}
+                            <div class="col-md-3 col-md-offset-9">
+                            {{/if}}
+                                <div class="form-group">
+                                    <p class="cc_order_quantity">
+                                        <span class="cc_quantity_label">{{pageLabelMap 'CartInc_Qty'}}&#58;&#160;</span>
+                                        <span class="cc_quantity">{{quantity}}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {{else}}
+                        {{#ifNotEquals pricingType "attrGroup" }}
+                            {{#if qtySkipIncrement}}
+                            <div class="row cc_qty_control_row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="input-group cc_input_group">
+                                            <span class="input-group-btn cc_input_group_btn">
+                                                <input type="button" value="{{pageLabelMap 'Prod_QtyDecrFF'}}" class="btn btn-default btn-sm minusFF cc_minusff">
+                                                <input type="button" value="{{pageLabelMap 'Prod_QtyDecrSingle'}}" class="btn btn-default btn-sm minus cc_minus">
+                                            </span>
+                                            <input id="entry_{{sfid}}" type="text" readonly="true" name="qty" value="{{quantity}}" class="input-text entry plus_minus form-control input-sm cc_entry" maxlength="7" />
+                                            <span class="input-group-btn cc_input_group_btn">
+                                                <input type="button" value="{{pageLabelMap 'Prod_QtyIncrSingle'}}" class="btn btn-default btn-sm plus cc_plus">
+                                                <input type="button" value="{{pageLabelMap 'Prod_QtyIncrFF'}}" class="btn btn-default btn-sm plusFF cc_plusff">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/if}}
+                            {{#ifEquals qtyIncrement 1}}
+                            <div class="row cc_qty_control_row">
+                                {{#if primaryAttr}}
+                                <div class="col-md-12">
+                                {{else}}
+                                <div class="col-md-8 col-md-offset-4">
+                                {{/if}}
+                                    <div class="form-group">
+                                        <div class="input-group cc_input_group">
+                                            <span class="input-group-btn cc_input_group_btn">
+                                                <input type="button" value="{{pageLabelMap 'Prod_QtyDecrSingle'}}" class="btn btn-default btn-sm minus cc_minus">
+                                            </span>
+                                            <input id="entry_{{sfid}}" type="text" name="qty" value="{{quantity}}" class="input-text entry plus_minus form-control input-sm cc_entry" maxlength="7" />
+                                            <span class="input-group-btn cc_input_group_btn">
+                                                <input type="button" value="{{pageLabelMap 'Prod_QtyIncrSingle'}}" class="btn btn-default btn-sm plus cc_plus">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/ifEquals}}
+                            <input type="hidden" name="qtyIncrement" value="{{qtyIncrement}}" class="item_qtyIncrement" />
+                            <input type="hidden" name="qtySkipIncrement" value="{{qtySkipIncrement}}" class="item_qtySkipIncrement" />
+
+                        {{/ifNotEquals}}
+                    {{/ifEquals}}
+                    </div>
+                </td>
+                    <td><input type="text" class="cc_value customPriceDisplayNew" data-id="{{this.sfid}}" value="{{price this.price this.currencyCode}}" readonly></td>
+                    <!-- <td><span class="cc_attr_price">{{price this.price this.currencyCode}}</span></td> -->
+                <td><span class="cc_attr_line_total">{{price this.subAmount this.currencyCode}}</span></td>
+                <td><a href="#" class="applyCustomPriceAttr" data-id="{{this.sfid}}">{{pageLabelMap 'CartApplyPricing'}}</a></td>
+
+                <td>
+                    <button class="removeAttributeItemButton close cc_close cc_remove_attribute_item_button" type="button" data-dismiss="modal" aria-hidden="true" data-id="{{sfid}}" data-group="{{parentCartItem}}"><span aria-hidden="true">&#215;</span></button>
+                </td>
+            </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    <!--<div class="row">
+        <div class="col-md-12">
+                        <span class="pull-right">
+                        <button class="btn btn-default btn-sm cc_update_cart_button updateCartButton" type="button">{{pageLabelMap 'CartInc_Update'}}</button>
+                    </span>
+        </div>
+    </div>-->
+
+    <div class="row">
+        <div class="col-md-12">
+            <span class="pull-right">{{pageLabelMap 'CartInc_Total'}}&#58;&#160;{{price this.attributes.subAmount}}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <a href="javascript:void(0);" class="pull-right removeItemButton cc_clear_all" data-dismiss="modal" aria-hidden="true" data-id="{{this.attributes.sfid}}">{{pageLabelMap 'ProductAttributesCart_RemoveAll'}}</a>
+        </div>
+    </div>
+</script>
+
+    <script id="CartDetail-Header-View" type="text/template">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="messagingSection-Error" role="alert" style="display: none"></div>
+            <div class="messagingAction-Error alert alert-danger" role="alert" style="display: none"></div>
+
+            <div class="messagingSection-Warning" role="alert" style="display: none"></div>
+            <div class="messagingAction-Warning alert alert-warning" role="alert" style="display: none"></div>
+
+            <div class="messagingSection-Info" role="alert" style="display: none"></div>
+            <div class="messagingAction-Info alert alert-info" role="alert" style="display: none"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p class="cart_sort cc_cart_sort">
+                <span class="cc_cart_sort_text">{{pageLabelMap 'Sort'}}</span>
+                <a href="#" class="cart_sort_item cc_cart_sort_item" data-sort="name"><span class="label label-default cc_cart_sort_text">{{pageLabelMap 'Name'}}</span></a>
+                <!-- <a href="#" class="cart_sort_item cc_cart_sort_item" data-sort="sku"><span class="label label-default cc_cart_sort_text">{{pageLabelMap 'SKU'}}</span></a> -->
+                <a href="#" class="cart_sort_item cc_cart_sort_item" data-sort="dateAdded"><span class="label label-default cc_cart_sort_text">{{pageLabelMap 'Date_Added'}}</span></a>
+            </p>
+        </div>
+    </div>
+    <hr>
+</script>
+
+    <script id="CartDetail-View-Desktop" type="text/template">
+        <div class="panel panel-default cc_panel cc_panel_shopping_cart cc_cart2">
+            <div class="panel-body cc_body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h2 id='shoppingCartTitle' class="title cc_title">{{pageLabelMap 'CartInc_ShoppingCart'}}
+                        &nbsp;
+                        {{#ifEquals this.orderType "Purchase Order"}}
+                            <span class="glyphicon glyphicon-trash cc_continue_shopping_button1" onclick="confirmCartDelete();" title="Delete Cart" data-placement="bottom" data-toggle="tooltip"></span> <!--onclick="confirmCartDelete();"-->
+                        {{/ifEquals}}
+                        {{#ifEquals this.orderType "Price Agreement"}}
+                            <span class="glyphicon glyphicon-trash cc_continue_shopping_button1" onclick="confirmCartDelete();" title="Delete Cart" data-placement="bottom" data-toggle="tooltip"></span> <!--onclick="confirmCartDelete();"-->
+                        {{/ifEquals}}
+                        </h2>
+                    </div>
+
+                    <!-- order type selector -->
+                    <!-- <div class="col-md-3 orderTypeContainer">
+                        <p class="cc_label">Order Type</p>
+                        <select id="orderTypeSelector" class="form-control input-sm">
+                            <option selected class="orderTypeOption" value="Order">Order</option>
+                            <option class="orderTypeOption" value="One Time Price Agreement">One Time Price Agreement</option>
+                            <option class="orderTypeOption" value="Price Agreement Request">Price Agreement Request</option>
+                            <option class="orderTypeOption" value="Project Price Agreement Request">Project Price Agreement Request</option>
+                            <option class="orderTypeOption" value="Price Agreement Modification">Price Agreement Modification</option>
+                        </select>
+                    </div> -->
+                    <!--label> {{pageLabelMap 'CartCustomMessage_Agreement'}} </label-->
+                    <!-- sold to account selector -->
+                    <div class="col-md-4">
+                        <div class="soldToSelector">
+                            <p class="cc_label">
+                                {{pageLabelMap 'CartSoldTo'}}
+                                <span class="soldToInfo glyphicon glyphicon-info-sign" title="Select Sold To Account From Suggestion List For Request Order" data-placement="bottom" data-toggle="tooltip"></span>
+                            </p>
+                            <div class="input-group SoldSearchContainer">
+                                <input type="text" id="SoldToAccount"
+                                       class="form-control search_input cc_search_input soldToSearchText"
+                                       placeholder="Search Sold To Account"
+                                       title="Search Sold To Account"
+                                       data-trigger="focus"
+                                       autocomplete="off">
+                                <ul class="soldToSearchResults"></ul>
+                                <!-- <div class="input-group-btn">
+                                    <input type="button" value="Save" class="btn btn-default btn-sm saveSoldTo">
+                                </div> -->
+
+                            </div>
+                            <!-- <ul class="soldToSearchResults"></ul> -->
+                        </div>
+                        <!-- sample order checkbox -->
+                        <br>
+                        <!-- Comment Below Sample Order Checkbox Code By Sameer Mahadik On(7-9-2021) -->
+                         <!-- <div class="sampleOrderContainer">
+                            <label for="sampleOrder" class="sampleOrderCheckbox"> {{pageLabelMap 'CartSampleOrder'}} </label>
+                            <input type="checkbox" id="sampleOrder" name="sampleOrder" {{#if this.sampleOrder}}checked{{/if}}>
+                        </div> -->
+                    </div>
+
+                    <!-- price agrrement field -->
+                    <div class="col-md-4">
+                        <div class="input-group cc_input-group PASearchContainer">
+                            <p class="cc_label">{{pageLabelMap 'SearchPriceAgreement'}}</p>
+                                <input type="text" class="form-control search_input cc_search_input priceAgreementSearchText" placeholder="{{pageLabelMap 'SearchPriceAgreement'}}" title="{{pageLabelMap 'SearchPriceAgreement'}}" data-id="header" data-trigger="focus" autocomplete="off" value="{{this.agreementNumber}}" disabled>
+                            <ul class="searchResults" data-id='header'></ul>
+                            <a href="#" class="applyPricingHeader" data-id='header'>{{pageLabelMap 'CartApplyPricing'}}</a>
+                            <span class="input-group-btn">
+                                <!-- <button class="btn btn-default doPriceAgreementSearch" type="Submit" data-id="{{this.sfid}}"><i class="fa fa-search" aria-hidden="true"></i></button> -->
+                                <!-- <button class="btn btn-default applyPriceAgreement" type="Submit" data-id="{{this.sfid}}">Apply</button> -->
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div id="cart_items_container" class="cc_cart_item_container">
+                            {{> headerSection}}
+                            <div class="cart_item_list cc_cart_item_list">
+                                {{#if this.ECartItemsS}}
+                                <span class="reverseOrder">{{reverseCartItems this.ECartItemsS.models}}</span>
+                                    {{#each this.ECartItemsS.models}}
+                                        <div class="cart_item {{this.attributes.sfid}} cc_cart_item" data-sku="{{this.attributes.product.SKU}}">
+                                            <span id="{{this.attributes.sfid}}cartItemError"></span>
+                                            {{> cartItemsDesktop}}
+                                        </div>
+                                    {{/each}}
+                                {{/if}}
+                            </div>
+                        </div>
+                        {{> emailModal}}
+                        {{> rfqModal}}
+                        {{> wishModal}}
+                        {{> actionsTotals}}
+                    </div>
+                </div>
+            </div>
+            <div id="modalSec"></div>
+        </div>
+                                
+        <div id="confirmCartDeleteModal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog cc_modal-dialg" role="document">
+                <div class="modal-content cc_modal-content">
+                    <div class="modal-header cc_modal-header">
+                        <button type="button" class="close cc_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&#215;</span></button>        
+                        <h3 class="modal-title cc_title">Delete Cart</h3>
+                    </div>
+                    <div class="modal-body cc_modal-body">
+                        <p>Are you sure you want to delete this cart?</p>        
+                    </div>
+                    <div class="modal-footer">
+        				<button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+        				<button type="button" class="btn btn-default btn-sm cancelButtononRPA cc_continue_shopping_button1">Proceed</button>
+      				</div>            
+          		</div>
+         	</div>
+        </div>                       
+    </script>
+
+    <script>
+        function confirmCartDelete() {
+            console.log('confirmCartDelete called!');
+            $('#confirmCartDeleteModal').modal('show');
+        }
+    </script>
+
+
+    <script id="CartItemDetail-Qty-View" type="text/template">
+        <!-- Commented out different quantity UI for external priced product -->
+        <!-- {{#ifEquals pricingType 'external'}}
+            <div class="row cc_qty_control_row">
+                {{#if primaryAttr}}
+                <div class="col-md-12">
+                    {{else}}
+                    <div class="col-md-3 col-md-offset-9">
+                        {{/if}}
+                        <div class="form-group">
+                            <p class="cc_order_quantity">
+                                <span class="cc_quantity_label">{{pageLabelMap 'CartInc_Qty'}}&#58;&#160;</span>
+                                <span class="cc_quantity">{{quantity}}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+        {{else}} -->
+        {{#ifNotEquals pricingType "attrGroup" }}
+            {{#if qtySkipIncrement}}
+                <div class="row cc_qty_control_row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="input-group cc_input_group">
+                                        <span class="input-group-btn cc_input_group_btn">
+                                            <input type="button" value="{{pageLabelMap 'Prod_QtyDecrFF'}}" class="btn btn-default btn-sm minusFF cc_minusff">
+                                            <input type="button" value="{{pageLabelMap 'Prod_QtyDecrSingle'}}" class="btn btn-default btn-sm minus cc_minus">
+                                        </span>
+                                <input id="entry_{{sfid}}" type="text" readonly="true" name="qty" value="{{quantity}}" class="input-text entry plus_minus form-control input-sm cc_entry" maxlength="7" />
+                                <span class="input-group-btn cc_input_group_btn">
+                                            <input type="button" value="{{pageLabelMap 'Prod_QtyIncrSingle'}}" class="btn btn-default btn-sm plus cc_plus">
+                                            <input type="button" value="{{pageLabelMap 'Prod_QtyIncrFF'}}" class="btn btn-default btn-sm plusFF cc_plusff">
+                                        </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/if}}
+            {{#ifEquals qtyIncrement 1}}
+                <div class="row cc_qty_control_row">
+                {{#if primaryAttr}}
+                    <div class="col-md-12">
+                {{else}}
+                    <div class="col-md-8 col-md-offset-4">
+                {{/if}}
+                        <div class="form-group">
+                            <div class="input-group cc_input_group">
+                                    <span class="input-group-btn cc_input_group_btn">
+                                        <input type="button" value="{{pageLabelMap 'Prod_QtyDecrSingle'}}" data-id="{{this.sfid}}" class="btn btn-default btn-sm minus cc_minus customQuantDisplay" {{#ifEquals quantity 1}} disabled="disabled" {{/ifEquals}}>
+                                    </span>
+                                <input id="entry_{{sfid}}" type="text" name="qty" value="{{quantity}}" class="input-text entry plus_minus form-control input-sm cc_entry" data-id="{{this.sfid}}" maxlength="7" />
+                                <span class="input-group-btn cc_input_group_btn">
+                                        <input type="button" value="{{pageLabelMap 'Prod_QtyIncrSingle'}}" data-id="{{this.sfid}}" class="btn btn-default btn-sm plus cc_plus customQuantDisplay">
+                                    </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {{/ifEquals}}
+                <input type="hidden" name="qtyIncrement" value="{{qtyIncrement}}" class="item_qtyIncrement" />
+                <input type="hidden" name="qtySkipIncrement" value="{{qtySkipIncrement}}" class="item_qtySkipIncrement" />
+                {{else}}
+                {{#ifEquals pricingType 'attrGroup'}}
+                <div class="row cc_qty_control_row">
+                    <div class="col-md-3 col-md-offset-9">
+                        <div class="form-group">
+                            <p class="cc_order_quantity">
+                                <span class="cc_quantity_label">{{pageLabelMap 'CartInc_Qty'}}&#58;&#160;</span>
+                                <span class="cc_quantity">{{quantity}}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {{/ifEquals}}
+            {{/ifNotEquals}}
+    </script>
+
+
+    <script id="CartItemDetail-View-Desktop" type="text/template">
+        {{#with this.attributes}}
+
+        {{#ifEquals itemStatus 'Invalid'}}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="cc_invalid cc_invalid_item">
+                    <p class="item_title cc_item_title">
+                        {{#if displayProduct}}
+                            {{#ifEquals pricingType 'external'}}
+                                {{#if extName}}
+                                    {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName extName)}}
+                                {{else}}
+                                    {{#if itemLabel}}
+                                        {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                    {{else}}
+                                        {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                    {{/if}}
+                                {{/if}}
+                            {{else}}
+                                {{#if itemLabel}}
+                                    {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                {{else}}
+                                    {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                {{/if}}
+                            {{/ifEquals}}
+                        {{else}}
+                            {{#ifEquals pricingType 'external'}}
+                                {{#if extName}}
+                                    {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName extName)}}
+                                {{else}}
+                                    {{#if itemLabel}}
+                                        {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                    {{else}}
+                                        {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                    {{/if}}
+                                {{/if}}
+                            {{else}}
+                                {{#if itemLabel}}
+                                    {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                {{else}}
+                                    {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                {{/if}}
+                            {{/ifEquals}}
+                        {{/if}}
+                    </p>
+                    {{#ifEquals pricingType 'external'}}
+                        {{#if extSKU}}
+                            <div class="sku cc_sku">
+                                <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{extSKU}}</span>
+                            </div>
+                        <!--{{else}}
+                            <div class="sku cc_sku">
+                                <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{product.materialDescription}}</span>
+                            </div>-->
+                        {{/if}}
+                    <!--{{else}}
+                        <div class="sku cc_sku">
+                            <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{product.materialDescription}}</span>
+                        </div>-->
+                    {{/ifEquals}}
+                    {{#if sptMap}}
+                        <p class="subscriptionSummary cc_subscription_summary">
+                            {{insertTokens sptMap.cartDisplayName sptMap.displayName (price price) (price subAmount) (price recurringPrice) (price recurringPriceSubAmt) (pageLabelPrefixMap 'Subscriptions_Frequency_' sptMap.orderFrequencyUOM) (pageLabelPrefixMap 'Subscriptions_Frequency_' sptMap.installmentFrequencyUOM) sptMap.orderFrequency sptMap.installmentFrequency sptMap.installmentCount sptMap.orderCount sptMap.recurringPricePercentage sptMap.upfrontPricePercentage}}
+                        </p>
+                    {{/if}}
+                    <button type="button" class="btn btn-default btn-sm removeItemButton cc_remove_item_button" data-dismiss="modal" aria-hidden="true" data-id="{{this.sfid}}" >{{pageLabelMap 'Action_Delete'}}</button>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <div class="row">
+            {{#ifEquals this.cartItemType 'Coupon'}}
+                <div class="col-md-8">
+                    <p class="item_title coupon_title cc_coupon_title">
+                        <span class="cc_label">{{pageLabelMap 'CartInc_AppliedCoupon'}}</span>
+                        <span class="cc_value">{{this.product.sfdcName}}</span>
+                    </p>
+            {{else}}
+                <div class="col-md-2">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <div class="cc_cart_product_image">
+                                {{#if product.EProductMediasS.[0]}}
+                                    {{productLink product 'cc_product_name_img' image=(displayImage this 'img-responsive center-block img-thumbnail' src=(displayEProductMedia this.product.EProductMediasS.[0]) alt=this.product.sfdcName dataId=this.product.SKU)}}
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <p class="item_title cc_item_title">
+                        {{#if displayProduct}}
+                            {{#ifEquals pricingType 'external'}}
+                                {{#if extName}}
+                                    {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName extName)}}
+                                {{else}}
+                                    {{#if itemLabel}}
+                                        {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                    {{else}}
+                                        {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                    {{/if}}
+                                {{/if}}
+                            {{else}}
+                                {{#if itemLabel}}
+                                    {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                {{else}}
+                                    {{productLink displayProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                {{/if}}
+                            {{/ifEquals}}
+                        {{else}}
+                        <!-- Disable link for MTO product -->
+                            {{#ifEquals product.SKU 'requestedSku'}}
+                                <span> {{extName}} </span>
+                            {{else}}
+                                {{#ifEquals pricingType 'external'}}
+                                    {{#if extName}}
+                                        {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName extName)}}
+                                    {{else}}
+                                        {{#if itemLabel}}
+                                            {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                        {{else}}
+                                            {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                        {{/if}}
+                                    {{/if}}
+                                {{else}}
+                                    {{#if itemLabel}}
+                                        {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}
+                                    {{else}}
+                                        {{productLink product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}
+                                    {{/if}}
+                                {{/ifEquals}}
+                            {{/ifEquals}}
+                        {{/if}}
+                    </p>
+                    {{#ifEquals pricingType 'external'}}
+                        <!--{{#if extSKU}}
+                        <div class="sku cc_sku">
+                            <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{extSKU}}</span>
+                        </div>
+                        {{else}}
+                        <div class="sku cc_sku">
+                            <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{product.materialDescription}}</span>
+                        </div>
+                        {{/if}}
+                    {{else}}-->
+                    {{/ifEquals}}
+                    {{#if sellerName}}
+                        <p class="cc_sold_by">
+                            <span class="soldbylabel cc_sold_by_label">{{pageLabelMap 'Prod_SoldBy'}}</span>
+                            <span class="soldbyname cc_sold_by_name">{{sellerName}}</span>
+                        </p>
+                    {{/if}}
+                    {{#if sptMap}}
+                        <p class="subscriptionSummary cc_subscription_summary">
+                            {{insertTokens sptMap.cartDisplayName sptMap.displayName (price price) (price subAmount) (price recurringPrice) (price recurringPriceSubAmt) (pageLabelPrefixMap 'Subscriptions_Frequency_' sptMap.orderFrequencyUOM) (pageLabelPrefixMap 'Subscriptions_Frequency_' sptMap.installmentFrequencyUOM) sptMap.orderFrequency sptMap.installmentFrequency sptMap.installmentCount sptMap.orderCount sptMap.recurringPricePercentage sptMap.upfrontPricePercentage}}
+                        </p>
+                    {{else}}
+                        {{#if this.isSubscription}}
+                        <p class="subscriptionSummary cc_subscription_summary">
+                            {{subscriptionSummary 'Cart_Subscription_' this.subscriptionFrequency product.SKU itemTotal}}
+                        </p>
+                        {{/if}}
+                    {{/if}}
+                    <span class="product-sku">
+                        SKU: {{#if extSKU}} {{extSKU}} {{else}} {{product.SKU}} {{/if}}
+                    </span>
+                    <div class="cart-links">
+                        {{#if showIncludedItems }}
+                            {{#ifNotEquals pricingType "attrGroup" }}
+                                <a href="#included_items{{sfid}}" class="includedItemsLink cc_included_items_link" id="includedItemsLink{{sfid}}" data-desktop="true" data-toggle="modal" data-id="{{sfid}}">{{pageLabelMap 'CartInc_IncludedItems'}}</a>
+                                {{#ifDisplay 'C.DsplAddtInfo'}} &#160;|&#160;{{/ifDisplay}}
+                                <div id="included_items{{this.sfid}}" class="modal fade cc_modal cc_cart_included_items_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content cc_modal_content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                                                {{#ifEquals this.pricingType 'external'}}
+                                                    {{#if extName}}
+                                                        <h3 id="myModalLabel">{{this.extName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                                    {{else}}
+                                                        {{#if this.itemLabel}}
+                                                            <h3 id="myModalLabel">{{this.itemLabel}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                                        {{else}}
+                                                            <h3 id="myModalLabel">{{this.product.sfdcName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                                        {{/if}}
+                                                    {{/if}}
+                                                {{else}}
+                                                    {{#if this.itemLabel}}
+                                                        <h3 id="myModalLabel">{{this.itemLabel}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                                    {{else}}
+                                                        <h3 id="myModalLabel">{{this.product.sfdcName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                                    {{/if}}
+                                                {{/ifEquals}}
+                                            </div>
+                                            <div class="modal-body cc_modal-body modal-body_included_items{{this.sfid}}" id="included_items_body{{sfid}}">
+                                                <i class="fa fa-spinner fa-pulse fa-lg slds-m-top--medium"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {{/ifNotEquals}}
+                        {{/if}}
+                        {{#ifEquals pricingType "attrGroup" }}
+                            <a href="#included_items{{sfid}}" class="attributeItemsLink cc_included_items_link gp_attribute_items_link" id="includedItemsLink{{sfid}}" data-desktop="true" data-toggle="modal" data-id="{{sfid}}">{{pageLabelMap 'Cart_UOMPricing'}}</a>
+                            {{#ifDisplay 'C.DsplAddtInfo'}} &#160;|&#160;{{/ifDisplay}}
+                            <div id="included_items{{this.sfid}}" class="modal fade cc_modal cc_cart_attribute_items_modal gp_cart_attribute_items_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content cc_modal_content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                                            {{#ifEquals this.pricingType 'external'}}
+                                            {{#if extName}}
+                                            <h3 id="myModalLabel">{{this.extName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                            {{else}}
+                                            <h3 id="myModalLabel">{{this.product.sfdcName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                            {{/if}}
+                                            {{else}}
+                                            <h3 id="myModalLabel">{{this.product.sfdcName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                            {{/ifEquals}}
+                                        </div>
+                                        <div class="modal-body cc_modal-body modal-attribute_items{{this.sfid}}" id="modal-attribute_items{{sfid}}">
+                                            <i class="fa fa-spinner fa-pulse fa-lg slds-m-top--medium"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {{/ifEquals}}
+                        {{#ifDisplay 'C.DsplAddtInfo'}}
+                            <a class="included_items cc_included_items" href="#additional_info{{sfid}}" id="additionalInfoLink" data-toggle="modal">{{pageLabelMap 'AdditionalInfo'}}</a>
+                            {{#ifDisplay 'C.DsplComments'}} &#160;|&#160;{{/ifDisplay}}
+                            {{> cartItemAdditional}}
+                        {{/ifDisplay}}
+                        {{#ifDisplay 'C.DsplComments'}}
+                            <!--a href="#comments_{{sfid}}" id="commentsLink cc_comments_link" data-toggle="modal">{{pageLabelMap 'CartLineCommentLabel'}}</a>
+                            {{> cartItemComment}} 
+                            &#160;|&#160; -->
+
+  <a href="#comments_{{sfid}}" id="commentsLink cc_comments_link" data-toggle="modal">{{pageLabelMap 'Comment'}}</a>
+                            <div id="comments_{{sfid}}" class="comments modal fade cc_modal cc_cart_comments_modal in" tabindex="-1" role="dialog" aria-labelledby="CartCommentsLabel" style="display: none;">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content cc_modal_content">
+                                        <div class="modal-header cc_modal_header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                            <h4 class="modal-title cc_modal_title" id="CartCommentsLabel">
+                                                {{pageLabelMap 'Comment'}}
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body cc_modal_body">
+                                            <form id="commentsForm{{sfid}}" class="cc_comments_form commentform">
+                                                           <textarea 
+                                            autofocus
+                                            placeholder="Enter comments here..." name="note"
+                                            data-id="{{this.sfid}}" 
+                                                           value="{{this.comments}}" onkeyup="setCommentRemainingChars(this)"
+                                                           class="commentField form-control cc_comment_field" maxlength="255"
+                                                           style="resize:none"
+                                                           >{{this.comments}}</textarea>
+                                                                                             
+                                            </form>
+                                        </div>
+
+                                        <div class="modal-footer cc_modal_footer">
+                                            <p>Remaining characters: <span  class="leftText" id="comment_characters_left">255</span></p>
+                                            <input type="button" class="saveComment btn btn-default btn-sm cc_save_comment" data-id="{{sfid}}" value="Save">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+ <!--&#160;|&#160;-->
+                        {{/ifDisplay}}
+
+                            <!--<a href="#requestedDeliveryDate_{{sfid}}" id="requestedDeliveryDateLink cc_comments_link" data-toggle="modal">{{pageLabelMap 'RequestedDeliveryDate'}}</a>
+                            <div id="requestedDeliveryDate_{{sfid}}" class="modal fade cc_modal cc_cart_comments_modal in" tabindex="-1" role="dialog" aria-labelledby="RequestedDeliveryDate" style="display: none;">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content cc_modal_content">
+                                        <div class="modal-header cc_modal_header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                            <h4 class="modal-title cc_modal_title" id="RequestedDeliveryDate">
+                                                    Requested Delivery Date
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body cc_modal_body">
+                                            <form id="requestedDeliveryDateForm{{sfid}}" class="cc_comments_form">
+                                                <input type="date"  name="requestedDeliveryDate" id="requestedDeliveryDate" class="cc_value" data-id="{{this.sfid}}" value="{{formatDate this.requestedDeliveryDate}}"  onclick="setMinDate()" >
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer cc_modal_footer">
+                                            <input type="button" class="saveRequestedDeliveryDate btn btn-default btn-sm cc_save_comment" data-id="{{sfid}}" value="Save">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            &#160;|&#160;
+
+                            <a href="#typeMarks_{{sfid}}" id="typeMarksLink cc_comments_link" data-toggle="modal">{{pageLabelMap 'TypeMarks'}}</a>
+                            <div id="typeMarks_{{sfid}}" class="typemark modal fade cc_modal cc_cart_comments_modal in" tabindex="-1" role="dialog" aria-labelledby="TypeMarks" style="display: none;">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content cc_modal_content">
+                                        <div class="modal-header cc_modal_header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                            <h4 class="modal-title cc_modal_title" id="RequestedDeliveryDate">
+                                                {{pageLabelMap 'TypeMarks'}}
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body cc_modal_body">
+                                            <form id="typeMarksForm{{sfid}}" class="cc_comments_form typemarkform">
+                                                <textarea autofocus placeholder="TypeMark" name="typeMarks" class="commentField form-control cc_comment_field typemark"
+                                                          maxlength="8" data-id="{{this.sfid}}" value="{{this.typeMarks}}"
+                                                          onkeyup="setTypemarkRemainingChars(this)"    style="resize:none">{{this.typeMarks}}</textarea>
+                                                <!-- <input type="text" name="typeMarks" class="cc_value" data-id="{{this.sfid}}" value="{{this.typeMarks}}">
+                                            </form>
+                                        </div>
+
+                                        <div class="modal-footer cc_modal_footer">
+                                            <p>Remaining characters: <span class="leftText" id="characters_left_span">8</span></p>
+                                            <input type="button" class="saveTypeMarks btn btn-default btn-sm cc_save_comment" data-id="{{sfid}}" value="Save">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>-->
+
+                    </div>
+                    {{#each minorLines}}
+                    {{#if sptMap}}
+                        <p class="subscriptionSummary cc_subscription_summary">
+                            {{insertTokens sptMap.cartDisplayName sptMap.displayName (price price) (price subAmount) (price recurringPrice) (price recurringPriceSubAmt) (pageLabelPrefixMap 'Subscriptions_Frequency_' sptMap.orderFrequencyUOM) (pageLabelPrefixMap 'Subscriptions_Frequency_' sptMap.installmentFrequencyUOM) sptMap.orderFrequency sptMap.installmentFrequency sptMap.installmentCount sptMap.orderCount sptMap.recurringPricePercentage sptMap.upfrontPricePercentage}}
+                        </p>
+                    {{/if}}
+                    {{/each}}
+                    <div class="messagingSection-{{sfid}}-Error" style="display: none"></div>
+                    <div class="messagingSection-{{sfid}}-Info alert-dismissible" style="display: none"><button type="button" class="close cc_close" data-dismiss="alert" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button></div>
+                {{/ifEquals}}
+                    <div class="form-group wishFinder cc_wish_finder" data-sku="{{product.SKU}}">
+                        <div class="row" style="padding-top:15px;">
+                            <div class="col-xs-12">
+                                <table style="border: 0px;">
+                                <tr style="border: 0px;padding:0px;margin:0px;">
+                                    <td style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:10px;">
+                                        <span class="cc_label">Requested Delivery Date</span>
+                                    </td>
+                                    <td style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:10px;">
+                                        <form style="padding:0px;margin:0px;" id="requestedDeliveryDateForm{{sfid}}" class="cc_comments_form"><input type="date"  name="requestedDeliveryDate" id="requestedDeliveryDate" class="cc_value saveRequestedDeliveryDate" data-id="{{this.sfid}}" {{#ifNotEquals this.requestedDeliveryDate NULL }} value="{{formatDate this.requestedDeliveryDate}}" {{/ifNotEquals}} onclick="setMinDate(this)" onchange="rqDateChanged = true"></form>
+                                    </td>
+                                </tr>
+                                <tr style="border: 0px;padding:0px;margin:0px;">
+                                    <td style="padding-top:5px;padding-bottom:0px;padding-left:0px;padding-right:10px;">
+                                        <span class="cc_label">Type Mark</span>
+                                    </td>
+                                    <td style="padding-top:0px;padding-bottom:0px;padding-left:0px;padding-right:10px;">
+                                        <form style="padding:0px;margin:0px;" id="typeMarksForm{{sfid}}" class="cc_comments_form typemarkform"><textarea placeholder="TypeMark" name="typeMarks" class="commentField form-control cc_comment_field typemark saveTypeMarks"
+                                                                                                                                                maxlength="8" data-id="{{this.sfid}}" value="{{this.typeMarks}}"
+                                                                                                                                                id="TypeMarks"  style="resize:none;width:100%" onchange="typeMarkChanged = true">{{this.typeMarks}}</textarea></form>
+                                    </td>
+                                </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {{#ifNotEquals pricingType "attrGroup" }}
+                        {{#ifNotEquals cartItemType "Coupon" }}
+                            <div class="form-group wishFinder cc_wish_finder" data-sku="{{product.SKU}}">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <button id="deleteItem" type="button" class="btn btn-default btn-sm deleteItem removeItemButton cc_remove_item_button" data-dismiss="modal" aria-hidden="true" data-id="{{sfid}}" >{{pageLabelMap 'Action_Delete'}}</button>
+
+                                        <!-- apply pricing button -->
+                                        <div class="PASearchContainer">
+                                        <a href="#" class="applyPricing" data-id="{{this.sfid}}">{{pageLabelMap 'CartApplyPricing'}}</a>
+										</div>
+                                        {{#unless sptMap}}
+                                        <div class="wishButtons cc_wish_buttons"></div>
+                                        {{/unless}}
+                                    </div>
+                                </div>
+                            </div>
+                        {{/ifNotEquals}}
+                    {{/ifNotEquals}}
+                    {{#ifEquals pricingType "attrGroup" }}
+                    <div class="PASearchContainer">
+                        <a href="#" class="applyPricingAttr" data-id="{{this.sfid}}">Apply Price Agreement</a>
+                    </div>
+                    {{/ifEquals}}
+                </div>
+                <div class="col-md-4">
+                    <div class="quantity cc_quantity" data-id="{{sfid}}">
+                        {{#ifNotEquals cartItemType 'Coupon'}}
+                        <div class="plus_minus cc_plus-minus gp_quantity_block" data-id="{{sfid}}">
+                            {{> cartItemsQty}}
+                        </div>
+                        {{/ifNotEquals}}
+                    </div>
+<!--                    <div style="text-align: right; padding-bottom: 8px;">
+                        <select class="uom-select" data-id="{{sfid}}" disabled>
+&lt;!&ndash;                            {{#each this.product.pricingUOMS}}&ndash;&gt;
+&lt;!&ndash;                            {{{uomOptionElement ../unitOfMeasure this.UOM}}}&ndash;&gt;
+&lt;!&ndash;                            {{/each}}&ndash;&gt;
+                            <option>{{getUOMlabel this.unitOfMeasure}}</option>
+                        </select>
+                    </div>-->
+                    <div style="text-align: right; padding-bottom: 10px;">
+                        <span class="table-cell text-align-right">
+                            Unit of Measure: {{getUOMlabel this.unitOfMeasure}}
+                        </span>
+                    </div>
+                    <div style="text-align: right; padding-bottom: 10px;">
+                        <span class="table-cell text-align-right">
+                            Pieces Per Unit: {{getPiecesPerUnit this.unitOfMeasure this.product.pricingUOMS}}
+                        </span>
+                    </div>
+
+                    <div class="price_block cc_price_block pull-right">
+                        {{#if price}}
+                            <p class="price cc_price">
+                                {{#ifNotEquals this.productR.SKU 'requestedSku'}}
+                                <a title="Calculate Commission"
+                                   class="showcommissionWidgetModalButton"
+                                   data-id="{{this.productR.SKU}}~{{this.sfid}}~{{this.product.sfdcName}}~{{this.unitOfMeasure}}~{{this.product.piecesPerUnit}}~{{this.product.sfdcCurrencyISOCode}}"
+                                   id="commissionWidgetModal"
+                                    style="display: none;">
+                                    <i class="fa fa-calculator" style="font-size:18px"></i>
+                                </a>
+                                {{/ifNotEquals}}
+                                <span class="cc_label">{{pageLabelMap 'CartInc_Price'}}</span>
+                                <span class="cc_value defaultPriceDisplay">{{{price price}}}</span> 
+
+                                <!-- custom price display -->
+                                {{#ifEquals pricingType "attrGroup" }}
+                                    <input type="text" class="cc_value customPriceDisplay" data-id="{{this.sfid}}" value="{{price price}}" readonly>
+                                {{else}}
+                                    <input type="text" class="cc_value customPriceDisplay customMyPriceDisplay" data-id="{{this.sfid}}" value="{{price price}}">
+                                {{/ifEquals}}
+                                <!-- <button class="btn btn-default applyCustomPrice" type="Submit" data-id="{{this.sfid}}">Apply</button> -->
+                            </p>
+
+                        <!-- Price Agreement search -->
+                        <div class="input-group cc_input-group PASearchContainer">
+                            <input type="text" class="form-control search_input cc_search_input priceAgreementSearchText" placeholder="{{pageLabelMap 'SearchPriceAgreement'}}" title="{{pageLabelMap 'SearchPriceAgreement'}}" data-id="{{this.sfid}}" data-trigger="focus" autocomplete="off" value="{{this.agreementNumber}}" disabled>
+                            <!--
+                            <form style="padding:0px;margin:0px;" id="PANoForm{{sfid}}" class="cc_comments_form">
+                                <input type="text" class="form-control search_input cc_search_input priceAgreementSearchText savePriceAgreementNumber" placeholder="{{pageLabelMap 'SearchPriceAgreement'}}" title="{{pageLabelMap 'SearchPriceAgreement'}}" data-id="{{this.sfid}}" data-trigger="focus" autocomplete="off" value="{{this.agreementNumber}}" name="PANo" onchange="PANoChanged = true" disabled>
+                            </form>-->
+                            <ul class="searchResults" data-id='{{this.sfid}}'></ul>
+                            <span class="input-group-btn">
+                                <!-- <button class="btn btn-default doPriceAgreementSearch" type="Submit" data-id="{{this.sfid}}"><i class="fa fa-search" aria-hidden="true"></i></button> -->
+                                <!-- <button class="btn btn-default applyPriceAgreement" type="Submit" data-id="{{this.sfid}}">Apply</button> -->
+                            </span>
+                        </div>
+                        
+                        <!-- {{#each this.minorData}}
+                            <div class="priceAgreementError{{this.sfid}}"></div>
+                        {{/each}} -->
+
+                        {{/if}}
+                        <div class="priceAgreementError{{this.sfid}}"></div>
+                        {{#ifEquals product.materialType 'Fixture (Quickship)'}}
+                        <div>
+                            <span class="cc_label">{{product.materialType}} {{pageLabelMap 'Cart_SubjectTo'}}</span> <br>
+                            <span class="cc_label">{{pageLabelMap 'Cart_SmallOrderCharge'}}</span> <br>
+                            <span class="cc_label">{{pageLabelMap 'Cart_LiftGateRestriction'}}</span>
+                        </div>
+                        {{/ifEquals}}
+
+                        {{#ifEquals product.materialType 'Lamp and Ballast'}}
+                        <div>
+                            <span class="cc_label">{{product.materialType}} {{pageLabelMap 'Cart_SubjectTo'}}</span> <br>
+                            <span class="cc_label">{{pageLabelMap 'Cart_SmallOrderCharge'}}</span> <br>
+                        </div>
+                        {{/ifEquals}}
+
+                        {{#if absoluteDiscount}}
+                        <p class="savings cc_savings">
+                            <span class="cc_label">{{pageLabelMap 'YouSave'}}</span>
+                            <span class="cc_value">{{price absoluteDiscount}}</span>
+                        </p>
+                        {{/if}}
+                        {{#ifContains this.pricingModifierTypes 'tiered'}}
+                        <p class="cc_prt_button_div cc_prt_button_div_cart">
+                            <button type="button" class="btn btn-default btn-sm cc_prt_button cc_prt_cart_button cc_collapse_button" data-id="{{sfid}}" data-toggle="collapse" data-target="#cc_prt_overflow_collapse_{{sfid}}" aria-expanded="false"><span class='text-collapsed'>{{pageLabelMap 'ProductPricingTiers_ShowMoreBtn'}}</span><span class='text-expanded'>{{pageLabelMap 'ProductPricingTiers_HideBtn'}}</span></button>
+                        </p>
+                        {{/ifContains}}
+                        <p class="price cc_price">
+                            <span class="cc_label">{{pageLabelMap 'CartInc_Total'}}</span>
+                            <span class="cc_value">{{price itemTotal}}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {{#ifContains this.pricingModifierTypes 'tiered'}}
+            <div class="row">
+                <div class="col-md-10 col-md-offset-2">
+                    <div id="cc_prt_overflow_collapse_{{sfid}}" class="collapse cc_prt_div_outer cc_prt_div_cart_collapse_{{sfid}}"></div>
+                </div>
+            </div>
+            {{/ifContains}}
+            <hr>
+            {{/ifEquals}}
+        {{/with}}
+    </script>
+
+    <script id="CartDetail-ActionTotals-View" type="text/template">
+        <div class="row">
+            <div class="col-md-12">
+                {{#ifStoreSetting 'Display_Cart_Coupon__c'}}
+                <div class="panel panel-default cc_panel cc_shopping_cart_discount_panel">
+                    <div class="panel-heading cc_heading">
+                        <h3 class="panel-title cc_title">{{pageLabelMap 'CartInc_discountCodes'}}</h3>
+                    </div>
+                    <div class="cc_myaccount_content panel-body cc_body">
+                        {{#if this.hasCoupon}}
+                        <form id="couponClearForm" class="cc_coupon_clear_form">
+                            <div class="discount_code cc_discount_code">
+                                <p class="cc_applied_coupon">{{pageLabelMap 'CartInc_AppliedCoupon'}} {{this.couponName}}</p>
+                                <p class="cc_clear_coupon_code"><button id="clearCouponBtn" type="button" class="btn btn-default btn-sm cc_clear_coupon">{{pageLabelMap 'CartInc_ClearCoupon'}}</button></p>
+                            </div>
+                        </form>
+                        {{else}}
+                        <form id="couponAddForm" class="cc_coupon_add_form">
+                            <div class="discount_code cc_discount_code">
+                                <p id="couponAddError" class="cc_coupon_add_error"></p>
+                                <p class="cc_enter_coupon_code">{{pageLabelMap 'CartInc_EntercouponCode'}}</p>
+                                <div class="form-group">
+                                    <label for="addCouponId" class="sr-only">Add Coupon</label>
+                                    <input type="text" id="addCouponId" name="couponId" class="form-control cc_add_coupon_id" />
+                                    <div class="couponMessagingSection-Error"></div>
+                                </div>
+                                <button id="addCouponBtn" type="button" class="btn btn-default btn-sm cc_add_coupon">{{pageLabelMap 'CartInc_ApplyCoupon'}}</button>
+                            </div>
+                        </form>
+                        {{/if}}
+                    </div>
+                </div>
+                {{/ifStoreSetting}}
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class=" cc_action_totals pull-right">
+
+                            <!-- Custom Cart Buttons -->
+                            <!-- <button class="btn btn-default btn-sm customCheckoutBtn revisePAButton" name="Revise Price Agreement" type="button" >{{pageLabelMap 'OrderTypePAModification'}}</button>
+                            <button class="btn btn-default btn-sm customCheckoutBtn requestPAButton" name="Price Agreement" type="button" >{{pageLabelMap 'OrderTypePARequest'}}</button>
+                            <button class="btn btn-default btn-sm customCheckoutBtn requestOneTimePAButton" name="One Time Price Agreement" type="button" >{{pageLabelMap 'OrderTypeOneTimePA'}}</button> -->
+                            {{#if false }}
+                            {{ else }}
+                                {{#ifStoreSetting 'AutoCalcPriceAdjust__c'}}
+                                {{else}}
+                                    <!-- <button class="btn btn-default btn-sm getExtPricingButton cc_get_ext_pricing_button" type="button" >{{pageLabelMap 'CartInc_ApplyDiscounts'}}</button> -->
+                                {{/ifStoreSetting}}
+                                {{#ifDisplay 'WL.PkrOn'}}
+                                    <button class="btn btn-default btn-sm cc_create_cart_wishlist" data-toggle="modal" data-target="#wishMod" name="" type="button" >{{pageLabelMap 'Create_Cart_Wishlist'}}</button>
+                                {{/ifDisplay}}
+                            {{/if}}
+                           <!--<button class="btn btn-default btn-sm updateCartButton cc_update_cart_button" name="" type="button" >{{pageLabelMap 'CartInc_Update'}}</button>                         -->
+                                    {{#if false }}
+                            {{#ifDisplay 'C.EmailAnon'}}
+                            <a href="#emailModal" id="emailCartLink" class="cc_email_cart_link" data-toggle="modal"><button class="btn btn-default btn-sm remove cc_email_cart_link_button" type="button" >{{pageLabelMap 'CartOrderEmailer_Header'}}</button></a>
+                            {{/ifDisplay}}
+                            {{else}}
+                            {{#ifDisplay 'C.EnableEmailCart'}}
+                            <a href="#emailModal" id="emailCartLink" class="cc_email_cart_link" data-toggle="modal"><button class="btn btn-default btn-sm remove cc_email_cart_link_button" type="button" >{{pageLabelMap 'CartOrderEmailer_Header'}}</button></a>
+                            {{/ifDisplay}}
+                            {{/if}}
+
+                            {{#if false }}
+                                <!-- {{#ifDisplay 'rfq.GuestUser'}}
+                                    <button class="btn btn-default btn-sm remove cc_rfq_link_button" data-toggle="modal" data-target="#rfqModal" type="button" >{{pageLabelMap 'CartRFQForm_Header'}}</button>
+                            {{/ifDisplay}} -->
+                            {{else}}
+                                <!-- {{#ifDisplay 'rfq.LoggedIn'}}
+                                    <button class="btn btn-default btn-sm remove cc_rfq_link_button" data-toggle="modal" data-target="#rfqModal" type="button" >{{pageLabelMap 'CartRFQForm_Header'}}</button>
+                                {{/ifDisplay}} -->
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="checkout list-unstyled cc_checkout pull-right">
+                            {{#if this.subtotalAmount}}
+                            <li class="grand_total cc_grand_total">
+                                <p class="price cc_price">
+                                    <span class="cc_label">{{pageLabelMap 'CartInc_Subtotal'}}:</span>
+                                    <span class="cc_value">{{{price this.subtotalAmount}}}</span>
+                                    {{#ifNotEquals this.orderType "Revise Price Agreement"}}
+                                        <span class="min-order-message">
+                                            <!-- display min order message as per sold to segment -->
+                                        </span>
+                                    {{/ifNotEquals}}
+                                </p>
+                            </li>
+                            {{/if}}
+                            {{#if this.totalInfo}}
+                            <li class="cart_total_amount cc_cart_total_amount">{{this.totalInfo}}</li>
+                            {{/if}}
+                            <li class="totalsmessagingSection cc_total_messaging_section"></li>
+                            <li class="continue-shopping-list">
+                                <button class="btn btn-default btn-sm continueShoppingButton cc_continue_shopping_button" name="" type="button" >{{pageLabelMap 'CartInc_ContinueShopping'}}</button>
+                             {{#ifEquals this.orderType "Revise Price Agreement"}}
+                               <button class="btn btn-default btn-sm cancelButtononRPA cc_continue_shopping_button1" name="" type="button" >Cancel</button>
+                            {{/ifEquals}}
+                            </li>
+                            {{#if this.ECartItemsS}}
+                                {{#ifNotEquals this.ECartItemsS.models.length 0}}
+                                    {{#if this.allowCheckout}}
+                                    {{#ifEquals this.preventCheckout false}}
+                                    <li class="checkout-list">
+                                        <!-- Custom Cart Buttons -->
+                                        {{#ifEquals this.orderType "Revise Price Agreement"}}
+                                            <button id="revisePA" class="btn btn-default btn-sm customCheckoutBtn revisePAButton cc_checkout_btn" name="Revise Price Agreement" type="button" >{{pageLabelMap 'OrderTypePAModification'}}</button>
+                                        {{/ifEquals}}
+
+                                        
+                                        {{#ifNotEquals this.orderType "Revise Price Agreement"}}
+                                            <button id="requestPA" class="btn btn-default btn-sm customCheckoutBtn requestPAButton cc_checkout_btn distributorHide" name="Price Agreement" type="button" >{{pageLabelMap 'OrderTypePARequest'}}</button>
+                                        {{/ifNotEquals}}
+                                            <!-- <button class="btn btn-default btn-sm customCheckoutBtn requestOneTimePAButton cc_checkout_btn" name="One Time Price Agreement" type="button" >{{pageLabelMap 'OrderTypeOneTimePA'}}</button> -->
+
+                                        <!--<button type="button" class="btn btn-default btn-sm checkOutBtn cc_checkout_btn pull-right">{{pageLabelMap 'CartInc_Checkout'}}</button>-->
+                                        <button type="button" id="requestOrder" class="btn btn-default btn-sm checkOutBtnNewBehavior cc_checkout_btn" disabled="disabled">{{pageLabelMap 'CartInc_Checkout'}}</button>
+                                    </li>
+                                    {{/ifEquals}}
+                                    {{/if}}
+                                {{/ifNotEquals}}
+                            {{/if}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="CartItemDetail-Additional-View" type="text/template">
+        <div id="additional_info{{sfid}}" class="modal fade cc_modal cc_cart_additional_info_modal" tabindex="-1" role="dialog" aria-labelledby="CartAddtlInfoLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content cc_modal_content">
+                    <div class="modal-header cc_modal_header">
+                        <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                        <h4 class="modal-title cc_modal_title" id="CartAddtlInfoLabel">
+                            {{#ifEquals pricingType 'external'}}
+                                {{#if extName}}
+                                    {{displayProductName 'Aggregate_Display' displayProduct.sfdcName extName}} {{pageLabelMap 'ProductsInc_MiscDetails'}}
+                                {{else}}
+                                    {{#if this.itemLabel}}
+                                        {{displayProductName 'Aggregate_Display' displayProduct.sfdcName this.itemLabel }} {{pageLabelMap 'ProductsInc_MiscDetails'}}
+                                    {{else}}
+                                        {{displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName }} {{pageLabelMap 'ProductsInc_MiscDetails'}}
+                                    {{/if}}
+                                {{/if}}
+                            {{else}}
+                                {{#if this.itemLabel}}
+                                    {{displayProductName 'Aggregate_Display' displayProduct.sfdcName this.itemLabel }} {{pageLabelMap 'ProductsInc_MiscDetails'}}
+                                {{else}}
+                                    {{displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName }} {{pageLabelMap 'ProductsInc_MiscDetails'}}
+                                {{/if}}
+                            {{/ifEquals}}
+                        </h4>
+                    </div>
+                    <div class="modal-body cc_modal_body">
+                        {{#if miscDetails}}
+                            <p class="cc_misc_details">
+                                {{miscDetails}}
+                            </p>
+                        {{/if}}
+                            {{#ifDisplay 'C.DsplAddtlSku'}}
+                                <!--{{#ifEquals pricingType 'external'}}
+                                    {{#if extSKU}}
+                                    <div class="sku cc_sku">
+                                        <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{extSKU}}</span>
+                                    </div>
+                                    {{else}}
+                                    <div class="sku cc_sku">
+                                        <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{product.materialDescription}}</span>
+                                    </div>
+                                    {{/if}}
+                                {{else}}
+                                    <div class="sku cc_sku">
+                                        <span class="cc_label_sku">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_value_sku">{{product.materialDescription}}</span>
+                                    </div>
+                                {{/ifEquals}}-->
+                            {{/ifDisplay}}
+                            {{#ifDisplay 'C.DsplAddtlShortDesc'}}
+                                <p class="cc_short_desc">
+                                    {{unescape product.shortDesc}}
+                                </p>
+                            {{/ifDisplay}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <style>
+        textarea.typemark {
+            resize: none;
+            width: 9ch;
+            height: 20px;
+            padding: 0;
+        }
+        .soldToSelector > p > span {
+            padding: 0 5px;
+            position: absolute !important;
+            top: 7px;
+            color: #5f88b6;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .soldToInfo + .tooltip > .tooltip-inner {
+            color: #059;
+            background-color: #BEF;
+        }
+        .checkout {
+            display: block;
+            width: 100%;
+            float: left;
+        }
+        .checkout li.continue-shopping-list {
+            width: 30%;
+            float: left;
+        }
+        .checkout .checkout-list {
+            width: 70%;
+            float: right;
+            text-align: right;
+        }
+        .min-order-message {
+            margin: 15px 0;
+            display: none;
+            font-size: 12px;
+            width: auto;
+        }
+        .min-order-message > span {
+            padding: 10px;
+            border-radius: 3px;
+            color: #059;
+            background: #BEF;
+        }
+        .grand_total p {
+            margin: 25px 0;
+        }
+        .product-sku {
+            color: #5f88b6;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .cart-links {
+            margin-top: 10px;
+        }
+
+        @media (max-width: 767px) {
+            .checkout > li {
+                display: block;
+                float: none !important;
+                width: 100% !important;
+            }
+            .checkout .continue-shopping-list, .checkout .checkout-list {
+                text-align: center;
+            }
+            .continueShoppingButton {
+                margin-bottom: 5px;
+            }
+            .min-order-message {
+                float: left;
+            }
+            .min-order-message > span {
+                float: left;
+                text-align: center;
+            }
+        }
+    </style>
+    <script>
+        var cartReversed = false;
+     Handlebars.registerHelper('reverseCartItems', function(orderItems) {
+         if (cartReversed) {
+             return;
+         }
+         cartReversed = true;
+         const urlParams = new URLSearchParams(window.location.search);
+         var isReorder = urlParams.get('reOrder') === "true";
+         var isRevised = urlParams.get('isRevise') === "true";
+         var isConvert = urlParams.get('isRevise') === "false";
+         console.log("Cart Items Before Reverse: ", orderItems);
+         return isReorder ? orderItems.reverse() : orderItems;
+    });
+
+            $(document).on('shown.bs.modal', '.typemark.modal', function() {
+          
+            $(this).find('[autofocus]').focus();
+            var span = this.querySelector('.commentField');
+            setTypemarkRemainingChars(span);
+
+        });
+
+        $(document).on('shown.bs.modal', '.comments.modal', function() {
+          $(this).find('[autofocus]').focus();
+            var span = this.querySelector('.commentField');
+            console.log(span);
+            setCommentRemainingChars(span)
+        });
+
+        $(document).on('keydown',".cc_comment_field",function(e){
+      
+      if (e.keyCode == 13 && !e.shiftKey)
+      {
+          // prevent default behavior
+          e.preventDefault();
+            }
+        });
+
+        function setTypemarkRemainingChars(eve) {
+            
+            console.log(eve.closest (".modal-content"));
+          /*  var maxLength = $('.typemarkform > textarea').attr('maxlength');
+            var typeMarkValue = $('.typemarkform > textarea').val();
+            var length = typeMarkValue.length;*/
+            // $('#characters_left_span').text((maxLength - length));
+            //   console.log(typeMarkValue, id)
+
+            //  var el = document.getElementById(id);
+
+            var r1 = eve.closest(".modal-content");
+       var maxLength =$(eve).attr('maxlength')
+       var  typeMarkValue =$(eve).val();
+     var   length = typeMarkValue.length;
+        console.log(maxLength)
+        var span = r1.querySelector('.leftText');
+
+            //var span =  r1.querySelector("#characters_left_span")
+            //document.getElementById('characters_left_span');
+
+            while( span.firstChild ) {
+                span.removeChild( span.firstChild );
+            }
+            span.appendChild( document.createTextNode(maxLength - length) );
+
+        }
+
+
+
+        function setCommentRemainingChars(eve) {
+
+            /*   var maxLength = $('.commentform > textarea').attr('maxlength');
+            console.log(maxLength)
+            var commentValue = $('.commentform > textarea').val();
+            var length = commentValue.length;
+            */
+            var r1 = eve.closest(".modal-content");
+            var maxLength =$(eve).attr('maxlength')
+            var commentValue =$(eve).val();
+            var length = commentValue.length;
+            console.log(maxLength)
+            var span = r1.querySelector('.leftText');
+
+
+            while( span.firstChild ) {
+                span.removeChild( span.firstChild );
+            }
+            span.appendChild( document.createTextNode(maxLength - length) );
+        }
+
+
+
+
+
+        /*Disable past dates in Requested Delivery Date*/
+        function setMinDate(p) {
+            var today = new Date();
+            //console.log('today',today);
+
+            var year = today.getFullYear();
+            //console.log('year',year);
+
+            var month = '' + (today.getMonth() + 1);
+            //console.log('month',month);
+
+            var day = '' + (today.getDate());
+            //console.log('day',day);
+
+            if (month.length < 2) {
+                month = '0' + month;
+                //console.log('month',month);
+
+            }
+            if (day.length < 2) {
+                day = '0' + day;
+            }
+            p.min = [year, month, day].join('-');
+            var valueOfField = p.min;
+        }
+/*
+                Handlebars.registerHelper("formatDate", function (datetime) {
+                    if (datetime == undefined) {
+                        datetime = new Date();
+                        datetime.setDate(datetime.getDate() - 1);
+                    }
+                    var d = new Date(datetime),
+                        month = '' + (d.getMonth() + 1),
+                        day = '' + (d.getDate() + 1),
+                        year = d.getFullYear();
+                    if (month.length < 2)
+                        month = '0' + month;
+                    if (day.length < 2)
+                        day = '0' + day;
+        
+                    return [year, month, day].join('-');
+                });
+                */
+    </script>
+    <style>
+    .reverseOrder {
+       display: none;
+    }
+ </style>
+</apex:component>

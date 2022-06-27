@@ -1,0 +1,413 @@
+<apex:component >
+    <style>
+        .billingBox {
+            display:none;
+        }
+    </style>
+    <script id="MyAccount-MyAddressBook-EditDialog" type="text/template">
+        <div id="editMod_{{sfid}}" class="modal fade cc_modal cc_addressbook_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
+         <div class="modal-dialog" role="document">
+          <div class="modal-content cc_modal_content">
+           <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#215;</button>
+            {{#if sfid}}
+             <h3 id="myModalLabel">{{pageLabelMap 'Edit'}} {{pageLabelMap 'Address'}}</h3>
+            {{else}}
+             <h3 id="myModalLabel">{{pageLabelMap 'AddressBook_Add_New_Address'}}</h3>
+            {{/if}}
+           </div>
+           <div class="modal-body cc_modal-body">
+                              <div class="addrModal-messagingSection-Error" style="display: none"></div>
+            <form id="editAddressForm" class="form-horizontal">
+             <input type="hidden" name="bookSfid" value="{{this.bookSfid}}" />
+             <input type="hidden" name="sfid" value="{{addressBean.sfid}}" />
+             <input type="hidden" name="addressBean.partnerId" value="{{addressBean.partnerId}}" />
+             <input type="hidden" name="addressBean.sfid" value="{{addressBean.sfid}}" />
+             {{#if addressBean.addrReadOnly}}
+              <input type="checkbox" name="addressBean.addrReadOnly" value="{{addressBean.addrReadOnly}}" checked="checked" style="display:none" />
+             {{else}}
+              <input type="checkbox" name="addressBean.addrReadOnly" value="false" style="display:none" />
+             {{/if}}
+             {{#if this.addressBean.addrReadOnly}}
+              <div class="form-group">
+               <div class="col-xs-6">
+                <input class="form-control cc_firstName" type="text" placeholder="{{pageLabelMap 'MyAccount_FirstNamePH'}}" value="{{addressBean.firstName}}" name="addressBean.firstName" readonly="readonly"/>
+               </div>
+               <div class="col-xs-6">
+                <input class="form-control cc_lastName" type="text" placeholder="{{pageLabelMap 'MyAccount_LastNamePH'}}" value="{{addressBean.lastName}}" name="addressBean.lastName" readonly="readonly"/>
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-6">
+                <input class="form-control cc_companyName" type="text" placeholder="{{pageLabelMap 'MyAccount_CompanyNamePH'}}" value="{{addressBean.companyName}}" name="addressBean.companyName" readonly="readonly"/>
+               </div>
+               <div class="col-xs-6">
+                <input class="form-control cc_phone" type="text" placeholder="{{pageLabelMap 'MyAccount_Phone'}}" value="{{addressBean.phone}}" name="addressBean.phone" readonly="readonly"/>
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-12">
+                <input class="form-control cc_address1" type="text" placeholder="{{pageLabelMap 'MyAccount_Address1PH'}}" value="{{addressBean.address1}}" name="addressBean.address1" readonly="readonly"/>
+                <!-- <input class="form-control cc_address2" type="text" placeholder="{{pageLabelMap 'MyAccount_Address2PH'}}" value="{{addressBean.address2}}" name="addressBean.address2" readonly="readonly"/>
+                <input class="form-control cc_address3" type="text" placeholder="{{pageLabelMap 'MyAccount_Address3PH'}}" value="{{addressBean.address3}}" name="addressBean.address3" readonly="readonly"/> -->
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-12">
+                <input class="form-control cc_countryCode"  type="text" placeholder="{{pageLabelMap 'MyAccount_CountryPH'}}" value="{{addressBean.countryCode}}" name="addressBean.countryCode"  readonly="readonly"/>
+               </div>
+               <div class="col-xs-12">
+                {{#if addressBean.state}}
+                <input class="form-control cc_state" type="text" placeholder="{{pageLabelMap 'MyAccount_StatePH'}}" value="{{addressBean.state}}" name="addressBean.state" readonly="readonly"/>
+                {{/if}}
+                {{#if addressBean.stateCode}}
+                <input class="form-control cc_stateCode" type="text" placeholder="{{pageLabelMap 'MyAccount_StatePH'}}" value="{{addressBean.stateCode}}" name="addressBean.stateCode" readonly="readonly"/>
+                {{/if}}
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-6">
+                <input class="form-control cc_city" type="text" placeholder="{{pageLabelMap 'MyAccount_CityPH'}}" value="{{addressBean.city}}" name="addressBean.city" readonly="readonly"/>
+               </div>
+               <div class="col-xs-6">
+                <input class="form-control cc_postal" type="text" placeholder="{{pageLabelMap 'MyAccount_PostalPH'}}" value="{{addressBean.postalCode}}" name="addressBean.postalCode" readonly="readonly"/>
+               </div>
+              </div>
+             {{else}}
+              <div class="form-group">
+               <div class="col-xs-6">
+                <input class="form-control cc_firstName" type="text" placeholder="{{pageLabelMap 'MyAccount_FirstNamePH'}}" value="{{addressBean.firstName}}" name="addressBean.firstName"/>
+               </div>
+               <div class="col-xs-6">
+                <input class="form-control cc_lastName" type="text" placeholder="{{pageLabelMap 'MyAccount_LastNamePH'}}" value="{{addressBean.lastName}}" name="addressBean.lastName"/>
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-6">
+                <input class="form-control cc_companyName" type="text" placeholder="{{pageLabelMap 'MyAccount_CompanyNamePH'}}" value="{{addressBean.companyName}}" name="addressBean.companyName"/>
+               </div>
+               <div class="col-xs-6">
+                <input class="form-control cc_phone" type="text" placeholder="{{pageLabelMap 'MyAccount_Phone'}}" value="{{addressBean.phone}}" name="addressBean.phone"/>
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-12">
+                <input class="form-control cc_address1" type="text" placeholder="{{pageLabelMap 'MyAccount_Address1PH'}}" value="{{addressBean.address1}}" name="addressBean.address1"/>
+                <!-- <input class="form-control cc_address2" type="text" placeholder="{{pageLabelMap 'MyAccount_Address2PH'}}" value="{{addressBean.address2}}" name="addressBean.address2"/>
+                <input class="form-control cc_address3" type="text" placeholder="{{pageLabelMap 'MyAccount_Address3PH'}}" value="{{addressBean.address3}}" name="addressBean.address3"/> -->
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-12">
+                {{{selectGeo 'country' this.countryList this.addressBean.countryCode 'countryListing form-control' 'addressBean.'}}}
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-12">
+                <div class="stateSection"></div>
+               </div>
+              </div>
+              <div class="form-group">
+               <div class="col-xs-6">
+                <input class="form-control cc_city" type="text" placeholder="{{pageLabelMap 'MyAccount_CityPH'}}" value="{{addressBean.city}}" name="addressBean.city"/>
+               </div>
+               <div class="col-xs-6">
+                <input class="form-control cc_postal" type="text" placeholder="{{pageLabelMap 'MyAccount_PostalPH'}}" value="{{addressBean.postalCode}}" name="addressBean.postalCode"/>
+               </div>
+              </div>
+             {{/if}}
+             <div class="form-group">
+              {{#each addressTypes}}
+               {{#ifEquals this.addressType 'Billing'}}
+                {{#if this.typeReadOnly}}
+                 <div class="col-xs-5 col-xs-offset-1">
+                  <div class="checkbox">
+                   <input type="checkbox" name="addressTypes[0].addressType" value="Billing" class="shipping_options billingBox"  disabled> </input>
+                   <input type="hidden" name="addressTypes[0].addressType" value="Billing" />
+                   <input type="checkbox" name="addressTypes[0].typeReadOnly" value="true" class="shipping_options billingBox" style="display:none"/>
+                  </div>
+                 </div>
+                {{else}}
+                <div class="col-xs-5 col-xs-offset-1">
+                 <div class="checkbox">
+                  <input type="checkbox" name="addressTypes[0].addressType" value="Billing" class="shipping_options billingBox"  > </input>
+                 </div>
+                </div>
+                {{/if}}
+                {{#if this.isDefault}}
+                 <div class="col-xs-5 col-xs-offset-1">
+                  <div class="checkbox">
+                   <input type="checkbox" name="addressTypes[0].isDefault" value="true" class="shipping_options billingBox" ></input>
+                  </div>
+                 </div>
+                {{else}}
+                 <div class="col-xs-5 col-xs-offset-1">
+                  <div class="checkbox">
+                   <input type="checkbox" name="addressTypes[0].isDefault" value="true" class="shipping_options billingBox"></input>
+                  </div>
+                 </div>
+                {{/if}}
+               {{/ifEquals}}
+               {{#ifEquals this.addressType 'Shipping'}}
+                {{#if this.typeReadOnly}}
+                <div class="col-xs-5 col-xs-offset-1">
+                 <div class="checkbox">
+                  <input type="checkbox" name="addressTypes[1].addressType" value="Shipping" class="shipping_options shippingBox" checked="checked" disabled>{{pageLabelMap 'Shipping'}}</input>
+                  <input type="hidden" name="addressTypes[1].addressType" value="Shipping" />
+                  <input type="checkbox" name="addressTypes[1].typeReadOnly" value="true" class="shipping_options billingBox"  style="display:none"/>
+                 </div>
+                </div>
+                {{else}}
+                <div class="col-xs-5 col-xs-offset-1">
+                 <div class="checkbox">
+                  <input type="checkbox" name="addressTypes[1].addressType" value="Shipping" class="shipping_options shippingBox" checked="checked">{{pageLabelMap 'Shipping'}}</input>
+                 </div>
+                </div>
+                {{/if}}
+                {{#if this.isDefault}}
+                <div class="col-xs-5 col-xs-offset-1">
+                 <div class="checkbox">
+                  <input type="checkbox" name="addressTypes[1].isDefault" value="true" class="shipping_options shippingBox"checked="checked">{{pageLabelMap 'Default'}}</input>
+                 </div>
+                </div>
+                {{else}}
+                <div class="col-xs-5 col-xs-offset-1">
+                 <div class="checkbox">
+                  <input type="checkbox" name="addressTypes[1].isDefault" value="true" class="shipping_options shippingBox">{{pageLabelMap 'Default'}}</input>
+                 </div>
+                </div>
+                {{/if}}
+               {{/ifEquals}}
+              {{/each}}
+             </div>
+             <div class="form-group">
+              {{#ifEquals addressTypes.length 1}}
+               {{#each addressTypes}}
+                {{#ifEquals this.addressType 'Billing'}}
+                 {{#if this.typeReadOnly}}
+                  <div class="col-xs-5 col-xs-offset-1">
+                   <div class="checkbox">
+                    <input type="checkbox" name="addressTypes[1].addressType" value="Shipping" class="shipping_options shippingBox" disabled>{{pageLabelMap 'Shipping'}}</input>
+                    <input type="hidden" name="addressTypes[1].addressType" value="Shipping" />
+                    <input type="checkbox" name="addressTypes[1].typeReadOnly" value="true" class="shipping_options billingBox" style="display:none"/>
+                   </div>
+                  </div>
+                 {{else}}
+                  <div class="col-xs-5 col-xs-offset-1">
+                   <div class="checkbox">
+                    <input type="checkbox" name="addressTypes[1].addressType" value="Shipping" class="shipping_options shippingBox">{{pageLabelMap 'Shipping'}}</input>
+                   </div>
+                  </div>
+                 {{/if}}
+                 <div class="col-xs-5 col-xs-offset-1">
+                  <div class="checkbox">
+                   <input type="checkbox" name="addressTypes[1].isDefault" value="true" class="shipping_options shippingBox">{{pageLabelMap 'Default'}}</input>
+                  </div>
+                 </div>
+                {{/ifEquals}}
+                {{#ifEquals this.addressType 'Shipping'}}
+                 <div class="col-xs-5 col-xs-offset-1">
+                  <div class="checkbox">
+                   <input type="checkbox" name="addressTypes[0].addressType" value="Billing" class="shipping_options billingBox"> </input>
+                  </div>
+                 </div>
+                 <div class="col-xs-5 col-xs-offset-1">
+                  <div class="checkbox">
+                   <input type="checkbox" name="addressTypes[0].isDefault" value="true" class="shipping_options billingBox"></input>
+                  </div>
+                 </div>
+                {{/ifEquals}}
+               {{/each}}
+              {{/ifEquals}}
+             </div>
+             <div class="form-group">
+              {{#ifEquals addressTypes.length 0}}
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[1].addressType" value="Shipping" class="shipping_options shippingBox">{{pageLabelMap 'Shipping'}}</input>
+                </div>
+               </div>
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[1].isDefault" value="true" class="shipping_options shippingBox">{{pageLabelMap 'Default'}}</input>
+                </div>
+               </div>
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[0].addressType" value="Billing" class="shipping_options billingBox"> </input>
+                </div>
+               </div>
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[0].isDefault" value="true" class="shipping_options billingBox"></input>
+                </div>
+               </div>
+              {{/ifEquals}}
+             </div>
+             <div class="form-group">
+              {{#if addressTypes}}
+              {{else}}
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[1].addressType" value="Shipping" class="shipping_options shippingBox" checked="checked">{{pageLabelMap 'Shipping'}}</input>
+                </div>
+               </div>
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[1].isDefault" value="true" class="shipping_options shippingBox">{{pageLabelMap 'Default'}}</input>
+                </div>
+               </div>
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[0].addressType" value="Billing" class="shipping_options billingBox"> </input>
+                </div>
+               </div>
+               <div class="col-xs-5 col-xs-offset-1">
+                <div class="checkbox">
+                 <input type="checkbox" name="addressTypes[0].isDefault" value="true" class="shipping_options billingBox"></input>
+                </div>
+               </div>
+              {{/if}}
+             </div>
+            </form>
+           </div>
+           <div class="modal-footer">
+            <input type="button" class="btn btn-default btn-sm cc_cancel_addr cancelAddr" data-id="{{sfid}}" value="{{pageLabelMap 'Cancel'}}"/>
+            <input type="button" class="btn btn-default btn-sm saveAddr cc_save_addr" data-id="{{sfid}}" value="{{pageLabelMap 'Save'}}"/>
+           </div>
+          </div>
+         </div>
+        </div>
+       </script>
+
+       <script id="AddressDisplay" type="text/template">
+        <div class="address_selection_display">
+         {{#ifDisplay 'SO.DsplAddrName'}}
+          {{#if this.firstName }}
+           <p class="cc_addr_name">
+            <span class="cc_firstname">{{this.firstName}}&#160;</span>
+            {{#if this.lastName }}
+             <span class="cc_lastname">{{this.lastName}}</span>
+            {{/if}}
+           </p>
+          {{else}}
+           {{#if this.lastName }}
+            <p class="cc_addr_name">
+             <span class="cc_lastname">{{this.lastName}}</span>
+            </p>
+           {{/if}}
+          {{/if}}
+
+         {{/ifDisplay}}
+         {{#ifDisplay 'SO.DsplAddrCompany'}}
+          {{#if this.companyName}}
+           <p class="cc_addr_company">{{this.companyName}}</p>
+          {{/if}}
+         {{/ifDisplay}}
+         {{#if this.address1}}
+          <span class="addr_line1 cc_addr_line">{{this.address1}}</span><br/>
+         {{else}}
+          {{#if this.addressFirstline}}
+           <span class="addr_line1 cc_addr_line">{{this.addressFirstline}}</span><br/>
+          {{/if}}
+         {{/if}}
+
+         {{#if this.address2}}
+          <span class="addr_line2 cc_addr_line">{{this.address2}}</span><br/>
+         {{else}}
+          {{#if this.addressSecondline}}
+           <span class="addr_line1 cc_addr_line">{{this.addressSecondline}}</span><br/>
+          {{/if}}
+         {{/if}}
+
+         {{#if this.address3}}
+          <span class="addr_line3 cc_addr_line">{{this.address3}}</span><br/>
+         {{else}}
+          {{#if this.addressThirdline}}
+           <span class="addr_line1 cc_addr_line">{{this.addressThirdline}}</span><br/>
+          {{/if}}
+         {{/if}}
+         <span class="cc_addr_city">{{this.city}}</span>
+         {{#if this.state}}
+          <span class="cc_addr_state">&#44;&#160;{{this.state}}</span>
+         {{else}}
+          {{#if this.stateCode}}
+           <span class="cc_addr_state">&#44;&#160;{{this.stateCode}}</span>
+          {{else}}
+           {{#if this.stateISOCode}}
+            <span class="cc_addr_state">&#44;&#160;{{this.stateISOCode}}</span>
+           {{/if}}
+          {{/if}}
+         {{/if}}
+         <span class="cc_addr_postal">&#160;{{this.postalCode}}</span><br/>
+         <span class="cc_addr_country">{{this.country}}</span><br/>
+         <span class="cc_addr_phone">{{this.phone}}</span><br/>
+        </div>
+       </script>
+
+       <script id="MyAccount-AddressBook-Desktop" type="text/template">
+
+        <div class="panel panel-default cc_panel cc_myaccount_changePassword">
+         <div class="panel-heading cc_heading">
+          <h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_AddressBook'}}</h3>
+         </div>
+         <div class="panel-body cc_body">
+          <div class="messagingSection-addressBook-Error" style="display: none"></div>
+          <div class="messagingSection-addressBook-Warning" style="display: none"></div>
+          <div class="messagingSection-addressBook-Info" style="display: none"></div>
+          <!--<p class="cc_add_address">
+           {{#if preventAddrEdit}} {{else}} <button type="button" class="addAddress btn btn-default btn-sm cc_add_address_btn" data-id="">{{pageLabelMap 'AddressBook_Add_New_Address'}}</button>{{/if}}
+          </p>-->
+         </div>
+        </div>
+        <div class="orderPaginationSec" ></div>
+        <div class="panel panel-default cc_panel cc_myaccount_addresses">
+         <div class="table-responsive">
+          <table id="addressListTable" class="table table-hover cc_table cc_address_list">
+           <thead class="cc_table_header_row">
+            <th class="cc_address_header">
+             {{pageLabelMap 'Address'}}
+            </th>
+            {{#ifDisplay 'addr.shAdrTy'}}
+            <th class="cc_address_type_header">
+             {{pageLabelMap 'ProductDetails_DocumentTab_Type'}}
+            </th>
+            {{/ifDisplay}}
+            {{#if preventAddrEdit}} {{else}}
+             <th class="cc_address_controls"></th>
+            {{/if}}
+           </thead>
+           <tbody>
+           {{#each this.addressList}}
+            <tr class="cc_address{{sfid}}">
+             <td class="cc_address_display">
+              {{> addressDisplay this.addressBean}}
+             </td>
+             {{#ifDisplay 'addr.shAdrTy'}}
+             <td class="cc_address_type">
+              {{#each addressTypes}}
+               {{#if this.isDefault}}
+                <div class="status cc_address_type_value">{{pageLabelMap 'Default'}} {{pageLabelMap addressType}}</div>
+               {{else}}
+                <div class="status cc_address_type_value">{{pageLabelMap addressType}}</div>
+               {{/if}}
+              {{/each}}
+             </td>
+             {{/ifDisplay}}
+             {{#if ../preventAddrEdit}} {{else}}
+             <td class="cc_address_control">
+              {{#if this.addressBean.addrReadOnly}} {{else}}
+              <button type="button" class="openModalAddr btn btn-default btn-sm cc_open_modal_addr" data-id="{{sfid}}">{{pageLabelMap 'Action_Edit'}}</button>
+              <button type="button" class="deleteAddress btn btn-default btn-sm cc_delete_addr" data-id="{{sfid}}">{{pageLabelMap 'Action_Delete'}}</button>&#160;
+              {{/if}}
+             </td>
+             {{/if}}
+            </tr>
+           {{/each}}
+           </tbody>
+          </table>
+         </div>
+        </div>
+        <div id="modalSec"></div>
+       </script>
+</apex:component>

@@ -1,0 +1,722 @@
+<apex:page docType="html-5.0" sidebar="false" showHeader="false" standardStylesheets="false" cache="false" applyHtmlTag="false"
+ id="OrderConfirmationBIE" controller="CheckoutActions">
+    
+ <script id="OrderDetails-View-Desktop" type="text/template">
+   {{log 'this confirmation' this}}
+   
+   <div class="cc_order_details">
+    {{#if this.isConfirmation}}
+      {{#ifEquals this.orderType 'Purchase Order'}}
+         <div class="panel panel-default cc_panel cc_order_confirmation">
+            <div class="panel-heading cc_heading">
+            <h3 class="panel-title cc_title">{{pageLabelMap 'OrderConfirmation_Title'}}</h3>
+            </div>
+            <div class="panel-body cc_body">
+            <p class="cc_order_confirmation_date">
+               {{#ifNotEquals this.SAPOrderNumber undefined}}
+            {{pageLabelMap 'OrderConfirmation_PlacedOrder' this.SAPOrderNumber this.orderDateStr}}
+            {{else}}
+<!--            {{pageLabelMap 'OrderConfirmation_PlacedOrderSAPNull' this.orderDateStr}} -->
+    		<span id="sapordernumber">Thank you for placing your order! .We are fetching order number from SAP....<i class="fa fa-1.5x fa-refresh fa-spin"></i></span>
+            <br>
+			<span id="saporderdate"></span> 	
+            {{/ifNotEquals}}
+            </p>
+            {{#unless this.userIsGuest}}
+            <p class="cc_order_confirmation_status">
+            <span class="cc_order_status_info">{{pageLabelMap 'OrderConfirmation_StatusInfo'}}&#160;</span>
+            <span class="cc_order_history"><a href="../Agents/s/" class="orderHistory cc_order_history">{{pageLabelMap 'OrderConfirmation_OrderHistory'}}</a>.</span>
+            </p>
+            {{/unless}}
+            <p class="cc_order_confirmation_guidingtext1">
+            {{pageLabelMap 'OrderConfirmation_GuidingText'}}
+            </p>
+            <p class="cc_order_confirmation_guidingtext2">
+            {{pageLabelMap 'OrderConfirmation_GuidingText2'}}
+            </p>
+            <div class="cc_order_confirmation_payments">
+            {{#each this.payments}}
+               {{#ifEquals paymentMethod "PO Number"}}
+               <p class="cc_order_confirmation_payment">{{pageLabelMap 'CheckOut_POGuidingText'}}</p>
+               {{/ifEquals}}
+            {{/each}}
+            </div>
+            </div>
+         </div>
+      {{else}}
+         <div class="panel panel-default cc_panel cc_order_confirmation">
+            <div class="panel-heading cc_heading">
+               <h3 class="panel-title cc_title">{{pageLabelMap 'OrderConfirmation_Title'}}</h3>
+            </div>
+            <div class="panel-body cc_body">
+               <p class="cc_order_confirmation_date">
+                  {{#ifEquals this.orderType 'Price Agreement'}}
+
+                     {{#ifNotEquals this.agreementNumber undefined}}
+                        {{pageLabelMap 'OrderConfirmation_PlacedPA' this.agreementNumber this.orderDateStr}}
+                     {{else}}
+                        <span id="sapordernumber">Thank you for requesting a price agreement! .We are fetching price agreement request number from SAP....<i class="fa fa-1.5x fa-refresh fa-spin"></i></span>
+            			<br>
+						<span id="saporderdate"></span>
+                     {{/ifNotEquals}}
+                  
+                  {{else}}
+                        {{#ifNotEquals this.agreementNumber undefined}}
+                        	{{pageLabelMap 'OrderConfirmation_RevisePA' this.reviseAgreementNumber this.agreementNumber this.orderDateStr}}
+                        {{else}}
+                        	<span id="sapordernumber">Thank you for requesting a revision for price agreement! .We are fetching price agreement revision request number from SAP....<i class="fa fa-1.5x fa-refresh fa-spin"></i></span>
+            				<br>
+							<span id="saporderdate"></span> 
+                        {{/ifNotEquals}}
+                  {{/ifEquals}}
+               </p>
+               <!-- {{#unless this.userIsGuest}}
+               <p class="cc_order_confirmation_status">
+                  <span class="cc_order_status_info">{{pageLabelMap 'OrderConfirmation_StatusInfo'}}&#160;</span>
+                  <span class="cc_order_history"><a href="#" class="orderHistory cc_order_history">{{pageLabelMap 'OrderConfirmation_OrderHistory'}}</a>.</span>
+               </p>
+               {{/unless}} -->
+               <!-- <p class="cc_order_confirmation_guidingtext1">
+                  {{pageLabelMap 'OrderConfirmation_GuidingText'}}
+               </p>
+               <p class="cc_order_confirmation_guidingtext2">
+                  {{pageLabelMap 'OrderConfirmation_GuidingText2'}}
+               </p> -->
+               <!-- <div class="cc_order_confirmation_payments">
+                  {{#each this.payments}}
+                     {{#ifEquals paymentMethod "PO Number"}}
+                     <p class="cc_order_confirmation_payment">{{pageLabelMap 'CheckOut_POGuidingText'}}</p>
+                     {{/ifEquals}}
+                  {{/each}}
+               </div> -->
+            </div>
+         </div>
+      {{/ifEquals}}
+
+
+
+
+
+
+
+
+    {{else}}
+     <div class="panel panel-default cc_panel cc_order_information">
+      <div class="panel-heading cc_heading">
+       <h3 class="panel-title cc_title">{{pageLabelMap 'OrderInformation'}}</h3>
+      </div>
+      <div class="panel-body cc_body">
+       <p class="cc_order_information_number">
+        <span class="cc_order_number">{{pageLabelMap 'OrderView_OrderNumber'}}&#58;&#160;</span>
+        {{#ifNotEquals this.SAPOrderNumber undefined}}
+        <span class="cc_order_name">{{this.SAPOrderNumber}}</span>
+        {{else}}
+        {{#ifNotEquals this.agreementNumber undefined}}
+        <span class="cc_order_name">{{this.agreementNumber}}</span>
+        {{else}}
+        <span class="cc_order_name">Unavailable</span>
+        {{/ifNotEquals}}
+        {{/ifNotEquals}}
+        {{#ifDisplay 'OD.DsplExtOrderNumber'}}
+         <span class="cc_order_ext_number">{{pageLabelMap 'ExternalOrderID'}}&#58;&#160;</span>
+         <span class="cc_order_ext_id">{{this.externalOrderId}}</span>
+        {{/ifDisplay}}
+       </p>
+       <p class="cc_order_information_date">
+        <span class="cc_order_date_label">{{pageLabelMap 'MyOrdersInc_OrderDate'}}&#58;&#160;</span>
+        <span class="cc_order_date">{{this.orderDateStr}}</span>
+       </p>
+       <p class="cc_order_information_status">
+        <span class="cc_order_status_label">{{pageLabelMap 'MyOrdersInc_Status'}}&#160;</span>
+        <span class="cc_order_status">{{pageLabelMap this.status}}</span>
+       </p>
+       <p class="pull-right">
+        <a href="#" class="orderHistory cc_order_history">{{pageLabelMap 'OrderConfirmation_OrderHistory'}}</a>
+       </p>
+       <div class="cc_order_information_payments">
+        {{#each this.payments}}
+         {{#ifEquals paymentMethod "PO Number"}}
+          <p class="cc_order_information_payment">{{pageLabelMap 'CheckOut_POGuidingText'}}</p>
+         {{/ifEquals}}
+        {{/each}}
+       </div>
+      </div>
+     </div>
+    {{/if}}
+    <div class="well cc_well cc_order_information">
+     <h4 class="cc_order_information_title">{{pageLabelMap 'CheckOut_GeneralInformation'}}</h4>
+      <div class="row">
+       <span id="orderinfobox">
+       <div class="col-xs-12 col-md-4">
+        <h5 class="cc_buyer_information">{{pageLabelMap 'CheckOut_BuyerInformation'}}</h5>
+        <p class="cc_buyer">
+         <span class="cc_buyer_firstname">{{this.buyerFirstName}} {{this.buyerLastName}}</span>
+         <span class="cc_buyer_phone">{{this.buyerPhone}}</span>
+         <span class="cc_buyer_email">{{this.buyerEmail}}</span>
+        </p>
+
+        {{#ifEquals this.orderType 'Pruchase Order'}}
+        <h5 class="cc_shipping_information">{{pageLabelMap 'CheckOut_ShippingInformation'}}</h5>
+        <p class="cc_shipping">
+         {{#if this.shippingMethod}}
+          <p class="cc_shipping_method_section">
+           <span class="cc_shipping_method_label">{{pageLabelMap 'CheckOut_ShippingMethod'}}&#58;&#160;</span>
+           <span class="cc_shipping_method">{{formatCurrency this.shippingMethod}}</span>
+          </p>
+         {{/if}}
+         {{#if this.shippingInst}}
+          <p class="cc_shipping_notes_section">
+           <span class="cc_shipping_notes_label">{{pageLabelMap 'CheckOut_ShippingNotes'}}&#58;&#160;</span>
+           <span class="cc_shipping_notes">{{this.shippingInst}}</span>
+          </p>
+         {{/if}}
+         {{#if this.requestedDate}}
+          <p class="cc_shipping_delivery_section">
+           <span class="cc_shipping_delivery_date_label">{{pageLabelMap 'Checkout_RequestedDeliveryDt'}}&#58;&#160;</span>
+           <span class="cc_shipping_delivery_date">{{this.requestedDateStr}}</span>
+          </p>
+         {{/if}}
+        </p>
+        {{/ifEquals}}
+       </div>
+
+
+       {{#ifEquals this.orderType 'Purchase Order'}}
+         <div class="col-xs-12 col-md-4">
+         <!-- <h5 class="cc_billing_address_label">{{pageLabelMap 'CheckOut_BillingAddress'}}</h5>
+         <p class="cc_billing">
+            <span class="cc_billing_address">{{> addressDisplay this.billingAddress}}</span>
+         </p> -->
+         {{log this}}
+         <h5 class="cc_payment_information">{{pageLabelMap 'CheckOut_PaymentInformationLeg'}}</h5>
+         <p class="cc_payment">
+            {{#each this.payments}}
+            {{#ifEquals paymentMethod "Credit Card"}}
+            <span class="cc_payment_information_cc_type">{{cardType}}&#160;</span>
+            <span class="cc_payment_information_cc_number_label">{{pageLabelMap 'CheckOut_CCCardNumber'}}&#58;&#160;</span>
+            <span class="cc_payment_information_cc_number">************{{cardNumber}}</span>
+            <span class="cc_payment_information_cc_expdate_label">{{pageLabelMap 'CheckOut_CCExpDate'}}&#58;&#160;</span>
+            <span class="cc_payment_information_cc_expdate">{{expMonth}}/{{expYear}}</span>
+            {{else}}
+            <span class="cc_payment_information_payment_method_label">{{pageLabelMap paymentMethod}}&#58;&#160;</span>
+            <span class="cc_payment_information_payment_method">{{accountNumber}}</span>
+            {{/ifEquals}}
+            {{/each}}
+            {{#each this.transactionPayments}}
+            <span class="cc_payment_information_transaction_payments">{{pageLabelMapMultiString 'PaymentDisplay_' this.accountType this.accountType this.accountNumber this.subAccountNumber (pageLabelMapMultiString 'PaymentType_' this.paymentType) (pageLabelMapMultiString 'PaymentExpMonth_' this.expirationMonth) (pageLabelMap this.expirationYear)}}</span>
+            {{/each}}
+         </p>
+         </div>
+      {{/ifEquals}}
+       </span>
+      {{#ifEquals this.orderType 'Purchase Order'}}
+       <div class="col-xs-12 col-md-3">
+        <h5 class="cc_shipping_address_label">{{pageLabelMap 'CheckOut_ShippingAddress'}}</h5>
+        {{#ifEquals this.shippingType "Z002"}} <p>
+                                    <span class="cc_shipping_address_label" style="font-weight: bold;">{{pageLabelMap 'Shipping Type'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_address_label">Ship To </span>
+                                </p>
+                                    {{/ifEquals}}
+                     {{#ifEquals this.shippingType "Will Call"}} <p>
+                                    <span class="cc_shipping_address_label" style="font-weight: bold;">{{pageLabelMap 'Shipping Type'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_address_label">{{this.shippingType}}</span>
+                                </p>
+                                    {{/ifEquals}}
+                                    {{#ifEquals this.shippingType "Drop Ship"}} <p>
+                                    <span class="cc_shipping_address_label" style="font-weight: bold;">{{pageLabelMap 'Shipping Type'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_address_label">{{this.shippingType}}</span>
+                                </p>
+                                    {{/ifEquals}} 
+        
+					<div class="cc_shipping_Z002Absent">                     
+                   
+                    </div>
+                    <span class="cc_z002_address"></span>       
+        {{#ifEquals this.shippingType 'Drop Ship'}} 
+        <p class="cc_shipping">
+         <span class="cc_shipping_address">{{> addressDisplay this.shippingAddress}}</span>
+        </p>
+        {{/ifEquals}} 
+       
+       </div>
+          {{#if this.hasCoupon}}
+          <div class="col-xs-12 col-md-4">
+         <h5 class="cc_coupon_label">{{pageLabelMap 'CartInc_AppliedCoupon'}}</h5>
+         <p class="cc_coupon_section">
+          <span class="cc_coupon">{{this.couponName}}</span>
+         </p>
+       </div>
+          {{/if}}
+          {{/ifEquals}}
+
+
+      </div>
+     </div>
+     {{> orderItemsDesktop}}
+     <div class="cc_totals_section">
+      {{> totalsSection}}
+     </div>
+     {{#if this.shipments}}
+      <table class="shopping_cart orderShipments cc_order_shipments_table">
+       <tr class="cc_tr">
+        <th class="cc_th_tracking_url">&#160;</th>
+        <th class="cc_th_date">{{pageLabelMap 'OrderShipment_ShipmentDate'}}</th>
+        <th class="cc_th_carrier">{{pageLabelMap 'OrderShipment_Carrier'}}</th>
+        <th class="cc_th_method">{{pageLabelMap 'OrderShipment_ShipmentMethod'}}</th>
+        <th class="cc_th_tracking_num">{{pageLabelMap 'OrderShipment_TrackingNumber'}}</th>
+        <th class="cc_th_deliver_date">{{pageLabelMap 'OrderShipment_DeliveryDate'}}</th>
+       </tr>
+       {{#each this.shipments}}
+        <tr class="cc_tr_values {{sfid}}">
+         <td class="cc_td_tracking_url"><a target="shiptracking" href="{{{trackingUrl}}}">{{pageLabelMap 'OrderShipment_Track'}}</a></td>
+         <td class="cc_td_date">{{shipmentDateStr}}</td>
+         <td class="cc_td_carrier">{{carrier}}</td>
+         <td class="cc_td_method">{{shippingMethod}}</td>
+         <td class="cc_td_tracking_num">{{trackingNo}}</td>
+         <td class="cc_td_deliver_date">{{deliveryDateStr}}</td>
+        </tr>
+        {{#each this.items}}
+         <tr class="cc_tr_details">
+          <td ></td>
+          <td colspan="5" class="cc_td_detail_line {{sfid}}">
+           <span class="cc_sku_label">{{pageLabelMap 'CartInc_SKU'}}</span>&#58;&#160;<span class="cc_sku_value">{{sku}}</span>, <span class="cc_qty_label">{{pageLabelMap 'CartInc_Qty'}}</span>&#58;&#160;<span class="cc_qty">{{quantity}}</span>
+          </td>
+         </tr>
+        {{/each}}
+       {{/each}}
+      </table>
+     {{/if}}
+    </div>
+   </div>
+  </script>
+ <script id="OrderItems-Desktop" type="text/template">
+    <div class="panel panel-default cc_panel cc_order_item_list">
+      <span class="reverseOrder">{{reverseOrderItems this.orderItems}}</span>
+     {{#each this.orderItems}}
+      <div class="panel-body {{this.itemID}} row cc_body">
+       {{#ifNotEquals this.itemType 'Coupon'}}
+        <div class="col-md-2">
+            {{#ifNotEquals this.productR.SKU 'requestedSku'}}
+         {{productLink this.mockProduct 'cc_order_prod_link' image=(displayImage this.mediaWrapper 'orderDetail img-responsive' alt=this.mockProduct.name dataId=this.mockProduct.sku)}}
+            {{/ifNotEquals}}
+        </div>
+        <div class="col-md-6">
+         <p class="cc_item_title">
+          {{#ifEquals this.pricingType 'external'}}
+           {{#if this.extName}}
+             {{#ifEquals this.productR.SKU 'requestedSku'}}
+                {{this.extName}}
+             {{else}}
+                {{productLink this.mockProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' this.translatedParentProductName this.extName)}}
+             {{/ifEquals}}
+           {{else}}
+            {{#if this.itemLabel}}
+             {{#ifEquals this.productR.SKU 'requestedSku'}}
+                {{this.itemLabel}}
+             {{else}}
+                {{productLink this.mockProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' this.translatedParentProductName this.itemLabel)}}
+             {{/ifEquals}}
+             {{else}}
+             {{#ifEquals this.productR.SKU 'requestedSku'}}
+                {{this.translatedProductName}}
+             {{else}}
+                {{productLink this.mockProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' this.translatedParentProductName this.translatedProductName)}}
+             {{/ifEquals}}
+             {{/if}}
+           {{/if}}
+          {{else}}
+           {{#if this.itemLabel}}
+             {{#ifEquals this.productR.SKU 'requestedSku'}}
+                {{this.itemLabel}}
+             {{else}}
+                {{productLink this.mockProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' this.translatedParentProductName this.itemLabel)}}
+             {{/ifEquals}}
+           {{else}}
+             {{#ifEquals this.productR.SKU 'requestedSku'}}
+                {{this.translatedProductName}}
+            {{else}}
+                {{productLink this.mockProduct 'cc_prod_link' text=(displayProductName 'Aggregate_Display' this.translatedParentProductName this.translatedProductName)}}
+             {{/ifEquals}}
+             {{/if}}
+          {{/ifEquals}}
+           <p> {{this.extSKU}}</p>
+            <span id="itemdetaildisplay-{{this.sfid}}" style="display:none">
+            <p>{{pageLabelMap 'Checkout_RequestedDeliveryDt'}}&#58; <span id="reqdelivery-{{this.sfid}}"><i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p>
+           <p>Type Mark&#58; <span id="typemarks-{{this.sfid}}"><i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p>
+            <p>Price Agreement: <span id="pa-{{this.sfid}}"><i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p>
+            <p>Comment: <span id="comment-{{this.sfid}}"><i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p>
+            </span>
+          {{#ifContains this.pricingModifierTypes 'tiered'}}
+           <div class="cc_prt_tool_tip_div cc_prt_tool_tip_div_od" data-toggle="tooltip" title="{{pageLabelMap 'ProductPricingTiers_VolumeHover'}}">
+            <span class="cc_prt_tool_tip_text cc_prt_tool_tip_text_od">{{pageLabelMap 'ProductPricingTiers_VolumePricingApplied'}}</span>
+           </div>
+          {{/ifContains}}
+         </p>
+         {{#if this.showSubProdTerm}}
+          <p class="cc_subscription">
+           <span class="cc_subscription_details">
+            {{insertTokens this.orderDisplayName this.displayName (price this.price) (price this.SubAmount) (price this.recurringPrice) (price this.recurringPriceSubAmount) (pageLabelPrefixMap 'Subscriptions_Frequency_' this.orderFrequencyUOM) (pageLabelPrefixMap 'Subscriptions_Frequency_' this.installmentFrequencyUOM) this.orderFrequency this.installmentFrequency this.installmentCount this.orderCount this.recurringPricePercentage this.upfrontPricePercentage}}
+           </span>
+          </p>
+         {{/if}}
+        </div>
+        <div class="col-md-4">
+         <div class="price cc_price">
+          {{#ifNotEquals ../isConfirmation true}}
+           <p class="cc_order_status">
+            <span class="cc_status_label">{{pageLabelMap 'MyOrdersInc_Status'}}&#58;&#160;</span>
+            <span class="cc_status">{{pageLabelMap orderLineStatus}}</span>
+           </p>
+          {{/ifNotEquals}}
+          <p class="cc_order_quantity">
+           <span class="cc_quantity_label">{{pageLabelMap 'CartInc_Qty'}}&#58;&#160;</span>
+           <span class="cc_quantity">{{this.quantity}}</span>
+          </p>
+          
+          <p class="cc_order_quantity">
+           <span class="cc_quantity_label">{{pageLabelMap 'UOM'}}&#58;&#160;</span>
+           <span class="cc_quantity">{{getUOMlabel this.unitOfMeasure}}</span>
+          </p>
+           
+           
+          <p class="cc_item_price">
+           {{#if this.price}}
+            <span class="cc_price_label">{{pageLabelMap 'Unit Price'}}&#58;&#160;</span>
+            <span class="cc_price">{{{price this.price ../currencyCode}}}</span>
+           {{/if}}
+           {{#if this.absoluteDiscount}}
+            {{#ifGreater this.absoluteDiscount 0}}
+             <span class="cc_price_label">{{pageLabelMap 'Checkout_YouSave'}}&#58;&#160;</span>
+             <span class="cc_price">{{{price this.absoluteDiscount ../currencyCode}}}</span>
+            {{/ifGreater}}
+            {{#ifLessThan this.absoluteDiscount 0}}
+             <span class="cc_price_label">{{pageLabelMap 'CartInc_Surcharge'}}&#58;&#160;</span>
+             <span class="cc_price">{{{priceAbs this.absoluteDiscount ../currencyCode}}}</span>
+            {{/ifLessThan}}
+           {{/if}}
+          </p>
+ 
+          <p class="cc_item_total">
+           <span class="cc_total_label">{{pageLabelMap 'Line Total'}}&#58;&#160;</span>
+           <span class="cc_total">{{{price this.SubAmount ../currencyCode}}}</span>
+          </p>
+          <p class="cc_external">
+           {{#ifEquals this.pricingType 'external'}}
+            {{#if this.extName}}
+             <span class="cc_ext_sku_label">{{pageLabelMap 'CatalogNo'}}</span>
+             <span class="cc_ext_sku">{{this.extSKU}}</span>
+            {{else}}
+             {{#if this.mockProduct.productFamily}}
+                 <span class="cc_checkout_sku_label">{{pageLabelMap 'FamilyName'}}</span>
+                 <span class="cc_checkout_sku">{{this.mockProduct.productFamily}}</span>
+             {{/if}}
+            {{/if}}
+           {{else}}
+            {{#if this.mockProduct.productFamily}}
+               <span class="cc_checkout_sku_label">{{pageLabelMap 'FamilyName'}}</span>
+               <span class="cc_checkout_sku">{{this.mockProduct.productFamily}}</span>
+            {{/if}}
+           {{/ifEquals}}
+          </p>
+          {{#if sellerName}}
+           <p class="cc_seller">
+            <span class="cc_soldby_label">{{pageLabelMap 'Prod_SoldBy'}}&#58;&#160;</span>
+            <span class="cc_soldby">{{sellerName}}</span>
+           </p>
+          {{/if}}
+ 
+          {{#if this.isSubscription}}
+           <p class="cc_subscription_summary">
+            {{subscriptionSummary 'Order_Subscription_' this.subscriptionFrequency mockProduct.sku itemTotal}}
+           </p>
+           <p class="cc_subscription_next_date">
+            {{pageLabelMap 'Order_Subscription_Next_Payment'}} {{this.nextSubscriptionDateStr}}
+           </p>
+           {{#if this.isLimitedSubscription}}
+            <p class="cc_subscription_summary">
+             {{pageLabelMap 'Order_Subscription_End_Date'}} {{this.subscriptionEndDateStr}}
+            </p>
+           {{/if}}
+          {{/if}}
+          {{#each minorLines}}
+           {{#if this.isSubscription}}
+            <p class="cc_subscription_summary">
+             {{subscriptionSummary 'Order_Subscription_' this.subscriptionFrequency mockProduct.sku itemTotal}}
+            </p>
+            <p class="cc_subscription_next_date">
+             {{pageLabelMap 'Order_Subscription_Next_Payment'}} {{this.nextSubscriptionDateStr}}
+            </p>
+            {{#if this.isLimitedSubscription}}
+             <p class="cc_subscription_end_date">
+              {{pageLabelMap 'Order_Subscription_End_Date'}} {{this.subscriptionEndDateStr}}
+             </p>
+            {{/if}}
+           {{/if}}
+          {{/each}}
+          {{#if this.minorLines }}
+           {{#ifNotEquals pricingType "attrGroup" }}
+            <p class="cc_included_items">
+             <a href="#included_items{{this.itemID}}" id="includedItemsLink" data-toggle="modal" data-id="{{this.itemID}}">{{pageLabelMap 'CheckOut_IncludedItems'}}</a>
+            </p>
+            {{> includedDisplay}}
+           {{/ifNotEquals}}
+          {{/if}}
+          {{#ifEquals pricingType "attrGroup" }}
+           <p class="cc_cart_attribute_items">
+            <a href="#order_attribute_items{{this.itemID}}" id="orderAttributeItemsLink" data-toggle="modal" data-id="{this.itemID}}">{{pageLabelMap 'CheckOut_UOMPricing'}}</a>
+           </p>{
+           {{> orderAttributesDisplay}}
+          {{/ifEquals}}
+         </div>
+        </div>
+       {{/ifNotEquals}}
+       {{#ifEquals this.itemType 'Coupon'}}
+        <div class="col-md-8">
+         <p class="item_title_label coupon_label"></p>
+         <p class="item_title coupon_title">
+          {{{this.mockProduct.name}}}
+         </p>
+        </div>
+        <div class="col-md-4">
+         <div class="price cc_price">
+          <p class="cc_item_total">
+           <span class="cc_total_label">{{pageLabelMap 'CartInc_Total'}}&#58;&#160;</span>
+           <span class="cc_total">{{{price this.SubAmount ../currencyCode}}}</span>
+          </p>
+         </div>
+        </div>
+       {{/ifEquals}}
+      </div>
+      <hr>
+     {{/each}}
+    </div>
+   </script>
+   <script>
+    Handlebars.registerHelper('getUOMlabel', function(uom) {
+        return getUomLabelByUomCode(uom);
+    });
+   
+    Handlebars.registerHelper('reverseOrderItems', function(orderItems) {
+         console.log("Order Items Before Reverse: ", orderItems);
+         let cartOrigin = localStorage.getItem('CartOrigin');
+         console.log("Cart Origin: " + cartOrigin);
+         return /*cartOrigin == 'Reorder' ? orderItems : */orderItems.reverse();
+    });
+    
+    Handlebars.registerHelper('formatCurrency', function(value) {
+        var formattedValue = value.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+        if (!formattedValue.includes('.')) {
+            formattedValue += '.00';
+        }
+        return formattedValue;
+    });
+
+
+    //changes for showing Shipping address on order confirmation page by Sagar
+    /* setTimeout(function () {
+             var ordItem=CCRZ.orderDetailModel.attributes.orderItems;
+              CCRZ.orderDetailModel.attributes.orderItems=ordItem.reverse();
+       
+        console.log("orderItems1:",CCRZ.orderDetailModel?.attributes.orderItems);
+      }, 3800);*/
+                 
+     setTimeout(function () {
+        console.log("Z002 Address:",CCRZ.orderDetailModel.attributes.z002Address);
+       
+        if(CCRZ.orderDetailModel.attributes.z002Address !== undefined){
+                var z002Split = (CCRZ.orderDetailModel.attributes.z002Address).split(';');
+                console.log("z002add inside Order: ", z002Split);
+                var a=z002Split[1];
+                var b =z002Split[2];
+                console.log("z002add b inside Order: ", b);
+                let html ='<br>'+z002Split[0]+ '<br>'+ z002Split[1]+ '<br>' +z002Split[2]+ '<br>' +z002Split[3]+ '<br>' +z002Split[4] + '<br>' +z002Split[5];
+                console.log('z002add html',html);
+                    $('.cc_shipping_Z002Absent').css('display','none');
+                    $('.cc_z002_address').html(html);
+            }
+     
+     }, 5500);
+    
+    // Remove Shipping Local Storage By Sameer Mahadik On(7-12-2021)
+    localStorage.removeItem('z002');
+    localStorage.removeItem('addSAPCust');
+    localStorage.removeItem('addCity');
+    localStorage.removeItem('addPostal');
+    localStorage.removeItem('addCountry');
+    localStorage.removeItem('addComp');
+    localStorage.removeItem('addState');
+    localStorage.removeItem('addLine1');
+
+    function loadEnhancements() {
+           setTimeout(function () {
+           var remoteAction = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+           remoteAction.invokeContainerLoadingCtx($(''), 'getOrderInfoById', this.CCRZ.orderDetailModel.attributes.sfid, (res, err)  => {
+                            console.log(res);
+                            if (res.success) {
+            			        $('#orderinfobox').html(res.data);
+                   		    }
+                        }, {
+                            nmsp: false, escape: false
+                        });
+           }, 300);
+    }
+
+    function loadItemDetails() {
+           if (CCRZ.orderDetailModel.attributes.orderType != 'Purchase Order') return;
+           setTimeout(function () {
+           var remoteAction = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                         this.CCRZ.orderDetailModel.attributes.orderItems.forEach(item => { remoteAction.invokeContainerLoadingCtx($(''), 'getItemReqDeviveryDate', item.sfid, (res, err)  => {
+                            if (res.success) {
+                                console.log("reqDeliveryDate " + res.data + '#reqdelivery-'+item.sfid);
+            				    $('#reqdelivery-'+item.sfid).text(res.data);
+                       		} else {
+                       		    console.log("Error reqDeliveryDate " + item.sfid + err.message);
+                            }
+                        }, {
+                            nmsp: false, escape: false
+                    });});
+           }, 20);
+           setTimeout(function () {
+           var remoteAction = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                         this.CCRZ.orderDetailModel.attributes.orderItems.forEach(item => { remoteAction.invokeContainerLoadingCtx($(''), 'getItemTypeMarks', item.sfid, (res, err)  => {
+                            if (res.success) {
+                                console.log("reqTypeMarks " + res.data + '#typemarks-'+item.sfid);
+           					    $('#typemarks-'+item.sfid).text(res.data);
+                       		} else {
+                       		    console.log("Error reqTypeMarks " + item.sfid + err.message);
+                            }
+                         }, {
+                                nmsp: false, escape: false
+                     });});
+           }, 40);
+           setTimeout(function () {
+           var remoteAction = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                         this.CCRZ.orderDetailModel.attributes.orderItems.forEach(item => { remoteAction.invokeContainerLoadingCtx($(''), 'getItemComment', item.sfid, (res, err)  => {
+                            if (res.success) {
+           					        $('#comment-'+item.sfid).text(res.data);
+                       		    }
+                            }, {
+                                nmsp: false, escape: false
+                            });});
+           }, 80);
+           setTimeout(function () {
+           var remoteAction = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                         this.CCRZ.orderDetailModel.attributes.orderItems.forEach(item => { remoteAction.invokeContainerLoadingCtx($(''), 'getOrderItemPriceAgreementNumber', item.sfid, (res, err)  => {
+                            if (res.success) {
+           					        $('#pa-'+item.sfid).text(res.data);
+                       		    }
+                            }, {
+                                nmsp: false, escape: false
+                            });});
+           }, 60);
+    }
+
+    function loadSAPNumber() {
+  	setTimeout(function () {
+         console.log("order check", this.CCRZ.orderDetailModel.attributes.sfid);
+         	var orderSfid=this.CCRZ.orderDetailModel.attributes.sfid;
+      	 	var remoteCallSAP = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+      	 	var timer;
+            let counter=0;
+      var z002Address1 = (this.CCRZ.orderDetailModel.attributes.z002Address);
+    console.log("Testtttttt",z002Address1);
+      	 timer = setInterval(function() {
+                remoteCallSAP.invokeContainerLoadingCtx($(''), 'getSAPOrderNo', orderSfid, (res, err)  => {
+                            //$("#overlay").remove();//line added
+                            //console.log("objLink",objLink);
+                            if (res.success) {
+                            // $("#overlay").remove();//line added
+                            	console.log("inside if---",res.data);
+               					$('#sapordernumber').text(res.data);
+                    			$('#saporderdate').text("Order Date: "+this.CCRZ.orderDetailModel.attributes.orderDateStr);
+                    			clearInterval(timer);
+                    			loadItemDetails();
+                    			loadEnhancements();
+                           	  }
+                              else {
+             						 counter=counter+1;
+                                     console.log("inside else---",counter);
+             						 if(counter==19){
+                                       location.reload();
+                                     }
+                                    }
+                                }, {
+                                    nmsp: false, escape: false
+                                });
+         }, 3000);
+    }, 100);
+    }
+    var enhancementsTimer = setInterval(function () {
+        if (typeof($('#orderinfobox')[0]) != 'undefined') {
+            clearInterval(enhancementsTimer);
+            loadEnhancements();
+            if (typeof(CCRZ.orderDetailModel.attributes.SAPOrderNumber) != 'undefined') {
+
+            }
+        }
+    }, 267);
+    var SAPTimer = setInterval(function () {
+        if (typeof($('#sapordernumber')[0]) != 'undefined') {
+            clearInterval(SAPTimer);
+            loadSAPNumber();
+        }
+        try {
+            if (typeof(CCRZ.orderDetailModel.attributes.SAPOrderNumber) != 'undefined' || typeof(CCRZ.orderDetailModel.attributes.agreementNumber) != 'undefined' || typeof(CCRZ.orderDetailModel.attributes.reviseAgreementNumber) != 'undefined') {
+                var detailTimer = setInterval(function () {
+                    if (typeof($('[id*="reqdelivery-"]')[0]) != 'undefined') {
+                        clearInterval(detailTimer);
+                        loadItemDetails();
+                    }
+                }, 469);
+                clearInterval(SAPTimer);
+            }
+        } catch(e) {}
+    }, 233);
+
+            var displayItemDetailsTimer = setInterval(function () {
+                if (typeof(CCRZ.orderDetailModel.attributes.orderType) == 'undefined') return;
+                if (CCRZ.orderDetailModel.attributes.orderType != 'Purchase Order') {
+                    clearInterval(displayItemDetailsTimer);
+                } else if (typeof($('[id*="itemdetaildisplay-"]')[0]) != 'undefined') {
+                    clearInterval(displayItemDetailsTimer);
+                    for (let i = 0; i < CCRZ.orderDetailModel.attributes.orderItems.length; i++) {
+                        document.getElementById('itemdetaildisplay-' + CCRZ.orderDetailModel.attributes.orderItems[i].sfid).style.display='inline';
+                    }
+                }
+            }, 262);
+ </script>  
+
+ <style>
+    .reverseOrder {
+       display: none;
+    }
+ </style>
+
+    <style>
+        #shipNotesModalBody {
+            max-width: 100%;
+        }
+
+        #shipNotesLeftCol {
+            text-align: right;
+            padding-right: 10%;
+        }
+
+        #shipNotesLeftCol input {
+            margin-bottom: 20px;
+        }
+        .shipForm {
+            margin: 0 !important;
+        }
+        .ship-req-date {
+			padding: 0 15px 0 0;
+		}
+
+		@media (max-width: 767px) {
+			.ship-contact-no {
+				padding-left: 0;
+			}
+		}
+    </style>
+    
+</apex:page>

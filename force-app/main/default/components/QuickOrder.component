@@ -1,0 +1,365 @@
+<apex:component controller="ccQuickOrderController">
+    <script id="MiniQuickOrder-Entry-Desktop" type="text/template">
+        <div class="form-group cc_form_quickorderrow">
+            <div class="col-xs-5">
+                <label for="quickorder[{{safeQuote this}}].sku" class="sr-only">Enter SKU</label>
+                <input
+                    id="quickorder[{{safeQuote this}}].sku"
+                    type="text"
+                    class="form-control quickOrderField addToCartOnEnter sku-input cc_sku_input ui-autocomplete-input search_input cc_search_input"
+                    placeholder="SKU / Catalog Number"
+                    name="quickorder[{{safeQuote this}}].sku"
+                    autocomplete="off"
+                    onchange="hasValueChanged = true"
+                />
+            <!--{{pageLabelMap 'QuickOrder_SKUPlaceholder'}}-->
+            </div>
+            <div class="col-xs-3">
+                <label for="quickorder[{{safeQuote this}}].qty" class="sr-only">Enter Quantity</label>
+                <input id="quickorder[{{safeQuote this}}].qty" type="text" maxlength="7" class="form-control quickOrderField addToCartOnEnter qty-input cc_qty_input" placeholder="{{pageLabelMap 'QuickOrder_QTYPlaceholder'}}" name="quickorder[{{safeQuote this}}].qty"/>
+            </div>
+            <div class="col-xs-4">
+                <label for="quickorder[{{safeQuote this}}].unitOfMeasure" class="sr-only">Enter UOM</label>
+                <select id="quickorder[{{safeQuote this}}].unitOfMeasure" class="form-control quickOrderField unitOfMeasure-input cc_unitOfMeasure_input" placeholder="UOM" name="quickorder[{{safeQuote this}}].unitOfMeasure" disabled>
+                </select>
+            </div>
+        </div>
+    </script>
+
+<script>
+        var hasValueChanged = false;
+        var cartInnerHTML = '';
+        jQuery(function ($) {
+            CCRZ.models.MiniQuickOrderModel = Backbone.Model.extend();
+
+            CCRZ.views.QuickOrderView2 = CCRZ.CloudCrazeView.extend({
+                templateDesktop: CCRZ.util.template(CCRZ.uiProperties.QuickOrderView.desktop.tmpl),
+                templateEntry: CCRZ.util.template(CCRZ.uiProperties.QuickOrderView.entry.tmpl),
+                className: "cc_RemoteActionController",
+                viewName: "QuickOrderView",
+                events: {
+                    "click .addToCartCustom": "addToCartCustom",
+                    "click .addMore": "addMore",
+                    "click .clearAll": "clearAll",
+                    "keypress .sku-input": "addToCartOnEnterCustom",
+                    "keypress .qty-input": "qtyEntryKey",
+                    "blur .sku-input": "fetchUOMs"
+
+                },
+                scrubQty: function (event) {
+                    var objLink = $(event.target);
+                    var qty = objLink.val();
+                    CCRZ.console.log('qty before=' + qty);
+                    qty = CCRZ.util.scrubQuantity(qty);
+                    CCRZ.console.log('qty after=' + qty);
+                    objLink.val(qty);
+                },
+                qtyEntryKey: function (event) {
+                    var v = this;
+                    if (window.event && window.event.keyCode == 13 || event.which == 13) {
+                        v.addToCartCustom(event);
+                        return false;
+                    } else {
+                        return CCRZ.util.isValidNumericInput(event); // todo, check qty field, not SKU
+                    }
+                },
+                addToCartOnEnterCustom: function (event) {
+                    event.stopImmediatePropagation();
+                    var v = this;
+                    if (window.event && window.event.keyCode == 13 || event.which == 13) {
+                        v.addToCartCustom(event);
+                        return false;
+                    } else {
+                        return true;
+                    }
+                },
+                validateQuantities: function (items) {
+                    var isValid = true;
+                    $.each(items, function (index, item) {
+                        var qty = item.qty;
+                        var scrubbedQty = CCRZ.util.scrubQuantity(qty);
+                        if (qty !== scrubbedQty) {
+                            isValid = false;
+                            var elName = "quickorder[" + index + "].qty";
+                            $(':input[name="' + elName + '"]').val(scrubbedQty); // reset bad qty to 1
+                        }
+                    });
+                    return isValid;
+                },
+                fetchUOMs: function (event) {
+                    if (!hasValueChanged) {
+                        return;
+                    }
+                    hasValueChanged = false;
+                    const sku = event.currentTarget.value;
+                    const index = event.currentTarget.id.split('[').pop().split(']')[0];;
+                    if (sku == '') {
+                        $('select[id="quickorder[' + index + '].unitOfMeasure"]').find('option').remove();
+                        $('select[id="quickorder[' + index + '].unitOfMeasure"]').attr('disabled',true);
+                        document.getElementById('quickorder[' + index + '].qty').value = '';
+                        return;
+                    }
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'ccQuickOrderController' });
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'),
+                        'getUOMsForSKU', sku,
+                        function (response) {
+                            let uomList = [];
+                            if (response && response.data){
+                                uomList = response.data;
+                            }
+                            const uomSelectElement = $('select[id="quickorder[' + index + '].unitOfMeasure"]');
+                            uomSelectElement.find('option').remove();
+                            console.log(uomList);
+                            if (uomList.length === 0) {
+                                uomSelectElement.append(new Option('Invalid SKU', 'Invalid SKU'));
+                            } else {
+                                for (let i = 0; i < uomList.length; i++) {
+                                    let optionElement = new Option(uomList[i].split('|')[1], uomList[i].split('|')[0]);
+                                    uomSelectElement.append(optionElement);
+                                    uomSelectElement.attr('disabled', false);
+                                }
+                            }
+                        }, { buffer: false, escape: false, nmsp: false }
+                    );
+                },
+                addToCartCustom: function (event) {
+                    console.log('addToCartCustom');
+                    var v = this;
+                    var e = event;
+                    //The form is located in the parent component (CSVUpload.component)
+                    var formData = form2js('skuQtyForm', '.', false, function (node) { }, false, true);
+                    var dataSetArray = formData.quickorder;
+                    var catalogNumbers = [];
+                    for(var i = 0; i < dataSetArray.length; i++){
+                        catalogNumbers.push(dataSetArray[i]['sku']);
+                        console.log('quick add ', dataSetArray[i]);
+                    }
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'ccQuickOrderController' });
+                    var whateverThisWasHere = this;
+
+                    var currentCartId = CCRZ.pagevars.currentCartId;
+                    console.log(currentCartId);
+                    var accountId = CCRZ.pagevars.effAccountId;
+                    console.log(accountId);
+                    console.log('quick add dataSet thing ', dataSetArray);
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'),
+                        'addCartItems', dataSetArray, accountId,
+                        function (response) {
+                            console.log('quick add response', response);
+                            if(response && response.data){
+                                console.log('quick add responded');
+                                $(".sku-input").val('');
+                                $(".qty-input").val(1);
+                                $(".uom-input").val('EA');
+                                CCRZ.pagevars.currentCartID = response.inputContext.currentCartId;
+                                CCRZ.pubSub.trigger('cartChange', response.inputContext.currentCartId);
+                                //console.log(response.data);
+                                CCRZ.pubSub.trigger('pageMessage', response.data);
+                                CCRZ.pubSub.trigger('action:CartDetailView:refresh', response.data);
+                                CCRZ.pubSub.trigger('action:MiniCartView:refresh', response.data);
+                                //if (CCRZ.pagevars.pageConfig.isTrue('qo.g2c')) {
+                                //    cartDetails();
+                                //}
+                                v.clearAll(e);
+                            }
+                        }, { buffer: false, escape: false, nmsp: false }
+                    );
+                    /*remoteCall.invokeContainerLoadingCtx($('.deskLayout'),
+                        'getSKUByCatalogNumber', catalogNumbers,
+                        function (resp) {
+                            console.log(`resp`, resp);
+
+                            for(var d of dataSetArray){
+                                if(d.sku){
+                                    d.sku = resp.data[d.sku];
+                                }
+                            }
+
+                            if (whateverThisWasHere.validateQuantities(dataSetArray)) {
+                                var dataSet = JSON.stringify(dataSetArray);
+                                console.log('Dataset: ' + dataSet);
+                                whateverThisWasHere.invokeContainerLoadingCtx($('.deskLayout'), "addBulk", dataSet,
+                                    function (response) {
+                                        if (response && response.data) {
+                                            var cartId = response.data.cartId;
+                                            CCRZ.pagevars.currentCartID = cartId;
+                                            console.log(response);
+                                            //cart change will set cookie
+                                            CCRZ.pubSub.trigger('cartChange', cartId);
+                                            CCRZ.pubSub.trigger('pageMessage', response.data);
+                                            CCRZ.pubSub.trigger('action:CartDetailView:refresh', response.data);
+
+                                            //reset the sku and qty
+                                            if (CCRZ.pagevars.pageConfig.isTrue('qo.clr')) {
+                                                $(".sku-input").val('');
+                                                $(".qty-input").val(1);
+                                            }
+                                            if (CCRZ.pagevars.pageConfig.isTrue('qo.g2c')) {
+                                                cartDetails();
+                                            }
+                                        }
+                                    }
+                                );
+                            } else {
+                                CCRZ.pubSub.trigger("pageMessage", CCRZ.createPageMessage('WARN', "messagingSection-Warning", 'Invalid_Qty'));
+                            }
+                        }, { buffer: false, escape: false, nmsp: false }
+                    );*/
+                },
+                addMore: function (event) {
+                    if (event) {
+                        event.stopImmediatePropagation();
+                    }
+                    var content = "";
+                    var rowSelector = "";
+                    if (CCRZ.display.isPhone())
+                        rowSelector = CCRZ.uiProperties.QuickOrderView.phone.selector + " .row";
+                    else {
+                        if (CCRZ.disableAdaptive) {
+                            rowSelector = CCRZ.uiProperties.QuickOrderView.desktop.selector + " .quickOrderRow";
+                        } else {
+                            rowSelector = CCRZ.uiProperties.QuickOrderView.desktop.selector + " .row";
+                        }
+
+                    }
+
+                    var ele = $(rowSelector);
+
+                    var currSize = this.count;
+                    for (var i = currSize; i < currSize + 3; i++) {
+                        content += this.templateEntry(i);
+                        this.count++;
+                    }
+                    $(rowSelector).append(content);
+                    //populateUomDropDown();
+                    CCRZ.pubSub.trigger('view:productSearchView:refresh');
+                    if (this.count > 29)
+                        $('.addMore').hide();
+                },
+                clearAll: function (event) {
+                    $('.quickOrderField.sku-input').val('');
+                    $('.quickOrderField.qty-input').val('');
+                    $('.unitOfMeasure-input option').remove();
+                    $('.unitOfMeasure-input').attr('disabled', true);
+                },
+                init: function () {
+                    this.count = 0;
+                    this.render();
+                },
+                renderDesktop: function () {
+                    var v = this;
+                    this.setElement($(CCRZ.uiProperties.QuickOrderView.desktop.selector));
+                    this.$el.html(v.templateDesktop());
+
+//                    This causes an infinite recursive loop
+//                    this.render();
+                    if (this.count == 0)
+                        this.addMore();
+                },
+                renderPhone: function () {
+                    var v = this;
+                    this.setElement($(CCRZ.uiProperties.QuickOrderView.phone.selector));
+                    this.$el.html(v.templateDesktop());
+                    if (this.count == 0)
+                        this.addMore();
+                },
+                renderViewChanged: function () {
+                    CCRZ.display.setCurrentView();
+                }
+            });
+
+            CCRZ.miniQuickOrderModel = new CCRZ.models.MiniQuickOrderModel();
+
+            var quickOrderView = new CCRZ.views.QuickOrderView2();
+
+            $('#quickorder_sku').on('input', function () {
+                if ($('#quickorder_qty').val() == '') {
+                    $('#quickorder_qty').val('1');
+                }
+            });
+
+            //setup default options, then use ui properties, if they exist...
+            var uiprops = {};
+            //only use the correct ui properties if they properly defined, else use component defaults.
+            if (CCRZ.uiProperties && CCRZ.uiProperties.autoComplete && CCRZ.uiProperties.autoComplete.PRODUCT_SEARCH && CCRZ.uiProperties.autoComplete.PRODUCT_SEARCH.search_input) {
+                uiprops = CCRZ.uiProperties.autoComplete.PRODUCT_SEARCH.search_input;
+            }
+            var options = _.extend({ minLength: 3 }, { delay: 300 }, { resultLimit: 10 }, { position: { collision: 'none flip' } }, uiprops);
+
+            /*CCRZ.pubSub.on('view:productSearchView:refresh', function () {
+                //populateUomDropDown();
+                $('.sku-input').autocomplete({
+                    source: function (request, response) {
+
+                        Visualforce.remoting.Manager.invokeAction(
+                            'ccrz.cc_ctrl_AutoComplete.searchAutoComplete',
+                            CCRZ.pagevars.remoteContext,
+                            request.term,
+                            options.resultLimit,
+                            'PRODUCT_SEARCH',
+                            function (resp) {
+                                if (resp && resp.data) {
+                                    response(resp.data);
+                                }
+                            },
+                            { buffer: false, escape: false }
+                        );
+                    },
+                    open: function () {
+                        setTimeout(function () {
+                            $('.ui-autocomplete').css('z-index', 99999999999999);
+                        }, 0);
+                    },
+                    minLength: options.minLength,
+                    delay: options.delay,
+                    position: options.position
+
+                });
+            });*/
+        });
+
+        /*function populateUomDropDown() {
+            var interval = window.setTimeout(()=>{populateUomDropDownAsync();}, 100);
+        }*/
+
+        /*function populateUomDropDownAsync() {
+            let uomMap = getUomCodeLabelMap();
+            try{
+                let foundMap = false;
+                const uomSelectElements = $('.unitOfMeasure-input');
+                const emptyUUOMSelectElements = [];
+                for (const uomSelectElement of uomSelectElements) {
+                    if (uomSelectElement.options.length === 0) {
+                        emptyUUOMSelectElements.push(uomSelectElement);
+                    }
+                }
+                for(let index in uomMap) {
+                    for (const uomSelectElement of emptyUUOMSelectElements) {
+                        uomSelectElement.append(new Option(uomMap[uomMap[index]], uomMap[index]));
+                    }
+                    foundMap = true;
+                }
+                if (!foundMap) {
+                    populateUomDropDown();
+                }
+            }catch(error){console.error(error);}
+        }*/
+        var quickOrderTimer = setInterval(function() {
+            if (document.getElementsByClassName('quick-order').length > 0) {
+                clearInterval(quickOrderTimer);
+                if (localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}') !== null) {
+                    var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                    userData = JSON.parse(userData);
+                    var agentSegment = (userData? (localStorage.getItem(userData['User Type']) == 'Distributor' ? userData['DistributorSegment'] : userData['AgentSegment']) : '');
+                    if (localStorage.getItem(agentSegment) == 'LB' || localStorage.getItem(agentSegment).toLowerCase() == 'lamp') {
+                        document.getElementsByClassName('quick-order')[0].style.display='block';
+                    }
+                }
+            }
+        }, 231);
+    </script>
+    <style>
+    .quick-order {
+		    display:none;
+    </style>
+</apex:component>

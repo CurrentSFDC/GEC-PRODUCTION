@@ -1,0 +1,1383 @@
+<apex:page docType="html-5.0" sidebar="false" showHeader="false" standardStylesheets="false" cache="false" applyHtmlTag="false"
+           id="CheckoutInfoBIE">
+    <c:General />
+    <c:ShippingInfo />
+    <c:OrderReview />
+    <c:UserInfo />
+    <c:MenuBIE ></c:MenuBIE>
+    <script id="CheckoutHeader-Desktop" type="text/template">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <ul class="nav nav-pills nav-justified thumbnail">
+                    {{#each this.views}}
+                     <li class="{{#ifEquals @index ../index}}active{{else}}disabled{{/ifEquals}} cc_checkoutStep{{@index}} cc_checkoutStep">
+                     <a><h4 class="list-group-item-heading">{{{this.title}}}</h4></a>
+                         </li>
+                     {{/each}}
+                     {{#ifEquals this.orderType 'Purchase Order'}}
+                     <li class="disabled cc_checkoutStepOrderConfirmation cc_checkoutStep">
+                         <a><h4 class="list-group-item-heading">{{pageLabelMap 'CheckOut_OrderConfirmationStep'}}</h4></a>
+                             </li>
+                         {{/ifEquals}}
+                         </ul>
+                         </div>
+                         </div>
+                         </div>
+                         </script>
+
+    <script>
+    var soldToAdd;
+    var z002AllAdd;
+    var z002AdrressData;
+    var custSegmentcheck;
+    var selectedStrategicOptionId = null;
+
+    Handlebars.registerHelper('getUOMlabel', function(uom) {
+        return getUomLabelByUomCode(uom);
+    });
+
+
+    //CCRZ.uiProperties.Menu.desktop.tmpl = 'menu-desktop-template-override';
+    function selectedZ002(){
+        var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+        remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'updateZ002', (res, err) => {
+            if (res.success) {
+            console.log('Z002');
+        } else {
+                                             //console.log(res);
+                                             }
+                                             }, {
+                                             nmsp: false, escape: false
+                                             });
+    }
+
+    function fetchAdress(){
+        console.log('Sold to ship Address from Pre-render',soldToAdd);
+        console.log('z002 All Address from Pre-render',z002AllAdd);
+        //console.log('Sold to street ship Address from Pre-render',soldToAdd.city);
+        z002AdrressData = "";
+        var html;
+        if(soldToAdd != undefined){
+
+            for (var key in soldToAdd) {
+                var z002SoldKeySplit = key.split(';');
+                html = '<div class="row cc_billing_shipping_info"><div class="col-md-6 cc_personal_info">'+z002SoldKeySplit[1]+' | '+z002SoldKeySplit[2] + '<br>'+soldToAdd[key].street+ '<br>'+ soldToAdd[key].city+ '<br>' +soldToAdd[key].state+ '<br>' +soldToAdd[key].postalCode+ '<br>' +soldToAdd[key].country
+                +'</div><div class="col-md-6 cc_select"><input type="button" value="Select Address" class="btn btn-default btn-sm cc_select_address" onClick="processSelectAddressSoldTo();"/></div></div>'
+            }
+            console.log('Sold to html from Pre-render',html);
+            $('.soldTOAddress').html(html);}
+
+        /*  $('.addr_line1').html(soldToAdd.street);
+                 $('.cc_addr_city').html(soldToAdd.city);
+                 $('.cc_addr_state').html(soldToAdd.state);
+                 $('.cc_addr_postal').html(soldToAdd.postalCode);
+                 $('.cc_addr_country').html(soldToAdd.country);
+                var view = this;
+                var addNew = CCRZ.currentUser.shippingAddress;
+                 console.log('Address Check for user new' + addNew);
+                 view.add1= addNew.split(",");
+                 view.addressNew = add1[0];
+                 view.cityNew= add1[1];
+                 view.postCoun=add1[2];
+                 view.postConNew = postCoun.split(" ");
+                 view.stateCode =  postConNew[1];
+                 view.postalCode = postConNew[2];
+                 $('.addr_line1').html(view.addressNew);
+        //$('.cc_addr_city').val(view.cityNew);
+        //document.getElementById("addCity").innerHTML=view.cityNew;
+        //console.log('Address Check for user City' + document.getElementById("addCity").innerHTML);
+                 $('.cc_addr_city').html(view.cityNew);
+                 $('.cc_addr_state').html(view.stateCode);
+                 $('.cc_addr_postal').html(view.postalCode);
+                 console.log('Address Split1' + view.addressNew);
+                 console.log('Address Split2' + view.cityNew);
+                 console.log('Address Split3' + view.postalCode);
+                 console.log('Address Split4' + view.stateCode);*/
+
+        for (var key in z002AllAdd) {
+
+            console.log("Key: ", key);
+            console.log("value: ", z002AllAdd[key]);
+            var z002KeySplit = key.split(';');
+            console.log("z002KeySplit[0]: ", z002KeySplit[0]);
+            console.log("z002KeySplit[1]: ", z002KeySplit[1]);
+            console.log("z002KeySplit[2]: ", z002KeySplit[2]);
+            console.log('Shipping Address street' + z002AllAdd[key].street);
+
+            z002AdrressData += '<br><div class="row cc_billing_shipping_info"><div class="col-md-6 cc_personal_info">'+z002KeySplit[1]+' | '+z002KeySplit[2] + '<br>'+z002AllAdd[key].street+ '<br>'+ z002AllAdd[key].city+ '<br>' +z002AllAdd[key].state+ '<br>' +z002AllAdd[key].postalCode+ '<br>' +z002AllAdd[key].country
+            +'</div><div class="col-md-6 cc_select"><input type="button" value="Select Address" class="btn btn-default btn-sm cc_select_address" onClick="processAddressSelectionNew('+'\''+key+'\''+');"/></div></div>'
+        }
+        console.log('z002AdrressData: ', z002AdrressData);
+        $('.z002Adrress').html(z002AdrressData);
+        // Set Search Shipping Address Input Field Blank By Sameer Mahadik on(6-16-2021)
+        $('.shipp-addr-search').val('');
+    }
+
+    function processSelectAddressSoldTo() {
+        var processSoldKeySplit;
+
+        // Show Shiiping Form By Sameer Mahadik On(7-9-2021)
+        $("#shippingAddressForm").show();
+        $(".ifPurchaseOrder").hide();
+        $(".clearShippingAddress").hide();
+
+        for (var key in soldToAdd) {
+            processSoldKeySplit = key.split(';');
+
+            $(".addressFieldInput").hide();
+            $(".addressFieldSpan").show();
+            $('.addCompName').html(processSoldKeySplit[1]+' | '+processSoldKeySplit[2]);
+            $('.addLine1R').html(soldToAdd[key].street);
+            $('.addCityName').html(soldToAdd[key].city);
+            $('.addStateName').html(soldToAdd[key].state);
+            $('.addPostalName').html(soldToAdd[key].postalCode);
+            $('.addCountryName').html(soldToAdd[key].country);
+            $('.addSAPcustHiddenSpan').html(processSoldKeySplit[0]);
+            $('.addSAPcustHiddenSpan').css('display','none');
+
+
+        }
+        $("#modal_shipping").modal('hide');
+        // Enabled Continue Button After Selecting Sold To Address By Sameer Mahadik On(7-9-2021)
+        $(".processUserInfo").attr("disabled", false);
+    }
+
+    function processAddressSelectionNew(event) {
+        var selz002Add;
+        var eventSplit;
+        console.log("processAddressSelectionNew Event ", event);
+        selz002Add=z002AllAdd[event];
+        //var selectedAdd = $(event.target).val();
+        //console.log("Get value ofsel Address " + document.getElementById("addAdd").innerHTML);
+        /*var addComp = document.getElementById("addComp").innerHTML;
+                 //localStorage.setItem("addComp",addComp );
+            var addLine1 = document.getElementById("addLine1").innerHTML;
+            var addCity = document.getElementById("addCity").innerHTML;
+            var addState = document.getElementById("addState").innerHTML;
+            var addPostal = document.getElementById("addPostal").innerHTML;
+            var addCountry = document.getElementById("addCountry").innerHTML;
+			var id;*/
+
+        // Show Shiiping Form By Sameer Mahadik On(7-9-2021)
+        $("#shippingAddressForm").show();
+        $(".ifPurchaseOrder").hide();
+        $(".clearShippingAddress").hide();
+
+        eventSplit = event.split(';');
+        $(".addressFieldInput").hide();
+        $(".addressFieldSpan").show();
+        $('.addCompName').html(eventSplit[1]+' | '+eventSplit[2]);
+        $('.addLine1R').html(z002AllAdd[event].street);
+        $('.addCityName').html(z002AllAdd[event].city);
+        $('.addStateName').html(z002AllAdd[event].state);
+        $('.addPostalName').html(z002AllAdd[event].postalCode);
+        $('.addCountryName').html(z002AllAdd[event].country);
+        $('.addSAPcustHiddenSpan').html(eventSplit[0]);
+        $('.addSAPcustHiddenSpan').css('display','none');
+        $("#modal_shipping").modal('hide');
+        // Enabled Continue Button After Selecting Sold To Address By Sameer Mahadik On(7-9-2021)
+        $(".processUserInfo").attr("disabled", false);
+
+        //Assigning the variable for the read only shipping dtl
+        /*$('.addCompName').html(addComp);
+            $('.addLine1R').html(addLine1);
+            $('.addCityName').html(addCity);
+            $('.addStateName').html(addState);
+            $('.addPostalName').html(addPostal);
+            $('.addCountryName').html(addCountry);
+		    $("#modal_shipping").modal('hide');*/
+
+    }
+
+
+    CCRZ.Checkout = _.extend(CCRZ.Checkout || {}, {
+        general: {
+            register: function (registrar) {
+                registrar.registerViewNew(CCRZ.pagevars.pageLabels['CheckOut_General'], new CCRZ.views.GeneralView(), 'images/order_review_header.png');
+            }
+        }
+    });
+    jQuery(function ($) {
+        CCRZ.pubSub.on('view:cartCheckoutView:awaitingSubViewInit', function (theView) {
+
+            var orderType = CCRZ.cartCheckoutModel.attributes.orderType;
+            if (CCRZ.Checkout.general) {
+                CCRZ.Checkout.general.register(theView);
+            }
+            if (CCRZ.Checkout.userInfo) {
+                CCRZ.Checkout.userInfo.register(theView);
+            }
+            if (CCRZ.Checkout.shipping && orderType == 'Purchase Order') {
+                CCRZ.Checkout.shipping.register(theView);
+            }
+            if (CCRZ.Checkout.review) {
+                CCRZ.Checkout.review.register(theView);
+            }
+            if (CCRZ.Checkout.payment && orderType == 'Purchase Order') {
+                CCRZ.Checkout.payment.register(theView);
+            }
+            CCRZ.pubSub.trigger('view:cartCheckoutView:subViewInit');
+        });
+
+        CCRZ.views.GeneralView = CCRZ.CloudCrazeView.extend({
+            templatePhone: CCRZ.util.template('General-Information-Desktop'),
+            templateDesktop: CCRZ.util.template('General-Information-Desktop'),
+            viewName: "GeneralView",
+            managedSubView: true,
+            events: {
+                "click .processReviewNew": "processReviewNew",
+                "change .countryListing": "changeStates",
+                "click .processUserInfo": "processUserInfo",
+                "click .processUserInfoPhone": "processUserInfoPhone",
+                "click .selectAddress": "processAddressSelectionNew",
+                "click .selectAddressPhone": "processAddressSelectionPhone",
+                "click .copyAddress": "copyAddress",
+                "click .fetchAdress": "fetchAdress",
+                "change .repCodeList": "changeRepCodes",
+                "click .clearShippingAddress": "clearDropShipAddress", // Change Function Name "clearAddress" => "clearDropShipAddress" By Sameer Mahadik On(7-14-2021)
+                "click .selectAddressSoldTo": "processSelectAddressSoldTo",
+                "input .shipp-addr-search": "searchShippAddress",
+                "input .projectfirstNameField": "projectNameRemaningCharCount",
+                "input #projectDescription": "projectCommentRemaningCharCount",
+                "click .shppingType": "selectShippingType",
+                "click .validate-po": "validatePo",
+                "keyup #accountNumber": "poKeyPress",
+                "focus .strategicAccountSearchText" : "getStrategicAccountSearchSuggestions",
+                "input .strategicAccountSearchText" : "strategicAccountSearchSuggestions",
+                "mousedown .strategicSearchOption" : "selectStrategicAccount"
+            },
+            init: function () {
+                Handlebars.registerPartial("projectAddressEntry", $("#projectAddressEntry").html());
+                var v = this;
+                v.addressBook = new CCRZ.models.AddressBookModel();
+                v.projStateView = new CCRZ.views.StateView();
+            },
+            initSetup: function (callback) {
+                callback();
+            },
+            preRender: function () {
+                //localStorage.removeItem('z002');
+				if (!CCRZ.cartCheckoutModel.attributes.projectAddress) {
+                    CCRZ.cartCheckoutModel.attributes.projectAddress = {};
+                }
+                // if(CCRZ.cartCheckoutModel.attributes.projectAddress.countryCode){
+                // 	CCRZ.cartCheckoutModel.set('projectCountry',CCRZ.cartCheckoutModel.attributes.projectAddress.countryCode);
+                // }
+
+                var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                userData = JSON.parse(userData);
+                var userCountry = localStorage.getItem(userData['UserCountry']);
+                $(".projectcountry option").filter(function() {
+                    return String(this.text).toUpperCase() == String(userCountry).toUpperCase();
+                }).attr('selected', "selected");
+                var userCountryCode = $('.projectcountry').find(":selected").val();
+
+                if ($('.projectcountry option:selected').text() != userCountry){
+                    console.log("Setting Country to: "+ 'United States');
+                    $(".projectcountry option").filter(function() {
+                    return this.text == 'United States'; 
+                    }).attr('selected', "selected");
+                    userCountryCode = $('.projectcountry').find(":selected").val();
+                }
+
+                CCRZ.cartCheckoutModel.attributes.projectAddress.countryCode = userCountryCode;
+                CCRZ.cartCheckoutModel.attributes.projectAddress.countryList = CCRZ.geoCodes.countryList.toJSON();
+
+                //Rep Code List
+                var view = this;
+                var contactId= 'test' ;
+                var agentRepcode;
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                remoteCall.invokeCtx('getSelRepCode',
+                                     function (selRepCode, err) {
+                                         console.log('Saved Rep Code',selRepCode);
+
+                                         agentRepcode=selRepCode;
+
+                                     }, {
+                                         nmsp: false, escape: false
+                                     });
+                
+                if (CCRZ.cartCheckoutModel.attributes.strategicAccountL !== null &&
+                CCRZ.cartCheckoutModel.attributes.strategicAccountL !== undefined &&
+                    CCRZ.cartCheckoutModel.attributes.StrategicAccounts == undefined) {
+                    var StrategicAccountId = CCRZ.cartCheckoutModel.attributes.strategicAccountL;
+                    remoteCall.invokeCtx('StrategicAccounts_New', StrategicAccountId,							
+                    function (startegicAccount, err) {
+                        console.log('Saved Str Acc: ',startegicAccount);
+                        selectedStrategicOptionId = startegicAccount.Id;
+                        var strategicAccountName = startegicAccount.Name + " - " + startegicAccount.GE_LGT_EM_SAP_Customer_Number__c;
+                        CCRZ.cartCheckoutModel.attributes.strategicAccountLName = strategicAccountName;
+                        $(".strategicAccountSearchText").val(strategicAccountName);
+                        $(".strategicAccountSearchResults").empty();
+                        $(".strategicAccountSearchResults").append('<li><a href="javascript:void(0);" class="strategicSearchOption" data-id=' + startegicAccount.Id + '>' + strategicAccountName + '</a></li>');							
+                    }, {
+                        nmsp: false, escape: false
+                    });
+                }
+
+                remoteCall.invokeCtx('cleardefaultShippingDetails',
+                                    function (res, err) {
+                                        console.log('cleardefaultShippingDetails',res);
+                                    }, {
+                                        nmsp: false, escape: false
+                                    });
+
+                remoteCall.invokeCtx('getAllrelatedZ002Add',
+                                     function (res, err) {
+                                         console.log('getAllrelatedZ002Add',res);
+                                         z002AllAdd=res;
+                                     }, {
+                                         nmsp: false, escape: false
+                                     });
+
+                remoteCall.invokeCtx('getCustSegment',
+                                     function (custSegment, err) {
+                                         console.log('custSegment',custSegment);
+
+                                         custSegmentcheck=custSegment;
+
+
+                                     }, {
+                                         nmsp: false, escape: false
+                                     });
+
+                remoteCall.invokeCtx('getrelatedRepCodes', contactId,
+                                     function (relatedRepCodes, err) {
+                                         console.log('Account Rep Code',relatedRepCodes);
+                                         console.log('Error in Rep code',err);
+
+                                         //var agentRepcode = CCRZ.cartCheckoutModel.attributes.agentRepCode;
+                                         var repOptions = '<option value="">None</option>';
+                                         relatedRepCodes.forEach(function(rep) {
+                                             var isSelected = '';
+                                             if(agentRepcode == rep.GE_LGT_Rep_Code__c) {
+                                                 console.log('in if condition');
+                                                 isSelected = 'selected';
+                                                 console.log('code : ', rep.GE_LGT_Rep_Code__c);
+                                                 $('#agentRepCode').val(rep.GE_LGT_Rep_Code__c);
+                                                 $("#agentName").val(rep.Name);
+                                             }
+                                             repOptions += '<option '+isSelected+' value="'+rep.Name+'">'+rep.GE_LGT_Rep_Code__c+'</option>';
+
+                                         });
+                                         $("#repCode").html(repOptions);
+                                     }, {
+                                         nmsp: false, escape: false
+                                     });
+
+                 remoteCall.invokeCtx('getsoldToAdd',
+                                     function (res, err) {
+                                         console.log('Sold to ship Address PreRender',res);
+
+                                         soldToAdd=res;
+
+                                     }, {
+                                         nmsp: false, escape: false
+                                     });
+
+            },
+            renderPhone: function () {
+                this.renderView(this.templatePhone);
+            },
+            renderDesktop: function () {
+                this.renderView(this.templateDesktop);
+            },
+            renderView: function (currTemplate) {
+                this.$el.html(currTemplate(CCRZ.cartCheckoutModel.toJSON()));
+            },
+            postRender: function () {
+                var v = this;
+                // $('.projectcountry option [value="US"]').attr('selected','selected');
+                var projBean = CCRZ.cartCheckoutModel.get('projectAddress');
+
+                var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                userData = JSON.parse(userData);
+                var userCountry = localStorage.getItem(userData['UserCountry']);
+                $(".countryListing option").filter(function() {
+                    return String(this.text).toUpperCase() == String(userCountry).toUpperCase();
+                }).attr('selected', "selected");
+                var userCountryCode = $('.countryListing').find(":selected").val();
+
+                if ($('.countryListing option:selected').text() != userCountry){
+                    console.log("Setting Country to: "+ 'United States');
+                    $(".countryListing option").filter(function() {
+                    return this.text == 'United States'; 
+                    }).attr('selected', "selected");
+                    userCountryCode = $('.countryListing').find(":selected").val();
+                }
+
+
+                console.log("User Country Code: "+userCountryCode);
+                CCRZ.cartCheckoutModel.set('projectCountry',userCountryCode);
+                projBean.countryCode=userCountryCode;
+                $(".countryListing").attr("disabled",true);
+                var userStateCode = localStorage.getItem("addState");
+                console.log("projBean.stateCode: "+ projBean.stateCode);
+                console.log("userStateCode: "+ userStateCode);
+                console.log("CCRZ.cartCheckoutModel.attributes.projectState: "+ CCRZ.cartCheckoutModel.attributes.projectState);
+                if(CCRZ.cartCheckoutModel.attributes.projectState !=null){
+                    projBean.stateCode=CCRZ.cartCheckoutModel.attributes.projectState;
+                }
+                if((projBean.stateCode == null || projBean.stateCode == undefined) && (userStateCode!=null && userStateCode!=undefined)){
+                    projBean.stateCode = userStateCode;
+                }
+                if (projBean && projBean.stateCode) {
+                    CCRZ.cartCheckoutModel.set('projectCountry',projBean.countryCode);
+                    v.renderProjStates(projBean.stateCode, userCountryCode);
+                } else if (projBean && projBean.state) {
+                    v.renderProjStates(projBean.state, userCountryCode);
+                } else if(CCRZ.cartCheckoutModel.attributes && CCRZ.cartCheckoutModel.attributes.projectState) {
+                    v.renderProjStates(CCRZ.cartCheckoutModel.attributes.projectState, userCountryCode);
+                } else {
+                    v.renderProjStates('', userCountryCode);
+                }
+
+                var today = new Date();
+				// Set save date to valid Form field  By Sameer on (4/16/2021)
+                if(CCRZ.cartCheckoutModel.attributes.validFrom) {
+                    today = new Date(CCRZ.cartCheckoutModel.attributes.validFrom);
+                }
+                var formattedDate = today.toISOString().substr(0, 10);
+                $('#validFrom').val(formattedDate);
+                var date = new Date(); // Now
+                date.setDate(date.getDate() + 60);
+				// Set save date to valid To field  By Sameer on (4/16/2021)
+                if(CCRZ.cartCheckoutModel.attributes.validTo) {
+                    date = new Date(CCRZ.cartCheckoutModel.attributes.validTo);
+                }
+                var formattedDateTo = date.toISOString().substr(0, 10);
+                $('#validTo').val(formattedDateTo);
+                // v.setupValidation();
+                // if (CCRZ.ga) {
+                // 	CCRZ.ga.sendPageview(_.extend({ 'source': 'Checkout' }, CCRZ.pagevars), {
+                // 		'title': 'Checkout - User Information'
+                // 		, 'page': [window.location.pathname, CCRZ.ga.safeParams()].join('?')
+                // 	});
+                // }
+                // Hide RepCode Field For Agent
+               if(CCRZ.currentUser.GEAccountGroup=='ZEAG' || custSegmentcheck==='NotValid'){
+                    $("#repCodeListField").css('display','none');
+                    $("#agentNameField").css('display','none');
+                }
+
+                // lotPricing checkbox checked By Sameer on (4/16/2021)
+                if(CCRZ.cartCheckoutModel.attributes.lotPricing || CCRZ.cartCheckoutModel.attributes.lotPricing == "on") {
+                    $("#lotPricing").prop('checked', true);
+                    $("#lotPricingAmount").attr('disabled', false);
+                }
+
+                // Set lotPricingAmount field blank if its 0 By Sameer on (4/16/2021)
+                if(CCRZ.cartCheckoutModel.attributes.lotPricingAmount == "0") {
+                    $("#lotPricingAmount").val('');
+                }
+
+                // Set Remaining Character Number For PojectName By Sameer Mahadik On(6-28-2021)
+                var projectName = $.trim($(".projectfirstNameField").val());
+                var projectComment = $.trim($("#projectDescription").val());
+                var charLimit = 20;
+                var commentCharLimit = 80;
+
+                if (CCRZ.cartCheckoutModel.attributes.orderType == 'Purchase Order') {
+                    charLimit = 18;
+                    commentCharLimit = 255;
+                }
+
+                var remainingChar = charLimit - projectName.length;
+                var remainingCommChar = commentCharLimit - projectComment.length;
+                if (remainingChar < 0) {
+                    remainingChar = 0;
+                }
+
+                if (remainingCommChar < 0) {
+                    remainingCommChar = 0;
+                }
+
+                $("span.projectNameCharLimit > abbr").text(remainingChar);
+                $("span.projectCommentCharLimit > abbr").text(remainingCommChar);
+            },
+            changeStates: function (event) {
+                var v = this;
+                var selectedCountry = $(event.target).val();
+
+                var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                userData = JSON.parse(userData);
+                var userCountry = localStorage.getItem(userData['UserCountry']);
+                v.renderProjStates('', userCountry);
+            },
+            renderProjStates: function (stateVal, countryVal) {
+                console.log("renderProjStates stateVal"+stateVal);
+                 var v = this;
+                var projStateStyle = 'wide form-control';
+                if (CCRZ.display.isPhone()) {
+                    projStateStyle = 'checkout_wide form-control';
+                }
+                v.projStateView.render('state', stateVal, projStateStyle, CCRZ.geoCodes.filterStates(countryVal).toJSON(), 'project', '.stateSection');
+                $(".projectstate").prop('tabindex', "3");
+                if(stateVal==null || stateVal=='' || stateVal==undefined){
+                    $('.projectstate').prepend($('<option value="" selected>Please Select Province/State</option>'));
+                }
+            },
+            processReviewNew: function () {
+                var formData = form2js('generalInfoForm', '.', false, function (node) { }, false, true);
+                if (this.validateInfo(formData)) {
+                    formData.orderType = CCRZ.cartCheckoutModel.get('orderType');
+
+                    // Check valid to date is greater than valid from By Sameer Mahadik On (2-2-2022)
+                    if (formData.orderType == "Price Agreement") {
+                        console.log("Form Data: ", formData);
+                        var validFrom = new Date(formData.validFrom);
+                        var validTo = new Date(formData.validTo);
+
+                        if (validFrom > validTo) {
+                            $(".general-messagingCustom-Error").html('<div class="alert alert-danger">Your <b>Valid To</b> date should be greater than <b>Valid From</b> date</div>').show();
+                            $(window).scrollTop({ top: 0, left: 0,  behavior: 'smooth' });
+
+                            return;
+                        }
+                    }
+
+                    if(CCRZ.currentUser.GEAccountGroup!='ZEAG')
+                    {
+                        var agentRepCodebyID = document.getElementById("repCode");
+                        console.log('agentRepCodespe : ', agentRepCodebyID.options[agentRepCodebyID.selectedIndex]);
+                        if (typeof agentRepCodebyID.options[agentRepCodebyID.selectedIndex] === 'undefined') {
+
+                        }
+                        else{
+                            formData.repCode = agentRepCodebyID.options[agentRepCodebyID.selectedIndex].text;
+                        }
+                        console.log('agentRepCodebyID : ', formData.repCode);
+                    }
+
+					// Set lotPricingAmount 0 if its blank By Sameer on (4/16/2021)
+                    if(formData.lotPricingAmount == "") {
+                        formData.lotPricingAmount = "0";
+                    }
+
+                    // Pass selected strategic account id for save By Sameer Mahadik On(11-25-2021)
+                    var getStrategicAcctValue = $(".strategicAccountSearchText").val();
+                    if (getStrategicAcctValue == "") {
+                        selectedStrategicOptionId = null;
+                        CCRZ.cartCheckoutModel.attributes.strategicAccountLName = "";
+                    }
+                    formData.strategicAccount = selectedStrategicOptionId;
+
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'updateGeneralFields', formData, formData.projectAddress, (res, err) => {
+                        if (res.success) {
+                        CCRZ.cartCheckoutModel.set(formData);
+						// Reassigned values for city, postalcode & lotPricing field By Sameer on (4/16/2021)
+                        CCRZ.cartCheckoutModel.attributes.projectCity = formData.projectAddress.city;
+                        CCRZ.cartCheckoutModel.attributes.projectPostalCode = formData.projectAddress.postalCode;
+                        CCRZ.cartCheckoutModel.attributes.lotPricing = formData.lotPricing ? formData.lotPricing : false;
+                        CCRZ.cartCheckoutModel.attributes.strategicAccountL = selectedStrategicOptionId;
+                        if(formData.projectAddress.stateCode != null && formData.projectAddress.stateCode != undefined){
+                            console.log("formData.projectAddress.stateCode: "+formData.projectAddress.stateCode);
+                            CCRZ.cartCheckoutModel.attributes.projectState = formData.projectAddress.stateCode;
+                            $(".projectstate").prop('tabindex', "3");
+                            $(".projectstate option").filter(function() {
+                                return this.value == formData.projectAddress.stateCode;
+                            }).attr('selected', "selected");
+                        } else {
+                            console.log("formData.projectAddress.stateCode: is null or undefined");
+                        }
+                        CCRZ.cartCheckoutView.slideRight();
+                    } else {
+                                                         //console.log(res);
+                                                         }
+                                                         }, {
+                                                         nmsp: false, escape: false
+                                                         });
+                    $('[type=button].proceed').attr('disabled', 'disabled').addClass('disabled');
+                }
+            },
+            validateInfo: function (formData) {
+                // Make Project Name, City & State Required If Order Type is "Price Agreement" & "Revise Price Agreement" By Sameer Mahadik On(6-23-2021)
+                var orderType = CCRZ.cartCheckoutModel.attributes.orderType;
+                var requiredFieldsClass = [
+                    {
+                        class: ".projectfirstNameField",
+                        error: "Missing Project Name."
+                    },
+                    {
+                        class: ".projectstate",
+                        error: "Missing Project State."
+                    },
+                    {
+                        class: ".projectCity",
+                        error: "Missing Project City."
+                    }
+                ];
+                var validationErrors = "";
+
+                if (orderType !== "Purchase Order") {
+                    requiredFieldsClass.forEach(elem => {
+                        if($(elem.class).val() == '') {
+                            validationErrors += '<div class="alert alert-danger">' + elem.error + '</div>';
+                        }
+                    });
+                }
+
+                $(".general-messagingCustom-Error").hide();
+                if (validationErrors !== '') {
+                    $(".general-messagingCustom-Error").html(validationErrors).show();
+
+                    $(window).scrollTop({ top: 0, left: 0,  behavior: 'smooth' });
+
+                    return false;
+                }
+
+                var lotPricingValue = document.getElementById("lotPricing");
+                if(lotPricingValue !== null) {
+                    if(lotPricingValue.checked) {
+                        if(document.getElementById("lotPricingAmount").value  =='' ) {
+                            alert("Please select lot Pricing Amount");
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            },
+            changeRepCodes: function (event) {
+                var selectedRepCode = $(event.target).val();
+                if (selectedRepCode === 'undefined'){
+                    selectedRepCode='';
+                }
+                console.log('isUndefineselectedRepCode : ', selectedRepCode);
+                $("#agentName").val(selectedRepCode);
+            },
+
+            clearAddress: function(event) {
+                console.log("Clear Shiiping Address....");
+                $('.addCompName').html('');
+                $('.addLine1R').html('');
+                $('.addCityName').html('');
+                $('.addStateName').html('');
+                $('.addPostalName').html('');
+                $('.addCountryName').html('');
+                $('.addSAPcustHiddenSpan').html('');
+                $(".addressFieldSpan").hide();
+                $(".addressFieldInput").show();
+                $('.addSAPcustHiddenSpan').css('display','none');
+
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                remoteCall.invokeCtx('clearShippingDetails',
+                                     function (res, err) {
+
+                                     }, {
+                                         nmsp: false, escape: false
+                                     });
+
+            },
+
+            clearDropShipAddress: function() {
+                var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+                userData = JSON.parse(userData);
+                var userCountry = localStorage.getItem(userData['UserCountry']);
+                $(".shippingcountry option").filter(function() {
+                    return String(this.text).toUpperCase() == String(userCountry).toUpperCase();
+                }).attr('selected', "selected");
+                var selectedCountry = $(".shippingcountry").find(":selected").val();
+
+                if ($('.shippingcountry option:selected').text() != userCountry){
+                    console.log("Setting Country to: "+ 'United States');
+                    $(".shippingcountry option").filter(function() {
+                    return this.text == 'United States';
+                    }).attr('selected', "selected");
+                    selectedCountry = $(".shippingcountry").find(":selected").val();
+                }
+
+                $(".cc_contact_input_company").val('');
+                $(".cc_contact_input_address").val('');
+                $(".cc_contact_input_city").val('');
+                $(".cc_contact_input_postal_code").val('');
+
+                console.log("Selected Country: "+ selectedCountry);
+                var projStateStyle = 'wide form-control';
+                if (CCRZ.display.isPhone()) {
+                    projStateStyle = 'checkout_wide form-control';
+                }
+                this.projStateView.render('state', '', projStateStyle, CCRZ.geoCodes.filterStates(selectedCountry).toJSON(), 'shipping', '.stateSection');
+                $('.shippingstate').prepend($('<option value="" selected>Please Select Province/State</option>'));
+            },
+
+            processUserInfo:function(event) {
+                var addComp = document.getElementById("companyNameSpan").innerHTML;
+                var addLine1 = document.getElementById("address1Span").innerHTML;
+                var addCity = document.getElementById("citySpan").innerHTML;
+                var addState = document.getElementById("stateSpan").innerHTML;
+                var addPostal = document.getElementById("postalCodeSpan").innerHTML;
+                var addCountry = document.getElementById("countrySpan").innerHTML;
+                var addSAPCust = document.getElementById("SAPcustHiddenSpan").innerHTML;
+                // Get value Of Shipping Type Radio Button By Sameer Mahadik On(7-9-2021)
+                var shippingType = $('.shppingType:checked').val();
+
+                console.log("Saving userInfo addSAPCust "+addSAPCust);
+
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                remoteCall.invokeCtx('saveShippingDetails',addComp,addLine1,addCity,addState,addPostal,addCountry,addSAPCust,shippingType,
+                                     function (res, err) {
+                                         console.log('saveShippingDetails',res.data);
+                                         // Set ShippingType value By Sameer Mahadik On(7-9-2021)
+                                         CCRZ.cartCheckoutModel.attributes.shippingType = shippingType;
+                                         if (shippingType !== "Will Call") {
+                                            CCRZ.cartCheckoutModel.attributes.showDayAirBoxes = true;
+                                         } else {
+                                            CCRZ.cartCheckoutModel.attributes.showDayAirBoxes = false;
+                                            if (CCRZ.cartCheckoutModel.attributes.shippingNotes !== undefined) {
+                                                var shippingNotes = CCRZ.cartCheckoutModel.attributes.shippingNotes;
+                                                delete shippingNotes['nextDayAir'];
+                                                delete shippingNotes['secondDayAir'];
+                                            }
+
+                                            if (CCRZ.cartCheckoutModel.attributes.shippingInstructions !== undefined) {
+                                                var shippingInstructions = CCRZ.cartCheckoutModel.attributes.shippingInstructions;
+                                                shippingInstructions = shippingInstructions.replace(' Next Day Air,', '');
+                                                shippingInstructions = shippingInstructions.replace(' 2nd Day Air,', '');
+                                                CCRZ.cartCheckoutModel.attributes.shippingInstructions = shippingInstructions;
+                                            }
+                                         }
+
+                                     }, {
+                                         nmsp: false, escape: false
+                                     });
+
+                console.log('Beforelocalstorage',addLine1);
+                if(addLine1==''){
+                    console.log('localstorage',addLine1);
+                }
+                if(addComp=='' && addLine1=='' && addCity=='' && addState=='' && addPostal=='' && addCountry==''){
+                    localStorage.setItem("z002","Absent");
+                    console.log('inside localstorage if set item');
+                }
+
+                else{
+                    localStorage.setItem("z002","Present");
+                    localStorage.setItem("addComp",addComp);
+                    localStorage.setItem("addLine1",addLine1);
+                    localStorage.setItem("addCity",addCity);
+                    localStorage.setItem("addState",addState);
+                    localStorage.setItem("addPostal",addPostal);
+                    localStorage.setItem("addCountry",addCountry);
+                    localStorage.setItem("addSAPCust",addSAPCust);
+
+                    console.log('inside localstorage else set item');
+
+                }
+
+            },
+
+            searchShippAddress: function(event) {
+                var searchString = event.target.value;
+                searchString = $.trim(searchString.toLowerCase());
+                var addressList = $("#modal_shipping .cc_billing_shipping_info");
+
+                for (var i = 0; i < addressList.length; i++) {
+                   var address = $(addressList[i]).text();
+                   address = address.toLowerCase();
+
+                   if (address.includes(searchString)) {
+                        $(addressList[i]).show();
+                   } else {
+                        $(addressList[i]).hide();
+                   }
+                }
+            },
+
+            projectNameRemaningCharCount: function(event) {
+                var projectName = $.trim(event.target.value);
+                var charLimit = 20;
+
+                if (CCRZ.cartCheckoutModel.attributes.orderType == "Purchase Order") {
+                    charLimit = 18;
+                }
+
+                if (projectName.length <= charLimit) {
+                    var remainingChar = charLimit - projectName.length;
+                    $("span.projectNameCharLimit > abbr").text(remainingChar);
+                }
+            },
+
+            projectCommentRemaningCharCount: function(event) {
+                var projectCommName = $.trim(event.target.value);
+                var charLimit = 80;
+
+                if (CCRZ.cartCheckoutModel.attributes.orderType == "Purchase Order") {
+                    charLimit = 255;
+                }
+
+                if (projectCommName.length <= charLimit) {
+                    var remainingChar = charLimit - projectCommName.length;
+                    $("span.projectCommentCharLimit > abbr").text(remainingChar);
+                }
+            },
+
+            selectShippingType: function(event) {
+                // Set Shipping View As Per Shipping Type BY Sameer Mahadik On(7-9-2021)
+                var shippingType = event.target.value;
+
+                if (shippingType == "Z002") {
+                    $("#shippingAddressForm").hide();
+                    $(".shipping-messagingSection-Error").hide();
+                    $('#modal_shipping').modal('show');
+                    $(".processUserInfo").attr("disabled", true);
+                } else if (shippingType == "Drop Ship") {
+                    this.clearAddress();
+                    this.clearDropShipAddress();
+                    $('#modal_shipping').modal('hide');
+                    $("#shippingAddressForm").show();
+                    $(".ifPurchaseOrder").show();
+                    $(".clearShippingAddress").show();
+                    $(".processUserInfo").attr("disabled", false);
+                } else {
+                    this.clearAddress();
+                    $('#modal_shipping').modal('hide');
+                    $("#shippingAddressForm").hide();
+                    $(".shipping-messagingSection-Error").hide();
+                    $(".processUserInfo").attr("disabled", false);
+                }
+            },
+
+            validatePo: function(event) {
+                var poValue = $("#accountNumber").val();
+                var soldTo = CCRZ.cartCheckoutModel.attributes.soldToAccount;
+
+                $(".poPayment-messagingSection-Error").html('').hide();
+                if (poValue == "") {
+                    $(".poPayment-messagingSection-Error").show();
+                    $(".poPayment-messagingSection-Error").html(
+                         '<div class="alert alert-danger">Field Validation Errors</div>'
+                        +'<div class="alert alert-danger">PO Number is required</div>');
+                        return false;
+                }
+
+                $("header").before('<div class="customLoader"></div>');
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'validateUniquePO', poValue, soldTo,
+                    function (res, err) {
+                        $(".customLoader").remove();
+                        if (res.success) {
+                            $(".makePOPayment").attr("disabled", false);
+                        } else {
+                            $(".poPayment-messagingSection-Error").show().html('<div class="alert alert-danger">PO Number is dupicated, Please enter another PO number.</div>');
+                        }
+
+                    }, {
+                        nmsp: false, escape: false
+                });
+
+            },
+
+            poKeyPress: function(event) {
+                if (event.keyCode !== 13) {
+                    $(".makePOPayment").attr("disabled", true);
+                }
+            },
+
+            getStrategicAccountSearchSuggestions: function() {
+                var view = this;
+
+                if (CCRZ.cartCheckoutModel.attributes.StrategicAccounts == undefined) {
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                    $("header").before('<div class="customLoader"></div>');
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'StrategicAccounts',
+                        function (StrategicAccounts, err) {
+                            console.log("statusCode: ", err.statusCode);
+                            if (err.statusCode !== undefined && err.statusCode == 200) {
+                                $(".customLoader").remove();
+                                console.log(err);
+                                console.log("StrategicAccounts",StrategicAccounts);
+                                if (StrategicAccounts.length > 0) {
+                                    CCRZ.cartCheckoutModel.attributes.StrategicAccounts = StrategicAccounts;
+                                    view.strategicAccountSearchSuggestions();
+                                }
+                            }
+
+                        }, {
+                        nmsp: false, escape: false
+                    });
+                } else {
+                    this.strategicAccountSearchSuggestions();
+                }
+            },
+
+            strategicAccountSearchSuggestions: function() {
+                var searchString = $(".strategicAccountSearchText").val().toLowerCase();
+
+                $(".strategicAccountSearchResults").empty();
+
+                console.log("StrategicAccountSearchSuggestions:" ,CCRZ.cartCheckoutModel.attributes.StrategicAccounts);
+                var currentTarget;
+                var targetLowerCase;
+                var matches = [];
+
+                CCRZ.cartCheckoutModel.attributes.StrategicAccounts.forEach(function(acct){
+                    currentTarget = acct.Name + " - " + acct.GE_LGT_EM_SAP_Customer_Number__c;
+                    targetLowerCase = currentTarget.toLowerCase();
+                    if(targetLowerCase.includes(searchString)) {
+                        matches.push({Id: acct.Id, Name: currentTarget});
+                    }
+                });
+
+                matches.forEach(function(match){
+                    $(".strategicAccountSearchResults").append('<li><a href="javascript:void(0);" class="strategicSearchOption" data-id=' + match.Id + '>' + match.Name + '</a></li>');
+                });
+            },
+
+            selectStrategicAccount: function(event) {
+                var selectedOptionName = $.trim(event.target.text);
+                selectedStrategicOptionId = $.trim($(event.target).data('id'));
+
+                console.log("Selected Option Id: ", selectedStrategicOptionId);
+                console.log("Selected Option Name: ", selectedOptionName);
+
+                $(".strategicAccountSearchText").val(selectedOptionName);
+                CCRZ.cartCheckoutModel.attributes.strategicAccountLName = selectedOptionName;
+            }
+
+        });
+
+
+
+        //original view creation
+
+        // CCRZ.views.GeneralView = CCRZ.CloudCrazeView.extend({
+        // 	templatePhone : CCRZ.util.template('General-Information-Desktop'),
+        // 	templateDesktop : CCRZ.util.template('General-Information-Desktop'),
+        // 	viewName : "GeneralView",
+        // 	managedSubView : true,
+        // 	events : {
+        // 		"click .processReviewNew" : "processReviewNew"
+        // 	},
+        // 	initSetup: function(callback) {
+        // 		callback();
+        // 	},
+        // 	renderPhone : function() {
+        // 		this.renderView(this.templatePhone);
+        // 	},
+        // 	renderDesktop : function() {
+        // 		this.renderView(this.templateDesktop);
+        // 	},
+        // 	renderView: function(currTemplate) {
+        // 		this.$el.html(currTemplate(this));
+        // 	},
+        // 	processReviewNew: function() {
+        // 		CCRZ.cartCheckoutView.slideRight();
+        // 	},
+        // });
+
+        // Remove Checked From "Select Shipping" Radio If "modal_shipping" Is Closed Without Selecting Address By Sameer Mahadik On(7-14-2021)
+        CCRZ.pubSub.on('view:cartCheckoutView:refresh', (myModel) => {
+            var orderType = CCRZ.cartCheckoutModel.attributes.orderType;
+            if (orderType == "Purchase Order") {
+                if (myModel.currStep == 1) {
+                    $("#modal_shipping").on("hidden.bs.modal", function () {
+                        if ($("#companyNameSpan").text() == "") {
+                            $(".shipZ002").prop("checked", false);
+                        } else {
+                            $("#shippingAddressForm").show();
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+    Backbone.on('view:Nav:created', function(viewPrototype){
+        var userData = localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}');
+        userData = JSON.parse(userData);
+        var userCountry = localStorage.getItem(userData['UserCountry']);
+        
+        if(userData.hasOwnProperty("internalUserFirstName") && userData.hasOwnProperty("internalUserLastName") && userData.hasOwnProperty("internalUserPhone") && userData.hasOwnProperty("internalUserName")){
+            console.log("Setting internalUserPhone, internalUserName, internalUserFirstName, internalUserLastName from localstorage");
+            var internalUserFirstName = localStorage.getItem(userData['internalUserFirstName']);
+            var internalUserLastName = localStorage.getItem(userData['internalUserLastName']);
+            var internalUserPhone = localStorage.getItem(userData['internalUserPhone']);
+            var internalUserName = localStorage.getItem(userData['internalUserName']);
+        } else {
+            console.log("Setting internalUserPhone, internalUserName, internalUserFirstName, internalUserLastName to null");
+            var internalUserPhone = null;
+            var internalUserName = null;
+            var internalUserFirstName = null;
+            var internalUserLastName = null;
+        }
+
+        viewPrototype.render = function(options){
+            console.log("OrderViewnew");
+            if(CCRZ.cartCheckoutModel.attributes.orderType=='Purchase Order'){
+                    $(".elsePurchaseOrder").hide();
+                    $(".ifPurchaseOrder").show();
+
+                }
+                else{
+                	 $(".ifPurchaseOrder").hide();
+                    $(".elsePurchaseOrder").show();
+                }
+            console.log("CCRZ Attributes inside view:Nav:created: ", CCRZ.cartCheckoutModel.attributes);
+
+            // $('#shippingAddressForm').trigger("reset");
+
+            // Scroll Page At Top When Click On Continue & Back Button By Sameer Mahadik On(7-14-2021)
+            $(window).scrollTop({ top: 0, left: 0,  behavior: 'smooth' });
+
+            // Hide "shippingAddressForm" Form By Sameer Mahadik On(7-9-2021)
+            if (CCRZ.cartCheckoutModel.attributes.orderType == 'Purchase Order') {
+                $("#shippingAddressForm").hide();
+
+                var shippingType = CCRZ.cartCheckoutModel.attributes.shippingType;
+
+                if (shippingType !== undefined && shippingType !== "") {
+                    $(".processUserInfo").attr("disabled", false);
+                    if (shippingType == "Z002") {
+                        if(localStorage.getItem("z002") == 'Present') {
+                            $(".shipZ002").attr("checked", "Checked");
+                            $("#shippingAddressForm").show();
+                            $(".ifPurchaseOrder").hide();
+                            $(".clearShippingAddress").hide();
+                        }
+                    } else if(shippingType == "Drop Ship") {
+                        $(".shipDropShip").attr("checked", "Checked");
+                        $("#shippingAddressForm").show();
+                        $(".ifPurchaseOrder").show();
+                        $(".clearShippingAddress").show();
+                    } else {
+                        $(".shipWillCall").attr("checked", "Checked");
+                    }
+                }
+
+            }
+            // $(".shippingField").val('');
+            // Trigger Clear Drop Shipp Address Click Event To Reset Drop Shipp Input Field By Sameer Mahadik On(7-14-2021)
+            //$(".clearShippingAddress").trigger("click");
+
+            if(localStorage.getItem("z002") == 'Present'){
+
+                console.log("localStorage.getItemif",localStorage.getItem("z002"));
+                $(".addressFieldInput").hide();
+                $(".addressFieldSpan").show();
+                //Assigning the variable for the read only shipping dtl
+                $('.addCompName').html(localStorage.getItem("addComp"));
+                $('.addLine1R').html(localStorage.getItem("addLine1"));
+                $('.addCityName').html(localStorage.getItem("addCity"));
+                $('.addStateName').html(localStorage.getItem("addState"));
+                $('.addPostalName').html(localStorage.getItem("addPostal"));
+                $('.addCountryName').html(localStorage.getItem("addCountry"));
+                $('.addSAPcustHiddenSpan').html(localStorage.getItem("addSAPCust"));
+                $('.addSAPcustHiddenSpan').css('display','none');
+            }
+
+            else{
+                console.log("localStorage.getItemelse",localStorage.getItem("z002"));
+                if(localStorage.getItem("z002") ==null){
+                    if(CCRZ.cartCheckoutModel.attributes.z002Address!==undefined){
+                        console.log("Inside else OrderViewnew check: ", CCRZ.cartCheckoutModel.attributes.z002Address);
+                        var z002SplitDef = (CCRZ.cartCheckoutModel.attributes.z002Address).split(';');
+                        $(".addressFieldInput").hide();
+                        $(".addressFieldSpan").show();
+                        //Assigning the variable for the read only shipping dtl
+                        $('.addCompName').html(z002SplitDef[0]);
+                        $('.addLine1R').html(z002SplitDef[1]);
+                        $('.addCityName').html(z002SplitDef[2]);
+                        $('.addStateName').html(z002SplitDef[3]);
+                        $('.addPostalName').html(z002SplitDef[4]);
+                        $('.addCountryName').html(z002SplitDef[5]);
+                        $('.addSAPcustHiddenSpan').html(z002SplitDef[6]);
+                        $('.addSAPcustHiddenSpan').css('display','none');
+                    }
+                }
+                else{
+                    console.log("Inside else of else OrderViewnew check: ", document.getElementById("companyName1"));
+                    //document.getElementById("companyName1").value = "test";
+                    $('#shippingAddressForm').trigger("reset")
+                }
+            }
+
+            console.log("CCRZ.cartCheckoutModel.attributes.z002Address: ", CCRZ.cartCheckoutModel.attributes.z002Address);
+            if(CCRZ.cartCheckoutModel.attributes.shippingType=='Will Call'){
+                  $('.cc_shipping_Z002Absent').css('display','none');
+                }
+
+            if(CCRZ.cartCheckoutModel.attributes.z002Address !== undefined){
+                var z002Split = (CCRZ.cartCheckoutModel.attributes.z002Address).split(';');
+                console.log("z002add inside Order: ", z002Split);
+                var a=z002Split[1];
+                var b =z002Split[2];
+                console.log("z002add b inside Order: ", b);
+                let html ='<br>'+z002Split[0]+ '<br>'+ z002Split[1]+ '<br>' +z002Split[2]+ '<br>' +z002Split[3]+ '<br>' +z002Split[4] + '<br>' +z002Split[5];
+                console.log('z002add html',html);
+                if(localStorage.getItem("z002") == 'Present'){
+                    $('.cc_shipping_Z002Absent').css('display','none');
+                    $('.cc_z002_address').html(html);
+                }
+                else{
+                    $('.cc_z002_address').css('display','none');
+                }
+            }
+            this.model.orderType = CCRZ.cartCheckoutModel.attributes.orderType;
+            this.model.index = (options != undefined) ? options.index : 0;
+            if (CCRZ.display.isPhone()){
+                this.setElement($(CCRZ.uiProperties.CheckoutNav.phone.selector));
+                this.$el.html(this.templatePhone(this.model));
+            }
+            else{
+                this.setElement($(CCRZ.uiProperties.CheckoutNav.desktop.selector));
+                this.$el.html(this.templateDesktop(this.model));
+            }
+            CCRZ.pubSub.trigger("view:"+this.viewName+":refresh", this);
+            console.log("ownedID---",CCRZ.cartCheckoutModel);
+            var owner11id=CCRZ.cartCheckoutModel.attributes.ownerId;
+            console.log("owner11id",owner11id);
+			$("#emailField").val('');
+            $("#homePhoneField").val('');
+            $("#firstNameField").val('');
+            $("#lastNameField").val('');
+            var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'CheckoutActions'});
+            remoteCall.invokeCtx('getusermail', owner11id,
+                function (res, err) {
+                    console.log("Value of response" , res);
+                    if(null != internalUserName && internalUserName != undefined) {
+                        $("#emailField").val(internalUserName);
+                    } else {
+                        $("#emailField").val(res.usermail);
+                    }
+
+                    if(null != internalUserPhone && internalUserPhone != undefined) {
+                        $("#homePhoneField").val(internalUserPhone);
+                    } else {
+                        $("#homePhoneField").val(res.userphone);
+                    }
+
+                    if(null != internalUserLastName && internalUserLastName != undefined) {
+                        $("#lastNameField").val(internalUserLastName);
+                    } else {
+                        $("#lastNameField").val(res.lastname);
+                    }
+
+                    if(null != internalUserFirstName && internalUserFirstName != undefined) {
+                        $("#firstNameField").val(internalUserFirstName);
+                    } else {
+                        $("#firstNameField").val(res.firstname);
+                    } 
+
+                    $("#emailField").attr("disabled",true);
+                    $("#homePhoneField").attr("disabled",true);
+                    $("#lastNameField").attr("disabled",true);
+                    $("#firstNameField").attr("disabled",true);
+
+                    console.log("Country from Local Storage: "+userCountry);
+                    $(".shippingcountry option").filter(function() {
+                        return String(this.text).toUpperCase() == String(userCountry).toUpperCase();
+                    }).attr('selected', "selected");
+
+                    console.log("$('.shippingcountry option:selected').text(): "+$('.shippingcountry option:selected').text());
+                    var selectedCountry = $(".shippingcountry").find(":selected").val();
+                    if ($('.shippingcountry option:selected').text() != userCountry){
+                        console.log("Setting Country to: "+ 'United States');
+                        $(".shippingcountry option").filter(function() {
+                            return this.text == 'United States';
+                        }).attr('selected', "selected");
+                        selectedCountry = $(".shippingcountry").find(":selected").val();
+                    }
+                    $(".shippingcountry").attr("disabled",true);
+
+                    if(CCRZ.cartCheckoutModel.attributes.shippingAddress.stateCode != null && CCRZ.cartCheckoutModel.attributes.shippingAddress.stateCode!='') {
+                        console.log("Selected Country: "+ selectedCountry);
+                        console.log("CCRZ.cartCheckoutModel.attributes.shippingAddress.stateCode: "+ CCRZ.cartCheckoutModel.attributes.shippingAddress.stateCode);
+                        var projStateStyle = 'wide form-control';
+                        if (CCRZ.display.isPhone()) {
+                            projStateStyle = 'checkout_wide form-control';
+                        }
+                        this.projStateView.render('state', CCRZ.cartCheckoutModel.attributes.shippingAddress.stateCode, projStateStyle, CCRZ.geoCodes.filterStates(selectedCountry).toJSON(), 'shipping', '.stateSection');
+                    } else {
+                        $('.shippingstate').prepend($('<option value="" selected>Please Select Province/State</option>'));
+                    }
+                }, {
+                    nmsp: false, escape: false
+                });
+
+
+            // Set save value of strategic account to input field by Sameer Mahadik On(11-24-2021)
+            if (CCRZ.cartCheckoutModel.attributes.StrategicAccounts !== undefined) {
+                CCRZ.cartCheckoutModel.attributes.StrategicAccounts.forEach(acct => {
+                    if (acct.Id == CCRZ.cartCheckoutModel.attributes.strategicAccountL) {
+                        selectedStrategicOptionId = acct.Id;
+                        var strategicAcctName = acct.Name + " - " + acct.GE_LGT_EM_SAP_Customer_Number__c;
+                        CCRZ.cartCheckoutModel.attributes.strategicAccountLName = strategicAcctName;
+                        $(".strategicAccountSearchText").val(strategicAcctName);
+                        $(".strategicAccountSearchResults").empty();
+                        $(".strategicAccountSearchResults").append('<li><a href="javascript:void(0);" class="strategicSearchOption" data-id=' + acct.Id + '>' + strategicAcctName + '</a></li>');
+                    }
+                });
+            }
+            
+        }
+        
+        
+        
+    
+    });
+
+    Backbone.on('view:AddressListing:created', function(viewPrototype){
+        viewPrototype.validateInfo = function(){
+            var isValid = false;
+            $('.alert-error').hide();
+            isValid = $("#mainform").valid();
+
+            if($("#ccEmailForm").length>0){
+                isValid = $("#ccEmailForm").valid();
+            }
+            //if (!CCRZ.display.isPhone()){
+            if (isValid)
+                isValid = isValid && $("#billingAddressForm").valid();
+            if (isValid)
+                isValid = isValid && $("#shippingAddressForm").valid();
+            //}
+            return isValid;
+        }
+        viewPrototype.setupValidation = function() {
+            $("#mainform").validate({
+                invalidHandler: function(event, validator) {
+                    CCRZ.handleValidationErrors(event, validator, 'main-messagingSection-Error', false);
+                },
+                rules: {
+                    buyerFirstName: {
+                        required: CCRZ.getPageConfig('Info.ReqFirstName', true)
+                    },
+                    buyerLastName: {
+                        required: CCRZ.getPageConfig('Info.ReqLastName', true)
+                    },
+                    buyerEmail: {
+                        required: CCRZ.getPageConfig('Info.ReqEmail', true),
+                        email: true
+                    },
+                    buyerPhone: {
+                        required: CCRZ.getPageConfig('Info.ReqPhone', false)
+                    }
+                },
+                messages: {
+                    buyerFirstName: {
+                        required: "MISSING_FIRST_NAME"
+                    },
+                    buyerLastName: {
+                        required: "MISSING_LAST_NAME"
+                    },
+                    buyerEmail: {
+                        required: "MISSING_EMAIL_ADDRESS",
+                        email: "FORMATTING_EMAIL"
+                    },
+                    buyerPhone: {
+                        required: "MISSING_PHONE"
+                    }
+                },
+                errorPlacement: function(error, element) { }
+            });
+            $("#ccEmailForm").validate({
+                invalidHandler: function(event, validator) {
+                    CCRZ.handleValidationErrors(event, validator, 'ccemail-messagingSection-Error', false);
+                },
+                rules: {
+                    ccEmailAddresses: {
+                        multiemail: true
+                    }
+                },
+                messages: {
+                    ccEmailAddresses: {
+                        multiemail: "FORMATTING_EMAIL"
+                    }
+                },
+                errorPlacement: function(error, element) { }
+            });
+            $("#billingAddressForm").validate({
+                invalidHandler: function(event1, validator1) {
+                    CCRZ.handleValidationErrors(event1, validator1, 'billing-messagingSection-Error', false);
+                },
+                rules: {
+                    "billingAddress.address1": {
+                        required: CCRZ.getPageConfig('Info.ReqAddr1', true)
+                    },
+                    "billingAddress.city": {
+                        required: CCRZ.getPageConfig('Info.ReqCity', true)
+                    },
+                    "billingAddress.postalCode": {
+                        maxlength: 10
+                    }
+                },
+                messages: {
+                    "billingAddress.address1": {
+                        required: "MISSING_BILL_ADDR_1"
+                    },
+                    "billingAddress.city": {
+                        required: "MISSING_BILL_CITY"
+                    },
+                    "billingAddress.postalCode": {
+                        maxlength: 'POSTAL_CODE_LENGTH_ERROR'
+                    }
+                },
+                errorPlacement: function(error, element) { }
+            });
+            $("#shippingAddressForm").validate({
+                invalidHandler: function(event1, validator1) {
+                    CCRZ.handleValidationErrors(event1, validator1, 'shipping-messagingSection-Error', false);
+                    $([document.documentElement, document.body]).animate({
+                        scrollTop: $("#mainform").offset().top
+                    }, "slow");
+                },
+                rules: {
+                    "shippingAddress.address1": {
+                        required: CCRZ.getPageConfig('Info.ReqAddr1', true)
+                    },
+                    "shippingAddress.city": {
+                        required: CCRZ.getPageConfig('Info.ReqCity', true)
+                    },
+                    "shippingAddress.postalCode": {
+                        maxlength: 10
+                    },
+                    "shippingAddress.stateCode":{
+                        required: true
+                    }
+                },
+                messages: {
+                    "shippingAddress.address1": {
+                        required: "Missing Address"
+                    },
+                    "shippingAddress.city": {
+                        required: "Missing City"
+                    },
+                    "shippingAddress.postalCode": {
+                        maxlength: 'Invalid Postal Code',
+                        required: 'Missing Postal Code'
+                    },
+                    "shippingAddress.stateCode":{
+                        required: "Missing State"
+                    }
+                },
+                errorPlacement: function(error, element) { }
+            });
+        }
+    });
+
+       var saveCartOrigin = setInterval(function () {
+         localStorage.removeItem("CartOrigin");
+         if (typeof(CCRZ.cartCheckoutModel.attributes.sfid) != 'undefined') {
+           clearInterval(saveCartOrigin);
+           var remoteAction = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+           remoteAction.invokeContainerLoadingCtx($(''), 'getCartOrigin', CCRZ.cartCheckoutModel.attributes.sfid, (res, err)  => {
+               console.log(res);
+               if (res.success) {
+                   localStorage.setItem("CartOrigin", res.data);
+               }
+           }, {
+               nmsp: false, escape: false
+           });
+         }
+       }, 300);
+
+    </script>
+</apex:page>

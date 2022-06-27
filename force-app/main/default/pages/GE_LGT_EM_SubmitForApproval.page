@@ -1,0 +1,67 @@
+<apex:page standardController="GE_LGT_EM_ComplaintLineItem__c" extensions="wrapperClassController" recordSetVar="Complaint Line Items">.
+<apex:form id="frm">
+
+    <apex:pageBlock id="mpb">
+    
+    <apex:pageMessages id="msg" />
+   
+ <apex:actionstatus id="loader"> 
+            <apex:facet name="start"> 
+            <div class="waitingSearchDiv" id="sdebata_loader" style="background-color: #fbfbfb;  height: 100%;opacity:0.65;width:100%;position: fixed;"> 
+            
+            <div class="waitingHolder" style="top: 200px; left:600px; width: 91px; position: fixed;"> 
+            <img class="waitingImage" src="/img/loading.gif" title="Please Wait..." /> 
+            <span class="waitingDescription">Please wait...</span> 
+            </div> 
+            </div> 
+            </apex:facet>     
+   </apex:actionstatus>  
+   <apex:pageBlockButtons location="TOP">
+      <!--<div style="text-align:center;">-->
+         <apex:commandButton value="Mass Sumbit for Approval" action="{!processSelected}" rerender="mpb,loader"/>
+         <apex:commandButton value="Back" action="{!BackToParent}"/>
+         
+     </apex:pageBlockButtons>
+
+        <apex:pageBlockTable value="{!contacts}" var="c">
+                          
+               <apex:column >
+                    <apex:facet name="header">
+                    <apex:inputcheckbox >
+                    <apex:actionSupport event="onclick" action="{!GetSelected}" onsubmit="checkAll(this)" rerender="mpb" status="loader" />
+                    </apex:inputcheckbox>
+                    </apex:facet>
+                    <apex:inputcheckbox value="{!c.selected}" id="check">
+                    <apex:actionSupport event="onclick" action="{!GetSelected}" rerender="mpb" status="loader"/></apex:inputCheckbox>
+                </apex:column>
+                  
+                <apex:column headerValue="Complaint Item No" value="{!c.CLItem.name}"/>
+                <apex:column headerValue="SAP Invoice Number" value="{!c.CLItem.GE_LGT_EM_SAPInvoiceNumber__c}" />
+                <apex:column headerValue="Status" value="{!c.CLItem.GE_LGT_EM_Status__c}"/>
+                <apex:column headerValue="Category" value="{!c.CLItem.GE_LGT_EM_Category__c}"/>
+                <apex:column headerValue="Approving Function" value="{!c.CLItem.GE_LGT_EM_ApprovingFunction__c}"/>
+                                             
+             
+        </apex:pageBlockTable>
+
+<apex:outputLabel value="[{!selectedCount} records selected]" id="count" style="color:blue"/>&nbsp;&nbsp;&nbsp;
+<apex:commandButton rendered="{!standardSetCon.hasprevious}" value="Previous" action="{!standardSetCon.previous}" rerender="mpb,count" status="loader"/>
+<apex:commandButton rendered="{!standardSetCon.hasnext}" value="Next" action="{!standardSetCon.next}" rerender="mpb,count" status="loader"/>
+
+</apex:pageBlock>
+</apex:form>
+
+<script type="text/javascript">
+
+function checkAll(cb)
+        {
+            var inputElem = document.getElementsByTagName("input");
+            for(var i=0; i<inputElem.length; i++)
+            {
+                if(inputElem[i].id.indexOf("check")!=-1)
+                inputElem[i].checked = cb.checked;
+            }
+        }
+ 
+</script>
+</apex:page>

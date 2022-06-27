@@ -1,0 +1,19 @@
+.THIS.slds-card__header {
+    background-color: burlywood!important;
+}
+
+.slds-card__header{
+    background-color: #FF9F19;
+}
+
+:host {
+    --sds-c-card-heading-color-background: rgb(212, 212, 214);
+  }
+
+  .component{
+    height: 350px;
+}
+
+p{
+    height: 25px;
+}

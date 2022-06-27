@@ -1,0 +1,1028 @@
+<!--
+ - Created on 2021-02-16.
+ -->
+
+<!-- Community Menu -->
+
+<template>
+    <template if:true={sitePage}>
+    <div class="menu">
+        <ul>
+            <li class="link">
+                <!--a href="/s/">CONNECT HOME</a-->
+                <a onclick={connectHomeLoad}>CONNECT HOME</a>
+            </li>
+
+            <li>
+                FIND PRODUCT
+                <ul class="levelTwo">
+
+                    <li>
+                        Fixtures
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7oAAG">Indoor</a>
+                                <!--a href="/lightning/r/ccrz__E_Category__c/a762F0000009t7DQAQ/view">Indoor</a-->
+                            </li>
+                            
+                            <li class="link">
+                                <!--a href="/lightning/r/ccrz__E_Category__c/a762F0000009t7EQAQ/view">Industrial</a-->
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUCSAA4">Industrial</a>
+                            </li>
+                            
+                            <li class="link">
+                                <!--a href="/lightning/r/ccrz__E_Category__c/a762F0000009t79QAA/view">Outdoor</a-->
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7nAAG">Outdoor</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Lamps
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUOFAA4">Ballasts &amp; Drivers</a>
+                            </li>
+                            
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUBLAA4">Indoor LED Lamps</a>
+                            </li>
+                            
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU9yAAG">Indoor Traditional Lamps</a>
+                            </li>
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUBHAA4">Outdoor LED Lamps</a>
+                            </li>
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU9pAAG">Outdoor Traditional Lamps</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Controls
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUCUAA4">Wireless Control</a>
+                            </li>
+
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUASAA4">Wired Controls</a>
+                            </li>
+                            
+                            <!--<li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUASAA4">Roadway Wireless Controls</a>
+                            </li>-->
+                            
+                            
+                            
+                        </ul>
+                    </li>
+                    <li>
+                        Specialty
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUMbAAO">Horticulture</a>
+                            </li>
+                            
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUDaAAO">Refrigerated Display</a>
+                            </li>
+                            
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUJjAAO">Signage</a>
+                            </li>
+                            <li class="link">
+
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUBGAA4">Transportation</a>
+                            
+                            </li>
+                            
+                        </ul>
+                    </li>
+
+
+
+
+
+                    <!--li class="link">
+                        <a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009r8vQAA">Indoor</a>
+                    </li>
+                    <li class="link">
+                        <a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009r8wQAA">Outdoor</a>
+                    </li>
+                    <li class="link">
+                        <a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009tBuQAI">Controls</a>
+                    </li-->
+                    <li>
+                        Product Programs
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7kAAG">QuickStock</a>
+                            </li>
+                            <!--li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009wXWQAY">QuickConfigure</a>
+                            </li-->
+                            <li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7lAAG">Proline</a>
+                            </li>
+                            <!--li class="link">
+                                <a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009tBwQAI">RefitAdvantage</a>
+                            </li-->
+                            <li class="link">
+                                <a href="https://www.gecurrent.com/marketplace">Clearance Marketplace</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li class="link"><a href="/DefaultStore">PRICE &amp; AVAILABILITY</a></li>
+            <li class="link"><a href="/DefaultStore/ccrz__ProductList?categoryId=a763j0000000CygAAE">SHOP</a></li>
+            <li class="link">
+                <!--a href="/s/orders">SEARCH ORDERS</a-->
+                <a onclick={searchOrders}>SEARCH ORDERS</a>
+            </li>
+
+            <li>
+                REQUEST SUPPORT
+                <ul class="levelTwo">
+                    <!--li class="link">
+                        <a href="/DefaultStore/ccrz__MyAccount?viewState=viewAccount">New Cart</a>
+                    </li-->
+                    <!--<li class="link">
+                        <a href="/s/underconstruction">Price Agreement</a>
+                    </li>
+                    <li class="link">
+                        <a href="/s/underconstruction">Order</a>
+                    </li>-->
+                    <template if:true={showCaseTypes}>
+                    <li>
+                        Sales Support
+                        <ul class="levelThree">
+                            <li if:true={isAgent} class="link">
+                                <!--a href="/s/new-spec-registration">New Specification Registration</a-->
+                                <a onclick={newSpecReg}>New Specification Registration</a>
+                            </li>
+                            <li class="link">
+                                <a onclick={LDR}>Lighting Application</a>
+                                <!--<a href="/s/lighting-design">Lighting Application</a>-->
+                            </li>
+                            <li class="link">
+                                <!--a href="/s/marketing-collateral">Marketing Collateral</a-->
+                                <a onclick={markCol}>Marketing Collateral</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        Product &amp; Availability
+                        <ul class="levelThree">
+                            <!--<li class="link">
+                                <a href="/s/underconstruction">Tech Info (Catalog Logic)</a>
+                            </li>-->
+                            <li class="link">
+                                <a onclick={When}>When can I get it?</a>
+                                <!--<a href="/s/when-can-i-get-it">When can I get it?</a>-->
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        Pricing
+                        <ul class="levelThree">
+                            <li class="link">
+                                <!--a href="/s/pricing-request">Pricing Inquiry</a-->
+                                <a onclick={prIn}>Pricing Inquiry</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Technical Support
+                        <ul class="levelThree">
+                            
+                            <li class="link">
+                                <!--a href="/Agents/s/stock-balancing-return">Stock Accomodation Return</a-->
+                                <a onclick={techser}> Technical Service</a>
+                            </li>
+
+                        </ul>
+                    </li>
+
+                    <li>
+                        Account/Order Mgmt
+                        <ul class="levelThree">
+                            <li class="link">
+                                <!--a href="/s/change-request">Change Request</a-->
+                                <a onclick={chReq}>Change Request</a>
+                            </li>
+                            <!--<li class="link">
+                                
+                                <a onclick={expOrd}>Expedite Order</a>
+                            </li>-->
+                            <!--<li class="link">
+                                <a href="/s/underconstruction">Spec Registration Inquiry</a>
+                            </li>-->
+                        </ul>
+                    </li>
+
+                    <li>
+                        Shipping
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a onclick={Overage}>Overage</a>
+                                <!--<a href="/s/shipping-discrepancy">Overage</a>-->
+                            </li>
+                            <li class="link">
+                                <a onclick={Shortage}>Shortage</a>
+                                <!--<a href="/s/shipping-discrepancy">Shortage</a>-->
+                            </li>
+                            <li class="link">
+                                <a onclick={Lost}>Lost/Damaged</a>
+                                <!--<a href="/s/shipping-discrepancy">Lost/Damage</a>-->
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Returns
+                        <ul class="levelThree">
+                            <!--<li class="link">
+                                <a href="/s/return-replace">Return and Replace</a>
+                            </li>-->
+                            <li class="link">
+                                <!--a href="/s/return-replace">Return</a-->
+                                <a onclick={ret}>Return</a>
+                            </li>
+                            <li class="link" if:false={isAgent}>
+                                <!--a href="/s/stock-balancing-return">Stock Accomodation Return</a-->
+                               <a onclick={stockAcc}>Stock Accommodation Return</a>
+                           </li>
+                            
+                        </ul>
+                    </li>
+                    <li>
+                        Adjustments
+                        <ul class="levelThree">
+                            <li if:true={showCreateClaimback} class="link">
+
+                                <a onclick={clBack}>Claimback</a>
+                            
+                            </li>
+                            <li class="link">
+                                <!--a href="/s/adjustments">Credit</a-->
+                                <a onclick={adjCre}>Credit</a>
+                            </li>
+                            
+                        </ul>
+                    </li>
+                    <li>
+                        Warranty
+                        <ul class="levelThree"> 
+                            <li class="link">
+                                <!--a href="/s/warranty-claim">Warranty Claim</a-->
+                                <a onclick={waCla}>Warranty Claim</a>
+                            </li>
+                        </ul>
+                    </li>
+                    </template>
+                    <!--<li>
+                        Technical Support
+                        <ul>
+                            <li class="link">
+                                <a href="/s/underconstruction">Technical Support</a>
+                            </li>
+                        </ul>
+                    </li>-->
+                
+                    <li>
+                        Web Assistance
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a onclick={Support}>Connect Platform Support</a>
+                                <!--<a href="/s/connect-platform-support">Connect Platform Support</a>-->
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            
+
+            <li>
+                RESOURCES
+                <ul class="levelTwo">
+                    <li class="link">
+                        <!--a href="/s/assets?type=newproducts">New Products</a-->
+                        <a onclick={newProd}>New Products</a>
+                    </li>
+                    <li class="link">
+                        <!--a href="/s/assets?type=marketing-and-promotions">Marketing &amp; Promotions</a-->
+                        <a onclick={markProm}>Marketing &amp; Promotions</a>
+                    </li>
+                    <li class="link">
+                        <!--a href="/s/assets?type=training">Training</a-->
+                        <a onclick={train}>Training</a>
+                    </li>
+                    <li class="link">
+                        <!--a href="/s/assets?type=webinar">Webinars</a-->
+                        <a onclick={web}>Webinars</a>
+                    </li>
+                    <li class="link">
+                        <!--a href="/s/assets?type=news">News</a-->
+                        <a onclick={news}>News</a>
+                    </li>
+                    <li class="link">
+                        <!--a href="/s/community-content/a952F0000000XIgQAM/tools-page">Tools</a-->
+                        <a onclick={tools}>Tools</a>
+                    </li>
+                    <li>
+                        Marketing Programs
+                        <ul class="levelThree">
+                            <li class="link">
+                                <a href="https://current.brandmuscle.net/login/login.aspx">Accelerated Marketing Program</a>
+                            </li>
+                            <li class="link">
+                                <!--a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7k">QuickStock</a-->
+                                <a onclick={quStock}>QuickStock</a>
+                                <!--a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009wUpQAI">QuickStock</a-->
+                            </li>
+                            <li class="link">
+                                <!--a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009wUqQAI">Proline</a-->
+                                <!--a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7l">Proline</a-->
+                                <a onclick={quStock}>Proline</a>
+                            </li>
+                            <!--<li class="link">
+                                <a href="/s/underconstruction">Voltage</a>
+                            </li>-->
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                ACCOUNT
+                <ul class="levelTwo">
+                    <!--<li class="link">
+                        <a href="/s/underconstruction">Team Members</a>
+                    </li>
+                    <li class="link">
+                        <a href="/s/underconstruction">Support Team</a>
+                    </li>-->
+                    <li class="link">
+
+                        <!--a href="/s/customer-list ">Customer List</a-->
+                     
+                         <a onclick={cusList}>Customer List</a>
+                     
+                     </li>
+                    <li>
+                        Transactions
+                        <ul class="levelThree">
+                            <li if:true={showPricing} class="link">
+                                <!--a href="/DefaultStore/ccrz__MyAccount?viewState=viewAccount">Saved Carts</a-->
+                                <a onclick={svCart}>Saved Carts</a>
+                            </li>
+                            <li if:true={showPricing} class="link">
+                                <!--a href="/s/price-agreements">Price Agreements</a-->
+                                <a onclick={prAgree}>Price Agreements</a>
+                            </li>
+                            <li class="link">
+                                <!--a href="/s/orders">Orders</a-->
+                                <a onclick={orderNew}>Orders</a>
+                            </li>
+                            <li if:false={isAgent} class="link">
+
+                                <a onclick={clSea}>Claimbacks</a>
+                            
+                            </li>
+                            <!--<li class="link">
+                                <a href="/s/underconstruction">All Orders</a>
+                            </li>-->
+                            <li class="link">
+                                <a href={serviceLink}>Service Requests</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!--<li class="link">
+                        <a href="/s/underconstruction">Performance</a>
+                    </li>-->
+                </ul>
+            </li>
+
+            
+            <template if:true={SysAdmin}>
+                <li class="link">
+                    <a href="/s/manage-comm-content">Manage Community Content</a>
+                </li>
+                </template>
+
+        </ul>
+    </div>
+    <!--SMALL SCREEN VIEW-->
+    <form>
+        <div style="height: 20px;"></div>
+        <div class="drawer-menu-container">
+            <input id="left-menu" class="left-menu" type="checkbox">
+            <input id="left-menu-reset" class="left-menu-reset" type="reset">
+            <div class="nav left-navigation">
+                <div class="main">
+                    <label class="menu-toggle menu-toggle-main" for="left-menu" ><span>&nbsp;</span></label>
+                    <label class="menu-close menu-close-main" for="left-menu-reset"><span>&nbsp;</span></label>
+                    <div class="drawer-menu">
+                        <div class="menu-item">
+                            <span class="heading">Menu</span>
+                        </div>
+                        <div class="menu-item">
+                            <a href="/s/">CONNECT HOME</a>
+                        </div>
+                        <template if:true={SysAdmin}>
+                        <div class="menu-item">
+                            <a href="/s/manage-comm-content">Manage Community Content</a>
+                        </div>
+                        </template>
+                        <!--Product Catalog-->
+                        <div class="menu-item">
+                            <label for="menu-product-catalog">FIND PRODUCT</label>
+                            <input id="menu-product-catalog" type="checkbox">
+                            <div class="nav">
+                                <div class="main">
+                                    <label class="menu-toggle" for="menu-product-catalog"><span>&nbsp;</span></label>
+                                    <div class="drawer-menu">
+                                        <div class="menu-item">
+                                            <span class="heading">FIND PRODUCT</span>
+                                        </div>
+
+                                        <div class="menu-item">
+                                            <label for="menu-fixtures">
+                                                Fixtures
+                                            </label>
+                                            <input id="menu-fixtures" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-fixtures"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Fixtures</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7oAAG">Indoor</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUCSAA4">Outdoor</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7nAAG">Controls</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="menu-item">
+                                            <label for="menu-lamps">
+                                                Lamps
+                                            </label>
+                                            <input id="menu-lamps" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-lamps"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Lamps</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUOFAA4">Ballasts &amp; Drivers</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUBLAA4">Indoor LED Lamps</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU9yAAG">Indoor Traditional Lamps</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUBHAA4">Outdoor LED Lamps</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU9pAAG">Outdoor Traditional Lamps</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="menu-item">
+                                            <label for="menu-controls">
+                                                Controls
+                                            </label>
+                                            <input id="menu-controls" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-controls"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Controls</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUCUAA4">Wireless Control</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUASAA4">Wired Controls</a>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUASAA4">Roadway Wireless Controls</a>
+                                                        </div>-->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="menu-item">
+                                            <label for="menu-specialty">
+                                                Specialty
+                                            </label>
+                                            <input id="menu-specialty" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-specialty"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Controls</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUMbAAO">Horticulture</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUDaAAO">Refrigerated Display</a>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUJjAAO">Signage</a>
+                                                        </div>
+                                                        <div class="menu-item">
+
+                                                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DUBGAA4">Transportation</a>
+                                                        
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        
+                                        <div class="menu-item">
+                                            <label for="menu-product-catalog-programs">
+                                                Product Programs
+                                            </label>
+                                            <input id="menu-product-catalog-programs" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-product-catalog-programs"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Product Programs</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7kAAG">QuickStock</a></span>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7m">QuickConfigure</a></span>
+                                                        </div>-->
+                                                        <div class="menu-item">
+                                                            <span><a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7lAAG">Proline</a></span>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/DefaultStore/ccrz__ProductList?categoryId=a762F0000009tBwQAI">RefitAdvantage</a></span>
+                                                        </div>-->
+                                                        <div class="menu-item">
+                                                            <span><a href="https://www.gecurrent.com/marketplace">Clearance Marketplace</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <!--Product, Price & Availability-->
+                        <div class="menu-item">
+                            <a href="/DefaultStore">PRICE &amp; AVAILABILITY</a>
+                        </div>
+                        <!--Create Order-->
+                        <div class="menu-item">
+                            <a href="/DefaultStore/ccrz__ProductList?categoryId=a763j0000000CygAAE">SHOP</a>
+                        </div>
+                        <!--Order Search-->
+                        <div class="menu-item">
+                            <a href="/s/orders">SEARCH ORDERS</a>
+                        </div>
+                        <!--Resources-->
+                        <div class="menu-item">
+                            <label for="menu-resources">RESOURCES</label>
+                            <input id="menu-resources" type="checkbox">
+                            <div class="nav">
+                                <div class="main">
+                                    <label class="menu-toggle" for="menu-resources"><span>&nbsp;</span></label>
+                                    <div class="drawer-menu">
+                                        <div class="menu-item">
+                                            <span class="heading">RESOURCES</span>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/assets?type=newproducts">New Products</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/assets?type=marketing-and-promotions">Marketing &amp; Promotions</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/assets?type=training">Training</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/assets?type=webinar">Webinar</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/assets?type=news">News</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/assets?type=tools">Tools</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-resources-marketing">
+                                                Marketing Programs
+                                            </label>
+                                            <input id="menu-resources-marketing" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-resources-marketing"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Marketing Programs</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="https://current.brandmuscle.net/login/login.aspx">Accelerated Marketing Program</a></span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7kAAG">QuickStock</a></span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/DefaultStore/ccrz__ProductList?categoryId=a763j000000DU7lAAG">ProLine</a></span>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/s/underconstruction">Voltage</a></span>
+                                                        </div>-->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--New Request-->
+                        <div class="menu-item">
+                            <label for="menu-new-request">NEW REQUEST</label>
+                            <input id="menu-new-request" type="checkbox">
+                            <div class="nav">
+                                <div class="main">
+                                    <label class="menu-toggle" for="menu-new-request"><span>&nbsp;</span></label>
+                                    <div class="drawer-menu">
+                                        <div class="menu-item">
+                                            <span class="heading">NEW REQUEST</span>
+                                        </div>
+                                        <div class="menu-item">
+                                            <!--<a href="/s/underconstruction">Order Request</a>-->
+                                            <a href="/DefaultStore/ccrz__MyAccount?viewState=viewAccount">New Cart</a>
+                                        </div>
+                                        <!--<div class="menu-item">
+                                            <a href="/s/underconstruction">New Order</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/underconstruction">New Price Agreement</a>
+                                        </div>-->
+                                        <template if:true={showCaseTypes}>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-sales-support">
+                                                Sales Support
+                                            </label>
+                                            <input id="menu-new-request-sales-support" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-sales-support"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Sales Support</span>
+                                                        </div>
+                                                        <div if:true={isAgent} class="menu-item">
+                                                            <span><a href="/s/new-spec-registration">New Specification Registration</a></span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a onclick={LDR}>Lighting Application</a></span>
+                                                            <!--<span><a href="/s/lighting-design">Lighting Application</a></span>-->
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/marketing-collateral">Marketing Collateral</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-product-availability">
+                                                Product &amp; Availability
+                                            </label>
+                                            <input id="menu-new-request-product-availability" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-product-availability"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Product &amp; Availability</span>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span> <a href="/s/underconstruction">Tech Info (Catalog Logic)</a></span>
+                                                        </div>-->
+                                                        <div class="menu-item">
+                                                            <span><a onclick={When}>When can I get it?</a></span>
+                                                            <!--<span><a href="/s/when-can-i-get-it">When can I get it?</a></span>-->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-pricing">
+                                                Pricing
+                                            </label>
+                                            <input id="menu-new-request-pricing" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-pricing"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Pricing</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/pricing-request">Pricing Inquiry</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-technical-support">
+                                                Technical Support
+                                            </label>
+                                            <input id="menu-new-request-technical-support" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-technical-support"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Technical Support</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/technical-service">Technical Service</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-account-order-mgmt">
+                                                Account/Order Mgmt
+                                            </label>
+                                            <input id="menu-new-request-account-order-mgmt" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-account-order-mgmt"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Account/Order Mgmt</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/change-request">Change Request</a></span>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/s/expedite">Expedite</a></span>
+                                                        </div>-->
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/s/underconstruction">Spec Registration Inquiry</a></span>
+                                                        </div>-->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-shipping">
+                                                Shipping
+                                            </label>
+                                            <input id="menu-new-request-shipping" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-shipping"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Shipping</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span> <a onclick={Overage}>Overage</a></span>
+                                                            <!--<span> <a href="/s/shipping-discrepancy">Overage</a></span>-->
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span> <a onclick={Shortage}>Shortage</a></span>
+                                                            <!--<span><a href="/s/shipping-discrepancy">Shortage</a></span>-->
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span> <a onclick={Lost}>Lost/Damage</a></span>
+                                                            <!--<span><a href="/s/shipping-discrepancy">Lost/Damage</a></span>-->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-return">
+                                                Returns
+                                            </label>
+                                            <input id="menu-new-request-return" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-return"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Return</span>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/s/return-replace">Return and Replace</a></span>
+                                                        </div>-->
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/return-replace">Return</a></span>
+                                                        </div>
+                                                        <div class="menu-item" if:false={isAgent}>
+                                                            <span> <a href="/s/stock-balancing-return">Stock Accommodation Return</a></span>
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/s/claim-back">Claimback</a></span>
+                                                        </div>-->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-adjustment">
+                                                Adjustments
+                                            </label>
+                                            <input id="menu-new-adjustment" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-adjustment"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Adjustments</span>
+                                                        </div>
+                                                        <div if:true={showCreateClaimback} class="menu-item">
+
+                                                            <span><a onclick={clBack}>Claimback</a></span>
+                                                        
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/adjustments">Credit</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-warranty">
+                                                Warranty
+                                            </label>
+                                            <input id="menu-new-request-warranty" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-warranty"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Warranty</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/warranty-claim">Warranty Claim</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </template>
+                                        <!--<div class="menu-item">
+                                            <label for="menu-new-request-technical-support">
+                                                Technical Support
+                                            </label>
+                                            <input id="menu-new-request-technical-support" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-technical-support"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Technical Support</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/underconstruction">Technical Support</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>-->
+                                        <div class="menu-item">
+                                            <label for="menu-new-request-web-assistance">
+                                                Web Assistance
+                                            </label>
+                                            <input id="menu-new-request-web-assistance" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-new-request-web-assistance"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Web Assistance</span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a onclick={Support}>Connect Platform Support</a></span>
+                                                            <!--<span><a href="/s/connect-platform-support">Connect Platform Support</a></span>-->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Account-->
+                        <div class="menu-item">
+                            <label for="menu-account">ACCOUNT</label>
+                            <input id="menu-account" type="checkbox">
+                            <div class="nav">
+                                <div class="main">
+                                    <label class="menu-toggle" for="menu-account"><span>&nbsp;</span></label>
+                                    <div class="drawer-menu">
+                                        <div class="menu-item">
+                                            <span class="heading">ACCOUNT</span>
+                                        </div>
+                                        <!--<div class="menu-item">
+                                            <a href="/s/underconstruction">Team Members</a>
+                                        </div>
+                                        <div class="menu-item">
+                                            <a href="/s/underconstruction">Support Team</a>
+                                        </div>-->
+                                        <div class="menu-item">
+
+                                            <a href="/s/customer-list">Customer List</a>
+                                        
+                                        </div>
+                                        <div class="menu-item">
+                                            <label for="menu-account-transactions">
+                                                Transactions
+                                            </label>
+                                            <input id="menu-account-transactions" type="checkbox">
+                                            <div class="nav">
+                                                <div class="main">
+                                                    <label class="menu-toggle" for="menu-account-transactions"><span>&nbsp;</span></label>
+                                                    <div class="drawer-menu">
+                                                        <div class="menu-item">
+                                                            <span class="heading">Transactions</span>
+                                                        </div>
+                                                        <div class="menu-item" if:true={showPricing}>
+                                                            <span><a href="/DefaultStore/ccrz__MyAccount?viewState=viewAccount">My Carts</a></span>
+                                                        </div>
+                                                        <div class="menu-item" if:true={showPricing}>
+                                                            <span><a href="/s/price-agreements">Price Agreements</a></span>
+                                                        </div>
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/orders">Orders</a></span>
+                                                        </div>
+                                                        <div if:false={isAgent} class="menu-item">
+
+                                                            <span><a onclick={clSea}>Claimbacks</a></span>
+                                                        
+                                                        </div>
+                                                        <!--<div class="menu-item">
+                                                            <span><a href="/s/underconstruction">All Orders</a></span>
+                                                        </div>-->
+                                                        <div class="menu-item">
+                                                            <span><a href="/s/cases">Service Requests</a></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--<div class="menu-item">
+                                            <a href="/s/underconstruction">Performance</a>
+                                        </div>-->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </form>
+    </template>
+</template>

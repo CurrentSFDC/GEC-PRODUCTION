@@ -1,0 +1,87 @@
+<template>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12">
+        <lightning-card>
+            <header slot="title">
+                <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                    <div class="slds-col slds-size_3-of-12">
+                        <img src={priceAgreement}>
+                    </div>
+                    <div class="slds-col slds-size_9-of-12 slds-align_absolute-left">
+                        Open Price Agreements
+                    </div>
+                </div>
+            </header>
+            <div style="height: 240px">
+                <!-- showPricing is used fo to check view pricing permission is set for read only user By Sameer On(8-18-2021) -->
+                <template if:true={showPricing}>
+                    <template if:false={isAgreementsLoading}>
+                        <template if:false={paItemsMessage}>
+                            <!-- Show loader if user click on Agreement Number By Sameer On(5-28-2021) -->
+                            <lightning-spinner if:true={isLoading} variant="brand"></lightning-spinner>
+                            <lightning-datatable
+                                    key-field="id"
+                                    data={paItems}
+                                    columns={paColumns}
+                                    onrowaction={handleRowAction}
+                                    resizle-column-disabled="true"
+                                    hide-checkbox-column="true">
+                            </lightning-datatable>
+                        </template>
+                        <template if:true={paItemsMessage}>
+                            <div style="margin-left: 15px;">{paItemsMessage}</div>
+                        </template>
+                    </template>
+                    <template if:true={isAgreementsLoading}>
+                        <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                    </template>
+                </template>
+                <template if:false={showPricing}>
+                    <div class="slds-text-align_center">
+                        You don't have permission to access this widget. 
+                    </div>
+                </template>    
+            </div>
+            <p slot="footer">
+                <lightning-button if:true={showPricing} label={buttonLabel} variant="brand" onclick={viewAllpaItems}></lightning-button>
+            </p>
+        </lightning-card>
+    </div>
+
+    <!-- Pdf View Model By Sameer On (4-29-2021) -->
+    <section role="dialog" tabindex="-1" class="slds-modal slds-modal_large pdfViewModal">
+        <div class="slds-modal__container">
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <c-pdf-viewer-2 base-64-pdf={base64PDF}></c-pdf-viewer-2>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_brand" onclick={backToCSV}>Back</button>
+                <button class="slds-button slds-button_neutral" onclick={closeModal}>Close</button>
+            </footer>
+        </div>
+    </section>
+    <!-- Pdf & CSV View Model By Sameer On (4-29-2021) -->
+    <section role="dialog" tabindex="-1" class="slds-modal slds-modal_large pdfCsvViewModal">
+        <div class="slds-modal__container csv-modal-container">
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-01" class="agreement-dialog-heading slds-hyphenate">View Price Agreement: {selectedAgreementNo}</h2>
+            </header>
+            <div class="slds-p-around_medium filePdfExcelView">
+                <div class="loader-wrapper" if:true={isSpinner}>
+                    <div class="loader-content">
+                        <div class="loader"></div>
+                        Please wait...
+                    </div>
+                    </div>
+                <lightning-icon if:true={allowPdfDownload} icon-name="doctype:pdf" alternative-text="PDF file" title="View PDF" onclick={showPDF}></lightning-icon>
+                <lightning-icon if:true={allowCSVDownload} icon-name="doctype:csv" alternative-text="CSV file" title="Export CSV" onclick={downloadAgreementCSV}></lightning-icon>
+                <div if:true={showDownloadNote} class="slds-m-around_x-small slds-p-around_xxx-small file-download-note">
+                    <b>Note:</b> {fileDownloadNote}
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick={closeModal}>Close</button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop"></div>
+</template>

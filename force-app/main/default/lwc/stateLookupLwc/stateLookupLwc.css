@@ -1,0 +1,34 @@
+.border{
+    border-color: #070707;
+}
+
+h4{
+    font-style: italic;
+    font-size: 12px;
+}
+
+
+h3{
+    background: #FF9F19;
+    font-weight: bold;
+    font-family: "Segoe UI";
+}
+
+h2{
+    font-family: "Segoe UI";
+}
+
+
+.slds-input-has-icon .slds-input__icon {
+    top: 65% !important;
+}
+
+.confirmation{
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.md::before {
+    content:" * ";
+    color: red;
+  }

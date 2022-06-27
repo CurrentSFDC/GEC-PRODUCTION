@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>49.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>This visualforce page appears in Complain Line Item Record. User will see case description inline along with this record</description>
+    <label>GE_LGT_EM_CaseDescription</label>
+</ApexPage>

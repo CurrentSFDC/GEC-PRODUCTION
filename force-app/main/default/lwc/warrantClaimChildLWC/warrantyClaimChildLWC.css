@@ -1,0 +1,26 @@
+.border{
+    border-color: #070707;
+}
+
+h3{
+    background: #6082B6;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+}
+
+h4{
+    font-family: "Segoe UI";
+    font-size: 35px;
+}
+
+/*.lighting-map {
+    position: absolute;
+    height: 16.75rem;
+}*/
+
+@media only screen and (max-width: 767px) {
+    .slds-map {
+        min-width: 100%;
+    }
+}

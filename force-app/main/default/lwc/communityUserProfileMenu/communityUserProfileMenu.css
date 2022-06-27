@@ -1,0 +1,60 @@
+.my-fallback-color {
+    --sds-c-icon-color-background: orange;
+}
+
+.my-badge-color{
+    
+--slds-c-badge-color-background: red;
+--slds-c-badge-text-color: white;
+--slds-c-badge-icon-color-foreground: white;
+}
+
+.my-button-color{
+    
+background-color: white;
+
+--sds-c-button-text-color: black;
+}
+
+img{
+    width: 30px;
+    height: 30px;
+    vertical-align: middle;
+    border-radius: 50%;
+}
+
+.profileMenu{
+    padding: 10px 7px 7px 7px;
+    font-weight: var(--lwc-semibold,600);
+    font-size: var(--lwc-ssFontSizeXSmall,.8125em);
+    text-transform: uppercase;
+    vertical-align: middle;
+    max-width: 50%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    color: white;
+    
+}
+
+/*span{
+    padding: 10px 7px 7px 7px;
+    font-weight: var(--lwc-semibold,600);
+    font-size: var(--lwc-ssFontSizeXSmall,.1.125em);
+    text-transform: uppercase;
+    vertical-align: middle;
+    max-width: 40%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    
+}*/
+
+.menuClass{
+    width: 162px;
+    height: 49px;;
+}

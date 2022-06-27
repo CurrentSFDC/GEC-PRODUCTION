@@ -1,0 +1,44 @@
+<apex:page >
+    
+    <!-- <script type='text/javascript' src='https://c.la2c1.salesforceliveagent.com/content/g/js/34.0/deployment.js'></script>
+
+
+<script type="text/javascript">
+    (function() { 
+        function handlePageLoad() {
+            var endpointMatcher = new RegExp("[\\?\\&]endpoint=([^&#]*)");
+            document.getElementById('Chat_Pre_Chat_Form').setAttribute('action',
+                                                                       decodeURIComponent(endpointMatcher.exec(document.location.search)[1]));
+        } if (window.addEventListener) {
+            window.addEventListener('load', handlePageLoad, false);
+        } else { window.attachEvent('onload', handlePageLoad, false);
+               }})(); 
+
+</script> -->
+    <html>
+        <body>
+            
+            <h1><font size="4px">GE Lighting Manufacturing Rep. Support</font></h1> <br /><br />
+            <h2><font size="2px">Please click on the Chat Button below to start the Chat!!</font></h2><br/><br/> 
+            
+            
+            
+            
+            <img id="liveagent_button_online_573i0000000NZxP" style="display: none; border: 0px none; cursor: pointer" onclick="liveagent.startChat('573i0000000NZxP')" src="https://gelighting-service.secure.force.com/liveagent/resource/1436548639000/Agent_Online" /><img id="liveagent_button_offline_573i0000000NZxP" style="display: none; border: 0px none; " src="https://gelighting-service.secure.force.com/liveagent/resource/1436548630000/Agent_Offline" />
+            <script type="text/javascript">
+            if (!window._laq) { window._laq = []; }
+            window._laq.push(function(){liveagent.showWhenOnline('573i0000000NZxP', document.getElementById('liveagent_button_online_573i0000000NZxP'));
+                                        liveagent.showWhenOffline('573i0000000NZxP', document.getElementById('liveagent_button_offline_573i0000000NZxP'));
+                                       });</script>
+            
+            <script type='text/javascript' src='https://c.la2c1.salesforceliveagent.com/content/g/js/34.0/deployment.js'></script>
+            <script type='text/javascript'>
+                liveagent.init('https://d.la2c1.salesforceliveagent.com/chat', '572i0000000NXKB', '00Di0000000HMr7');
+            </script>
+            
+            <div style="width:400px;margin-top:5px;margin-bottom:15px;margin-left:5px;"><i><font color="grey">All Chat Sessions are stored for quality assurance purposes.</font></i></div>
+            
+        </body>
+    </html>
+    
+</apex:page>

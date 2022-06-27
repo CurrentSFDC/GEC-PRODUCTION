@@ -1,0 +1,41 @@
+h3{
+    background: #6082B6;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+}
+
+h2{
+    font-size: 20px;
+    color:dimgray;
+    font-family: 'Segoe UI';
+    
+}
+
+.info{
+    font-size: 20px;
+    text-align: center;
+    color:dimgray;
+    font-family: 'Segoe UI';
+    
+}
+
+.itemFont{
+    font-size: 15px;
+    color:dimgray;
+    font-family: 'Segoe UI';
+    font-weight: bold;
+}
+
+.header{
+    font-size: 30px;
+    text-align: center;
+    color:dimgray;
+    font-family: 'Segoe UI';
+    
+}
+
+img{
+    height: 120px;
+    width: 500px;
+}

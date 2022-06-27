@@ -1,0 +1,214 @@
+<apex:component controller="ccCSVUploadController">
+    <script id="MiniQuickOrder-Desktop" type="text/template">
+        {{log 'QuickOrder'}}
+
+        <div class="panel-heading cc_heading">
+            <h3 class="panel-title cc_title">
+                {{pageLabelMap 'QuickOrder'}}
+            </h3>
+        </div>
+
+        <div class="panel-body">
+
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="active" role="presentation">
+                    <a href="#quick-order" role="tab" data-toggle="tab" aria-controls="quick-order">
+                        <h3 class="panel-title cc_title">
+                            {{pageLabelMap 'QuickOrder_EnterSKU'}}
+                        </h3>
+                    </a>
+                </li>
+
+                <li role="presentation">
+                    <a href="#upload-csv" role="tab" data-toggle="tab" aria-controls="upload-csv">
+                        <h3 class="panel-title cc_title">
+                            {{pageLabelMap 'UploadCSV'}}
+                        </h3>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="quick-order">
+                    <div id="quick_order" class="quick_order cc_quick_order"></div>
+                    <p class="cc_caption">{{pageLabelMap 'QuickOrder_QuickOrderBoxCaption'}}</p>
+                    <form id="skuQtyForm" class="form-horizontal cc_form_sku_qty p-t-1">
+                        <div class="quickOrderRow cc_quick_order_row">
+                        </div>
+                    </form>
+
+                    <div class="cc_form_group control-row space-between m-t-1">
+                        <button class="btn btn-default btn-sm addToCartCustom cc_addtocart" type="submit">{{pageLabelMap 'QuickOrder_AddToCart'}}</button>
+                        <button class="btn btn-link btn-sm addMore cc_addmore" type="submit" style="color: white">{{pageLabelMap 'QuickOrder_AddMore'}}</button>
+                        <button class="btn btn-default btn-sm clearAll cc_clearall" type="submit" style="float: right;color: white">Clear All</button>
+                    </div>
+                    <p>If you did not find the product, please use the <a href="/DefaultStore/ccrz__ProductList?operation=quickSearch&searchText=CatNo.">Extended Catalog Search</a>.</p>
+                </div>
+
+                <div role="tabpanel" class="tab-pane upload-csv" id="upload-csv">
+
+                </div>
+            </div>
+        </div>
+
+    </script>
+
+    <c:QuickOrder />
+
+    <script id="csv-upload" type="text/template">
+		{{log this}}
+		<div class="alert alert-info messagingSection-Info infoMsg" style="display:none"></div>
+		<div class="alert alert-danger messagingSection-Error errorMsg" style="display:none"></div>
+
+		<div class="form-group">
+            <p style="padding: 8px 0">
+                Please note: file upload overrides the cart items.
+            </p>
+			<div class="cc_input_file">
+				<input type="file" id="attachmentFile" class="form-button" />
+			</div>
+		</div>
+		<div class="form-group control-row">
+			<button type="button" class="btn btn-default btn-sm form-button" onclick="uploadCSV();">
+				{{pageLabelMap 'CartUploadButton'}}
+			</button>
+
+			<a href="{!URLFOR($Resource.CartUploadTemplate)}" download="CartUploadTemplate.csv">{{pageLabelMap 'DownloadTemplate'}}</a>
+		</div>
+	</script>
+
+    <script>
+        $(function () {
+            CCRZ.pubSub.on('view:QuickOrderView:refresh', view => {
+                CCRZ.views.CSVUpload = CCRZ.CloudCrazeView.extend({
+                    viewName: 'CSVUpload',
+                    template: CCRZ.util.template('csv-upload'),
+                    init: function (options) {
+                        this.setElement(options.selector);
+                        this.render();
+                    },
+                    renderDesktop: function () {
+                        this.$el.html(this.template({}))
+                    },
+                })
+
+                CCRZ.CSVUpload = new CCRZ.views.CSVUpload({
+                    selector: '#upload-csv'
+                })
+            })
+        });
+
+        var globalData;
+        var isFileLoad = false;
+        function uploadCSV() {
+            let fileInput = document.getElementById('attachmentFile');
+            $('.infoMsg').hide();
+            $('.errorMsg').hide();
+            var useNewCart = false;
+            var file = fileInput.files[0];
+            console.log(`file`, file);
+            isFileLoad = true;
+            if (file) {
+                reader = new FileReader();
+                reader.onloadend = function (event) {
+                    globalData = event.target.result;
+                    console.log(`event.target.result`, event.target.result);
+                    if (validateCSVBeforeUpload(event.target.result)) {
+                        remoteInvoke(file);
+                    }
+                };
+                reader.readAsText(file);
+
+                function remoteInvoke(dataFile) {
+                    var filename = dataFile.name;
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'ccCSVUploadController' });
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'),
+                        'parseCSV', globalData, useNewCart,
+                        function (resp) {
+                            fileInput.value = null;
+                            console.log(`resp`, resp);
+                            var cartId = resp.data['encryptedCartId'];
+                            if (resp.success) {
+
+                                var added = resp.data['numOfItems'];
+                                if (added != undefined && added > 1) {
+                                    $('.infoMsg').html(`${added} products added to cart.`).show();
+                                }
+                                if (added != undefined && added == 1) {
+                                    $('.infoMsg').html(`${added} product added to cart.`).show();
+                                }
+
+                                var invaildCats = resp.data['invaildCats'];
+                                if (invaildCats != "") {
+                                    $('.errorMsg').html('An error has occurred while processing the following product(s):<br/>' + invaildCats + 'Please update your file, re-select the file, and try to upload again.<br/><br/>If you are having difficulty with the catalog number, please <a href="/s/connect-platform-support?type=upload_error">send us a message</a>.').show();
+                                }
+
+                                /*var invalidSkus = resp.data['ccrz.ccAPICart.INELIGIBLEPRODUCTS'];
+                                if (invalidSkus.length) {
+                                    var dynLink = "/ccrz__CCPage?pageKey=CU&errorType=CSV&errorMsg=" + invalidSkus;
+                                    $('.errorMsg').html('Some products could not be added. Please <a href="' + dynLink + '">Contact Us </a> to provide additional information').show();
+                                }
+
+                                var invalidSkus = resp.data['ccrz.ccAPICart.INELIGIBLEPRODUCTS'];
+                                if (invalidSkus.length) {
+                                    var dynLink = "/ccrz__CCPage?pageKey=CU&errorType=CSV&errorMsg=" + invalidSkus;
+                                    $('.errorMsg').html('Some products could not be added. Please <a href="' + dynLink + '">Contact Us </a> to provide additional information').show();
+                                }*/
+                            }
+                            else if (resp.data?.uomError) {
+                                $('.errorMsg').html(resp.data.uomError).show();
+                            }
+                            else {
+                                var invalidSkus = resp.data['ccrz.ccAPICart.INELIGIBLEPRODUCTS'];
+                                // var dynLink = "/ccrz__CCPage?pageKey=CU&errorType=CSV&errorMsg=" + invalidSkus;
+                                var dynLink = "/Agents/s/connect-platform-support";
+                                $('.errorMsg').html('There was an error uploading your file. Please <a href="' + dynLink + '">Contact Us </a> to provide additional information').show();
+                            }
+                            if (cartId) {
+                                CCRZ.pagevars.currentCartID = cartId;
+                                CCRZ.pubSub.trigger('cartChange', cartId);
+                            }
+                        }, { buffer: false, escape: false, nmsp: false }
+                    );
+                }
+            }
+            else {
+                $('.errorMsg').html('Please select a file to upload.').show();
+            }
+        }
+
+        function validateCSVBeforeUpload(csv){
+            if (csv == null || csv === '') {
+                return false;
+            }
+            let rows = csv.split(/(?:\r\n|\n)+/).slice(1);
+            console.log(`rows`,rows);
+            let indexOfUOM = 2;
+            let indexOfTypeMark = 3;
+            let rowsWithMissingUOM = [];
+            let rowsWithIllegalTypeMark = [];
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i] !== '') {
+                let row = rows[i].split(',');
+                console.log(`row,`,row,row[indexOfUOM]);
+                if(row[indexOfUOM] == null || row[indexOfUOM] === ''){
+                    rowsWithMissingUOM.push(i+1);
+                }
+                    /*if (row[indexOfTypeMark].length > 8) {
+                        rowsWithIllegalTypeMark.push(i + 1);
+                    }*/
+            }
+            }
+            if (rowsWithMissingUOM.length > 0) {
+                $('.errorMsg').html('Missing UOM. Affected rows: ' + rowsWithMissingUOM.join(', ')).show();
+                return false;
+            }
+            /*if (rowsWithIllegalTypeMark.length > 0) {
+                $('.errorMsg').html('Type mark is limited to 8 characters. Affected rows: ' + rowsWithIllegalTypeMark.join(', ')).show();
+                return false;
+            }*/
+            return true;
+        }
+    </script>
+
+</apex:component>

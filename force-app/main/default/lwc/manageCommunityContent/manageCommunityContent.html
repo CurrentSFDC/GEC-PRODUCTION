@@ -1,0 +1,781 @@
+<template>
+    <div class={flexipageRegionWidth}></div>
+    <lightning-progress-indicator
+        current-step={currentStep}
+        type="path"
+        variant="base"
+    >
+        <lightning-progress-step
+            label="1. Content Information"
+            value="1"
+        ></lightning-progress-step>
+        <lightning-progress-step
+            label="2. Add Sales Kits and Media"
+            value="2"
+        ></lightning-progress-step>
+        <lightning-progress-step
+            label="3. Review"
+            value="3"
+        ></lightning-progress-step>
+        <lightning-progress-step
+            label="4. Confirmation"
+            value="4"
+        ></lightning-progress-step>
+    </lightning-progress-indicator>
+        <lightning-messages> </lightning-messages>
+        
+        <!--STEP ONE-->
+        <div class="stepOne">
+            
+                <div class="slds-grid slds-gutters slds-wrap">
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                      ` <h3 class="slds-section-title--divider">CONTENT DETAILS</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <template if:true={ListingPicklistValues.data}>
+                                <lightning-combobox 
+                                                label="Listing Type"
+                                                value={values}
+                                                placeholder="-Select Listing Type-"
+                                                options={ListingPicklistValues.data.values}
+                                                required
+                                                class = "lt validVal"
+                                                onchange={handlePick} >
+                                </lightning-combobox>
+                            </template>
+                            <lightning-input type="text" class="ctle" label="Title" value={commTitle}></lightning-input>
+                            <lightning-textarea type="text" class="des" label="Description" value={commDescription}></lightning-textarea>
+                            <template if:true={PersonaPicklistValues.data}>
+                                <lightning-combobox 
+                                                label="User Type"
+                                                value={values}
+                                                placeholder="-Select User Type-"
+                                                options={PersonaPicklistValues.data.values}
+                                                required
+                                                class = "ut validVal"
+                                                onchange={handlePersonaPick} >
+                                </lightning-combobox>
+                            </template>
+                           
+                            
+                        </div>
+                    </div>
+                
+                    <template if:true={showDates}>
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                            <h3 class="slds-section-title--divider">CONTENT DATES</h3>
+                            <div class="slds-box slds-theme_shade border">
+                                <template if:true={ContentPicklistValues.data}>
+                                    <lightning-combobox 
+                                                    label="Content Type"
+                                                    value={values}
+                                                    placeholder="-Select Content Type-"
+                                                    options={ContentPicklistValues.data.values}
+                                                    required
+                                                    class = "ct validVal"
+                                                    onchange={handleContentPick} >
+                                    </lightning-combobox>
+                                </template>
+                                <lightning-input type="date" class="dd" label="Display Date" value={commDisplayDate} required></lightning-input>
+                                <lightning-input type="date" class="ls" label="Listing Start Date" value={commListingStart} required></lightning-input>
+                                <lightning-input type="date" class="le" label="Listing End Date" value={commListingEnd} required></lightning-input>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                 <!--USED FOR COMMUNITY CONTENT DETAIL PAGE-->
+                 <template if:true={showTraining}>
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-8">
+                          ` <h3 class="slds-section-title--divider">CONTENT FUNCTIONS</h3>
+                            <div class="slds-box slds-theme_shade border">
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                                        <div class="slds-box slds-theme_shade border">
+                               
+                                            <lightning-input class="hurl" type="url" label="Hyperlink URL" value={commHyperURL}></lightning-input>
+                                            <template if:true={OpenInPicklistValues.data}>
+                                                <lightning-combobox 
+                                                                label="Open Hyperlink In"
+                                                                value={values}
+                                                                placeholder="-Select Hyperlink Action-"
+                                                                options={OpenInPicklistValues.data.values}
+                                                                required
+                                                                class = "ha validVal"
+                                                                onchange={handleHyperInPick} >
+                                                </lightning-combobox>
+                                            </template>
+                                            <template if:true={CallToActionPicklistValues.data}>
+                                                <lightning-combobox 
+                                                                label="Call To Action"
+                                                                value={values}
+                                                                placeholder="-Select Call To Action-"
+                                                                options={CallToActionPicklistValues.data.values}
+                                                                required
+                                                                class = "cta validVal"
+                                                                onchange={handleCallPick} >
+                                                </lightning-combobox>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                         
+                    </div>
+                    </template>
+
+                <!--USED FOR COMMUNITY CONTENT DETAIL PAGE-->
+                <template if:true={showFunctions}>
+                <div class="slds-grid slds-gutters slds-wrap">
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-8">
+                      ` <h3 class="slds-section-title--divider">CONTENT FUNCTIONS</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid slds-gutters slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                                    <div class="slds-box slds-theme_shade border">
+                           
+                                        <template if:true={HyperLinkPicklistValues.data}>
+                                            <lightning-combobox 
+                                                            label="HyperLink System Name"
+                                                            value={values}
+                                                            placeholder="-Select Hyperlink Type-"
+                                                            options={HyperLinkPicklistValues.data.values}
+                                                            required
+                                                            class = "ht validVal"
+                                                            onchange={handleHyperlinkPick} >
+                                            </lightning-combobox>
+                                        </template>
+                                        <template if:true={OpenInPicklistValues.data}>
+                                            <lightning-combobox 
+                                                            label="Open Hyperlink In"
+                                                            value={values}
+                                                            placeholder="-Select Hyperlink Action-"
+                                                            options={OpenInPicklistValues.data.values}
+                                                            required
+                                                            class = "ha validVal"
+                                                            onchange={handleHyperInPick} >
+                                            </lightning-combobox>
+                                        </template>
+                                        <template if:true={CallToActionPicklistValues.data}>
+                                            <lightning-combobox 
+                                                            label="Call To Action"
+                                                            value={values}
+                                                            placeholder="-Select Call To Action-"
+                                                            options={CallToActionPicklistValues.data.values}
+                                                            required
+                                                            class = "cta validVal"
+                                                            onchange={handleCallPick} >
+                                            </lightning-combobox>
+                                        </template>
+                                    </div>
+                                </div>
+                               
+                                    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                                        <div class="slds-box slds-theme_shade border">
+                                            <lightning-input type="url" class="ur" label="Image URL" value={commImageURL}></lightning-input>
+                                            <lightning-input type="text" class="iat" label="Image Alternate Text" value={commImageAlt}></lightning-input>
+                                            <lightning-input class="hurl" type="url" label="Hyperlink URL" value={commHyperURL}></lightning-input>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                     
+                </div>
+                </template>
+                <br>
+                <div class="slds-grid slds-gutters slds-wrap">
+
+                    <template if:true={alertFields}>
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-8">
+                            <h3 class="slds-section-title--divider">ALERT BAR INFO</h3>
+                            <div class="slds-box slds-theme_shade border">
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                                        <div class="slds-box slds-theme_shade border">
+                                            <lightning-input class="alert" type="text" label="Alert Bar Message" ></lightning-input><br>
+                                            <lightning-input class="alc" type="checkbox" label="Show Alert in Community" onchange={handleChecked}></lightning-input><br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+
+                    <template if:true={communityPage}>
+                        <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-8">
+                            <h3 class="slds-section-title--divider">DETAIL PAGE INFO</h3>
+                            <div class="slds-box slds-theme_shade border">
+                                <div class="slds-grid slds-gutters slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                                        <div class="slds-box slds-theme_shade border">
+                                            <lightning-input class="sho" type="text" label="Subtitle 1 - Header" value={commSubHeadOne}></lightning-input><br>
+                                            <lightning-input-rich-text class="shdo" placeholder="Subtitle 1 - Description..." value={commSubDesOne} formats={formats}></lightning-input-rich-text>
+                                            <lightning-input class="sht" type="text" label="Subtitle 2 - Header" value={commSubHeadTwo}></lightning-input><br>
+                                            <lightning-input-rich-text class="shdt" placeholder="Subtitle 2 - Description..." value={commSubDesTwo} formats={formats} onfocus={setFormat}></lightning-input-rich-text><br>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-8">
+                                        <div class="slds-box slds-theme_shade border">
+                                            <lightning-input class="ah" type="text" label="Accordion Header" value={commAccHeader}></lightning-input><br>
+                                            <lightning-input class="hn" type="text" label="Hyperlink Name" value={commHyperName}></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>  
+                    </template>  
+                </div>
+            
+
+
+               <template if:true={showUpload}>
+                <div class="slds-col slds-size_1-of-1 slds-size_8-of-8">
+                    <h3 class="slds-section-title--divider">{uploadTitle}</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid slds-gutters slds-wrap">
+                            <template if:true={isImage}>
+                            <div class="slds-col slds-small-size_1-of-1 slds-large-size_2-of-8">
+                            
+                        
+                            <lightning-card title="Add An Image">
+                                    <div class="slds-m-around_medium">
+                                        <lightning-input type="file" 
+                                        accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+                                        label="Attachment" onchange={openfileUpload}></lightning-input>
+                                    </div>
+                                    <template if:true={fileData}>
+                                        <p>{fileData.filename}</p>
+                                    </template>
+                                    <lightning-button variant="brand" label="Upload Image" title="Submit" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>
+                                </lightning-card>
+                            
+                            </div>
+                            <div class="slds-col slds-small-size_1-of-1 slds-large-size_4-of-8 ">
+
+                            <lightning-card title="Image Preview">
+                               <img src={commImageURL}>
+                            </lightning-card>
+                            </div>
+                            <div class="slds-col slds-small-size_1-of-1 slds-large-size_2-of-8">
+                                <lightning-card title="Recommendations">
+                                Listing Type: {listingType} <br>
+                                Recommended Image Size: {imageMessage} <br>
+                                Recommended Format: {recFormat}
+                                </lightning-card>
+                                <template if:true={showDetailMessage}>
+                                    <lightning-card title="Reminder">
+                                        {detailMessage}
+                                    </lightning-card>
+                                </template>
+
+                            </div>
+                            </template>
+                            <template if:false={isImage}>
+                            <div class="slds-col slds-small-size_1-of-1 slds-large-size_2-of-8">
+                                
+                                    <lightning-card title="Add A Document">
+                                        <div class="slds-m-around_medium">
+                                            <lightning-input type="file" 
+                                            accept=".xlsx, .xls, .csv, .doc, .docx, .pdf"
+                                            label="Attachment" onchange={openfileUpload}></lightning-input>
+                                        </div>
+                                        <template if:true={fileData}>
+                                            <p>{fileData.filename}</p>
+                                        </template>
+                                        <lightning-button variant="brand" label="submit" title="Submit" onclick={handleClick} class="slds-m-left_x-small"></lightning-button>
+                                    </lightning-card>
+        
+                                
+                                
+                                </div>
+                            </template>
+                        </div>
+
+
+                            <!--<div class="slds-col slds-small-size_1-of-1 slds-large-size_2-of-8">
+                                <lightning-file-upload
+                                    label="Attach Files"
+                                    class="fileupload"
+                                    name="uploadFile"
+                                    accept={acceptedFormats}  
+                                    onuploadfinished={handleUploadFinished} multiple>
+                                </lightning-file-upload><br>
+                                <h4>Accepted Formats: <lightning-helptext content={acceptedFormats}></lightning-helptext></h4>
+                            </div>
+                            <div class="slds-col slds-border_left slds-small-size_1-of-1 slds-large-size_6-of-8">
+                                <div class="slds-p-left_medium">
+                                    <h2 class="slds-section-title--divider">Uploaded Files</h2>
+                                    <template if:true={showFiles}>
+                                        <lightning-datatable data={files} columns={fileColumns} key-field="Id" hide-checkbox-column="true" onrowaction={handleDelete} class="slds-max-medium-table_stacked">
+                                        </lightning-datatable>
+                                      
+                                    </template>
+                                </div>
+                                </div>
+                            </div>-->
+                        </div>
+                    </div>
+                
+            </template>
+            
+            <div class="slds-align_absolute-center">
+                <lightning-button
+                    class="slds-m-top_small"
+                    label="Next"
+                    onclick={createContent}
+                    variant="brand"
+                    disabled={showNextButton} 
+                ></lightning-button>
+            </div>
+            
+    </div>
+        <!--END OF STEP ONE-->
+
+        <!--STEP TWO-->
+       
+        <div class="stepTwo slds-hide">
+
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-1 slds-large-size_12-of-12">
+                  ` <h3 class="slds-section-title--divider">Accordion Content</h3>
+                  <div class="slds-box slds-theme_shade border">
+                            <lightning-button variant="brand" label="Add Accordion Content" onclick={addSalesKit}></lightning-button>
+                            
+                                
+                                
+                                
+                            <template if:true={salesKits}>
+                                <lightning-datatable wrap-text-max-lines="2" data={salesKits} columns={skColumns} key-field="Id" draft-values={draftValues} onsave={handleSave} onrowselection={handleSelect} onrowaction={handleRowActions} suppress-bottom-bar="true" hide-checkbox-column>
+                                </lightning-datatable>
+                                
+                            </template>
+                            <template if:true={error}>
+                                {error}
+                            </template>
+                                
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-1 slds-large-size_12-of-12">
+                  ` <h3 class="slds-section-title--divider">Media</h3>
+                  <div class="slds-box slds-theme_shade border">
+                            <lightning-button variant="brand" label="Add Media" onclick={addMedia}></lightning-button>
+                            
+                                
+                                
+                                
+                            <template if:true={commMedia}>
+                                <lightning-datatable wrap-text-max-lines="2" data={commMedia} columns={mediaColumns} key-field="Id" draft-values={draftValues} onsave={handleSave} onrowselection={handleSelect} onrowaction={handleRowActions} suppress-bottom-bar="true" hide-checkbox-column>
+                                </lightning-datatable>
+                                
+                            </template>
+                            <template if:true={error}>
+                                {error}
+                            </template>
+                                
+                    </div>
+                </div>
+
+            </div>
+            <div class="slds-align_absolute-center">
+                <lightning-button-group>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepOne}
+                    ></lightning-button>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Next"
+                        onclick={goToStepThree}
+                        variant="brand"
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+        </div>
+        <!--END OF STEP TWO-->
+
+        <!--STEP THREE-->
+        <div class="stepThree slds-hide">
+
+            <div class="slds-box">
+                <div class="slds-text-title_caps">Review</div> <br>   
+            
+        
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Content Details</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <b>Listing Type: </b>{listingType}<br>
+                                    <b>Title: </b>{commTitle}<br>
+                                    <b>Description: </b>{commDescription}<br>
+                                    <b>User Type: </b>{userType}<br>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Content Dates</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <b>Content Type:</b> {contentType}<br>
+                                    <b>Display Date:</b> {commDisplayDate}<br>
+                                    <b>Listing Start Date:</b> {commListingStart} <br>
+                                    <b>Listing End Date: </b>{commListingEnd}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_8-of-8">
+                        <h3 class="slds-section-title--divider">Content Functions</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col slds-size_4-of-8">
+                                    <b>System/Page Name: </b>{hyperLinkSystem}<br>
+                                    <b>Open Link In: </b>{hyperOpenIn}<br>
+                                    <b>Call To Action: </b>{callToAction}<br>
+                                    
+                                </div>
+                                <div class="slds-col slds-size_4-of-8">
+                                    <lightning-card title="IMAGE">
+                                        <img src={commImageURL}>
+                                     </lightning-card>
+                                    <b>Image URL:</b> {commImageURL}<br>
+                                    <b>Image Alternate Text:</b> {commImageAlt} <br>
+                                    <b>Hyperlink URL: </b>{commHyperURL}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <template if:true={communityPage}>
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_8-of-8">
+                            <h3 class="slds-section-title--divider">Detail Page Info:</h3>
+                            <div class="slds-box slds-theme_shade border">
+                                <div class="slds-grid">
+                                    <div class="slds-col slds-size_4-of-8">
+                                        <b>Subtitle 1 - Header: </b>{commSubHeadOne}<br>
+                                        <b>Subtitle 1 - Description: </b>{commSubDesOne}<br>
+                                        <b>Hyperlink Name: </b>{commHyperName}<br>
+                                        
+                                    </div>
+                                    <div class="slds-col slds-size_4-of-8">
+                                        <b>Subtitle 2 - Header:</b> {commSubHeadTwo}<br>
+                                        <b>Subtitle 2 - Description:</b> {commSubDesTwo} <br>
+                                        <b>Accordion Header Title: </b>{commAccHeader}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+
+            </div>
+
+            <div class="slds-align_absolute-center">
+                <lightning-button-group>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepTwo}
+                    ></lightning-button>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Next"
+                        onclick={updateContent}
+                        variant="brand"
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+            
+        </div>
+        
+        <!--END OF STEP THREE-->
+
+        <!--STEP FOUR-->
+        <div class="stepFour slds-hide">
+            <div class="slds-col slds-size_8-of-8">
+                <h3 class="slds-section-title--divider">Confirmation</h3>
+                <div class="slds-box slds-theme_shade border confirmation">
+                    <h2><b>Thank you for using the Manage Community Content Tool! We will be providing Edit Functionality soon!!</b>
+                    </h2><br>
+            
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+                            <lightning-button
+                                class="slds-m-top_small"
+                                label="Home"
+                                onclick={goHome}
+                            ></lightning-button>
+                            <lightning-button
+                                class="slds-m-top_small"
+                                label="Create New"
+                                onclick={startOver}
+                                variant="brand"
+                            ></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+        <!--END OF STEP FOUR-->
+    
+
+
+    <!--ADD SALES KIT MODAL-->
+        <!-- MODAL FOR ADDING SALES KITS -->
+        <template if:true={addSalesKitModal}>
+            <section role="dialog" tabindex="-1"
+                    aria-labelledby="modal-heading-01"
+                    aria-modal="true"
+                    aria-describedby="modal-content-id-1"
+                    class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- modal header -->
+                <header class="slds-modal__header">
+                    <!--<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeAddModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button>-->
+                    <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">Add Accordion Content</h2>
+                    <p class="error">{errorMessage}</p>
+                </header>
+                <!-- modal body -->
+               
+                
+                <!-- showing record edit form -->
+                <lightning-messages></lightning-messages>
+                <div class="slds-modal__content slds-p-around_medium">
+                        <div class="slds-box"> <!-- BOX 1 UPPER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    <lightning-input
+                                        label="Name"
+                                        type="text"
+                                        class="na"
+                                    ></lightning-input>
+                                    <template if:true={PortalPicklistValues.data}>
+                                        <lightning-combobox 
+                                                        label="User Type"
+                                                        value={values}
+                                                        placeholder="-Select User Type-"
+                                                        options={PortalPicklistValues.data.values}
+                                                        required
+                                                        class = "prt validVal"
+                                                        onchange={handlePortalPick} >
+                                        </lightning-combobox>
+                                    </template>
+                                    <template if:true={TypePicklistValues.data}>
+                                        <lightning-combobox 
+                                                        label="Type"
+                                                        value={values}
+                                                        placeholder="-Select Type-"
+                                                        options={TypePicklistValues.data.values}
+                                                        required
+                                                        class = "type validVal"
+                                                        onchange={handleTypePick} >
+                                        </lightning-combobox>
+                                    </template>
+                                    <lightning-input
+                                    label="Content ID"
+                                    value={salesKitConID}
+                                    disabled="true"
+                                    type="text"
+                                    class="cid"
+                                ></lightning-input>
+                                <lightning-input
+                                    label="File URL"
+                                    value={fileURL}
+                                    disabled="true"
+                                    type="text"
+                                    class="cid"
+                                ></lightning-input>
+                                <div class="slds-col slds-small-size_1-of-1 slds-large-size_8-of-8">
+                            
+                                    <lightning-card title="Add A File">
+                                            <text class="recSize">Max File Size: 5 MB</text>
+                                            <div class="slds-m-around_medium">
+                                                <lightning-input type="file" 
+                                                accept=".xlsx, .xls, .csv, .png, .doc, .docx, .pdf"
+                                                label="Attachment" onchange={openfileUpload}></lightning-input>
+                                            </div>
+                                            <template if:true={fileData}>
+                                                <p>{fileData.filename}</p>
+                                            </template>
+                                            <lightning-button variant="brand" label="submit" title="Submit" onclick={handleSalesKitClick} class="slds-m-left_x-small"></lightning-button>
+                                        </lightning-card>
+                                    
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer">
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+                            <lightning-button variant="brand-outline"
+                                    label="Close"
+                                    title="Close"
+                                    onclick={closeSalesKitModal}>
+                                </lightning-button>
+                            <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                    variant="brand"
+                                    onclick={createSalesKit}
+                                    label="Save">
+                                </lightning-button>
+                        
+                        </div>
+                    </div>
+                
+                </footer>
+            </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+           
+        </template>
+        <!--END ADD SALES KITS MANUALLY MODAL-->
+
+
+         <!--ADD MEDIA MODAL-->
+        <!-- MODAL FOR ADDING MEDIA -->
+        <template if:true={addMediaModal}>
+            <section role="dialog" tabindex="-1"
+                    aria-labelledby="modal-heading-01"
+                    aria-modal="true"
+                    aria-describedby="modal-content-id-1"
+                    class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- modal header -->
+                <header class="slds-modal__header">
+                    <!--<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeAddModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button>-->
+                    <h2 id="modal-heading-meida" class="slds-text-heading_medium slds-hyphenate">Add Media</h2>
+                    <p class="error">{errorMessage}</p>
+                </header>
+                <!-- modal body -->
+               
+                
+                <!-- showing record edit form -->
+                <lightning-messages></lightning-messages>
+                <div class="slds-modal__content slds-p-around_medium">
+                        <div class="slds-box"> <!-- BOX 1 UPPER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    <lightning-input
+                                        label="Name"
+                                        type="text"
+                                        class="mna"
+                                    ></lightning-input>
+                                    <template if:true={MediaTypePicklistValues.data}>
+                                        <lightning-combobox 
+                                                        label="Media Type"
+                                                        value={values}
+                                                        placeholder="-Select Media Type-"
+                                                        options={MediaTypePicklistValues.data.values}
+                                                        required
+                                                        class = "prt validVal"
+                                                        onchange={handleMediaTypePick} >
+                                        </lightning-combobox>
+                                    </template>
+
+                                    <lightning-input
+                                    label="Media ID"
+                                    value={mediaConID}
+                                    disabled={disableMediaID}
+                                    type="text"
+                                    class="cid"
+                                ></lightning-input>
+                                <lightning-input
+                                    label="Media URL"
+                                    value={mediaURL}
+                                    disabled={disabledMediaURL}
+                                    type="text"
+                                    class="mur"
+                                ></lightning-input>
+                                <div class="slds-col slds-small-size_1-of-1 slds-large-size_8-of-8">
+                                   <template if:true={mediaImage}> 
+                                    <lightning-card title="Add An Image">
+                                            <text class="recSize">Recommended Image Size: 750px x 500px</text>
+                                            <div class="slds-m-around_medium">
+                                                <lightning-input type="file" 
+                                                accept=".jpg, .png"
+                                                label="Attachment" onchange={openfileUpload}></lightning-input>
+                                            </div>
+                                            <template if:true={fileData}>
+                                                <p>{fileData.filename}</p>
+                                            </template>
+                                            <lightning-button variant="brand" label="submit" title="Submit" onclick={handleMediaClick} class="slds-m-left_x-small"></lightning-button>
+                                        </lightning-card>
+                                    </template>
+                                    <template if:true={isYouTube}>
+                                        <lightning-card title="YouTube Configuration">
+                                            For YouTube Videos, please configure the fields as follows: <br>
+                                            Example: <br>
+                                            URL = https://www.youtube.com/watch?v=uCIc2uiUWO8 <br>
+                                            Media ID = uCIc2uiUWO8 (the last part after the "=" sign)
+                                        </lightning-card>
+                                    </template>
+                                    <template if:true={isVimeo}>
+                                        <lightning-card title="Vimeo Configuration">
+                                            For Vimeo Videos, paste the URL from Vimeo into the Media URL field above. <br><br>
+                                            Example: https://vimeo.com/226053498
+                                        </lightning-card>
+                                    </template>
+                                    </div>
+                                </div>
+                                </div>
+                                </div>
+                </div>
+                
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer">
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+                            <lightning-button variant="brand-outline"
+                                    label="Close"
+                                    title="Close"
+                                    onclick={closeMediaModal}>
+                                </lightning-button>
+                            <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                    variant="brand"
+                                    onclick={createMedia}
+                                    label="Save">
+                                </lightning-button>
+                        
+                        </div>
+                    </div>
+                
+                </footer>
+            </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+           
+        </template>
+        <!--END ADD MEDIA MANUALLY MODAL-->
+
+
+
+
+</template>

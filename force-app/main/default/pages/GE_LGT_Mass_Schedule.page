@@ -1,0 +1,277 @@
+<apex:page controller="GE_LGT_Mass_Schedule" sidebar="False" >
+<style>
+
+    .buttonStyle { background-color:Yellow;}
+
+    .headerColor {
+        background-color: yellowgreen !important;
+    }
+    .pbTitle {
+         font-size: 500px;
+    }
+
+    <!--
+    .bPageBlock .brandSecondaryBrd .apexDefaultPageBlock .secondaryPalette #clrBlock {
+          background-color: lavenderblush !important;
+    }
+    -->
+</style>
+<script>
+function funmkeadonly(revid){
+//alert(revid);
+document.getElementById(revid).readOnly = true;
+}
+function updatePriceonQuantityChange(vqid){
+//alert(vqid);
+
+vqvalue = document.getElementById(vqid).value;
+vuid = vqid.replace("idquantity","idunitprice");
+vrevid = vqid.replace("idquantity","idrevenue");
+vuvalue = document.getElementById(vuid).value;
+vrevvalue = document.getElementById(vrevid).value;
+vuvalue = Number(vuvalue.replace(",",""));
+vqvalue = Number(vqvalue.replace(",",""));
+document.getElementById(vrevid).value = Number(vqvalue) * Number(vuvalue);
+}
+
+function myFunction() {
+
+    var txt;
+    var r = confirm("Do you want Continue with One Time Schedule");
+    if (r == true) {
+        deloli();
+    } else {
+        return false;
+    }
+    
+}
+function myFunction1() {
+
+    var txt;
+    var r = confirm("Do you want Continue with delete  ProductSchedules");
+    if (r == true) {
+        delolisch();
+    } else {
+        return false;
+    }
+    
+}
+ function setVal(){
+     //alert('{!b}');
+     
+
+     var r_alert = confirm('Do you want to continue with Populate Installments');
+     if (r_alert == true) {
+     
+     
+     var Installment_array=document.getElementById('j_id0:j_id2:j_id4:idpbt1:0:NOI').value;
+     var InstallmentPeriod_array=document.getElementById('j_id0:j_id2:j_id4:idpbt1:0:Ip').value;
+    //alert(quantity_array);
+      // var quantityArray=[];
+      
+       for(var i=0;i<'{!productCount}';i++){
+       
+       var f = 'j_id0:j_id2:j_id4:idpbt1:'+(i+1)+':NOI';
+      // alert(d);
+       document.getElementById(f).value=Installment_array;
+       var g = 'j_id0:j_id2:j_id4:idpbt1:'+(i+1)+':Ip'
+      // alert(d);
+       document.getElementById(g).value=InstallmentPeriod_array;
+       
+        
+       } 
+     //  alert(myStringArray);
+       
+        
+     //   document.getElementById('j_id0:j_id2:j_id3:j_id4:1:j_id9').val(a);
+    //    document.getElementById("quantity_box_all").value=a;
+
+    //document.submit();
+    return false;
+   
+   }
+    else {
+    document.getElementById('j_id0:j_id2:j_id38').style.display='none';
+        return false;
+    }
+   return false; 
+ }
+  function setVal1(){
+    
+     var date_alert = confirm('Do you want to continue with Populate Dates');
+     if (date_alert == true) {
+     
+     var Installment_sd=document.getElementById('j_id0:j_id2:j_id4:idpbt1:0:sdfocus').value;
+
+       for(var i=0;i<'{!productCount}';i++){
+       
+       var h = 'j_id0:j_id2:j_id4:idpbt1:'+(i+1)+':sdfocus';
+
+       document.getElementById(h).value=Installment_sd;
+
+       
+        
+       } 
+     //  alert(myStringArray);
+       
+        
+     //   document.getElementById('j_id0:j_id2:j_id3:j_id4:1:j_id9').val(a);
+    //    document.getElementById("quantity_box_all").value=a;
+
+    document.submit();
+    return true;
+     
+     
+   
+     }else {
+        return false;
+    }
+ }
+    setTimeout(function(){
+    setval()}, 3000);
+  </script>
+ 
+<apex:form >
+
+<center><b><font color="red">Be sure to save your changes by hitting Save All!</font></b></Center>
+     
+    <apex:pageBlock title="Product Schedule" >
+        <apex:pageBlockTable value="{!lstwrapper}" var="lw" style="overflow:scroll;" border="1" align="left" headerClass="headerColor" id="idpbt1">
+            <apex:column >  
+                <apex:facet name="header">
+                    <apex:inputCheckbox value="{!allBool}" > <apex:actionSupport reRender="idpbt1" action="{!selectAll}" event="onchange"/> </apex:inputCheckbox>
+                </apex:facet>
+                    <apex:inputCheckbox value="{!lw.c}" id="idcheck"/>
+            </apex:column>
+            <apex:column id="test" headerValue="Product Name" value="{!lw.oli.Product2.Name}" />
+            
+            <apex:column headerValue="Schedule Date"  >
+            
+                    <apex:inputField value="{!lw.oli.Servicedate}"  required="false" id="sdfocus"  />
+            </apex:column>
+            
+            <apex:column headerValue="Installment Period">
+                    <apex:selectList value="{!lw.s2}" size="1" id="Ip">
+                    <apex:selectOption itemValue="quarterly" itemLabel="Quarterly"/>
+                    <apex:selectOption itemValue="monthly" itemLabel="Monthly"/>
+                    </apex:selectList>
+            </apex:column>
+            <apex:column headervalue="Quantity"  >
+                    <apex:Inputfield value="{!lw.oli.quantity}"  style="width: 100%;" onblur="updatePriceonQuantityChange(this.id);" id="idquantity"/>
+                    <apex:inputhidden value="{!lw.oli.unitprice}"   id="idunitprice"   />
+            </apex:column>
+            
+            
+           
+            <apex:column headervalue="Revenue">
+                  <!--  <apex:inputfield value="{!lw.oli.TotalPrice}"  style="width: 100%;" id="idrevenue" onfocus="funmkeadonly(this.id);"/> -->
+                    <apex:inputText value="{!lw.oli.TotalPrice}"  style="width: 100%;" id="idrevenue" onfocus="funmkeadonly(this.id);"/>
+            </apex:column>
+            <apex:column headervalue="Number of Installments"  >
+                    <apex:inputText id="NOI" value="{!lw.n}" style="width: 50%;"/>
+            <!--<table>
+          
+                <tr><td><Strong>Quantity</Strong></td><td><Strong>Schedule Type</Strong></td><td><Strong>Installment Period</Strong></td><td><Strong>Number of Installments</Strong></td></tr>
+                <tr><td><apex:inputfield value="{!lw.olisch.quantity}"  style="width: 100%;"/></td><td><apex:outputText value="Divide Amount into Multiple Installments"/></td><td><apex:outputText value="Quarterly"/></td><td><apex:inputtext value="{!n}" style="width: 50%;"/></td></tr>
+            </table>-->
+            <!--<apex:panelGrid columns="4"  >
+                <apex:outputText value="Quantity" />
+                <apex:outputText value="Second" />
+                <apex:outputText value="Third" />
+                <apex:outputText value="Fourth" />              
+            </apex:panelGrid>
+            <apex:panelGrid columns="4"  >
+                <apex:inputfield value="{!lw.olisch.quantity}"/>
+                <apex:inputfield value="{!lw.olisch.quantity}" />
+                <apex:outputText value="Third" />
+                <apex:outputText value="Fourth"/>
+            </apex:panelGrid>-->
+            </apex:column>
+            <!--<apex:column headervalue="Revenue" onmousemove="">
+            <table>
+                <tr><td><Strong>Revenue</Strong></td><td><Strong>Schedule Type</Strong></td><td><Strong>Installment Period</Strong></td><td><Strong>Number of Installments</Strong></td></tr>
+                <tr><td><apex:inputfield value="{!lw.olisch.Revenue}" style="width: 100%;"/></td><td><apex:outputText value="Divide Amount into Multiple Installments"/></td><td><apex:outputText value="Quarterly"/></td><td><apex:inputtext value="{!n}" style="width: 50%;"/></td></tr>
+            </table>
+            <!--<apex:panelGrid columns="4"  >  
+                <apex:outputText value="Quantity" />
+                <apex:outputText value="Second" />
+                <apex:outputText value="Third" />
+                <apex:outputText value="Fourth" />
+            </apex:panelGrid>
+            <apex:panelGrid columns="4"  >
+                <apex:inputfield value="{!lw.olisch.quantity}"/>
+                <apex:outputText value="Second" />
+                <apex:outputText value="Third" />
+                <apex:outputText value="Fourth"/>
+            </apex:panelGrid>-->
+  
+        </apex:pageBlockTable> 
+        <!--
+        <apex:pageBlock >
+                <apex:panelGrid columns="2" width="46%" border="1" cellspacing="0" cellpadding="0">
+                    <apex:panelGrid columns="2"  columnClasses="colStyle" width="100%">    
+                       Product Name <apex:OutputText value="ol.GE_LGT_Product_Name__c" />  
+                    </apex:panelGrid>
+                </apex:panelGrid>
+        </apex:pageBlock>  
+        -->
+            <apex:pageBlockButtons >
+                
+                <apex:commandButton value="Save All"  action="{!scheduleall}" styleClass="buttonStyle" style="background:Yellow" />
+                <apex:actionFunction name="deloli" action="{!deloli}" reRender="idrepeat"/> 
+                <input type="button" Class="btn" value="Delete Schedule"  onclick="myFunction1();" reRender="clearMsg2"/>       
+                <apex:actionFunction name="delolisch" action="{!delolisch}"/>
+                
+                <apex:commandButton value="Populate Dates" onclick="return setVal1();"/>
+                <apex:commandButton value="Populate Installments" onclick="return setVal();"/>
+                
+                
+                <input type="button" Class="btn" value="One Time Shipment"  onclick="myFunction();" />
+                
+                <apex:commandButton value="Return to Opportunity"  action="{!returntooppty}"/>        
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+                    <apex:pageMessage summary="Records inserted Successfully" severity="info" strength="3" rendered="{!d}" />
+                    <apex:pageMessage summary="Records inserted Successfully" severity="info" strength="3" rendered="{!b}" />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                 <center><apex:commandButton value="Edit Schedules " action="{!Editall}" rendered="{!NOT(editpbrender)}"/></center>
+                <apex:repeat value="{!listoppsd}" var="ls" id="idrepeat" rendered="{!NOT(editpbrender)}">
+                    <apex:outputPanel layout="block" styleClass="clr">
+        <apex:pageBlock title="{!ls.Product2.Name}" id="clrBlock">
+            <apex:pageBlockTable value="{!ls.OpportunityLineItemSchedules}" var="c" >
+                    <apex:column value="{!c.ScheduleDate}"/>
+                    <apex:column value="{!c.Quantity}"/>
+                    <apex:column value="{!c.Revenue}"/>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+                    </apex:outputPanel>
+                </apex:repeat>
+                
+                
+           
+                <apex:outputPanel layout="block" styleClass="clr" rendered="{!editpbrender}">
+                <center><apex:commandButton value="SaveAll Schedules " action="{!saveall}"/></center>
+                <apex:repeat value="{!listoppsd}" var="ls"  >
+                    
+        <apex:pageBlock title="{!ls.Product2.Name}" >
+            <apex:pageBlockTable value="{!ls.OpportunityLineItemSchedules}" var="c" >
+                    <apex:column headerValue="Schedule Date"><apex:inputField value="{!c.ScheduleDate}" /> </apex:column>
+                    <apex:column headerValue="Quantity"><apex:inputField value="{!c.Quantity}" /></apex:column>
+                    <apex:column headerValue="Revenue"> <apex:inputField value="{!c.Revenue}" /></apex:column>
+            </apex:pageBlockTable>
+           
+        </apex:pageBlock>
+                    
+                </apex:repeat>
+                <center><apex:commandButton value="SaveAll Schedules" action="{!saveall}"/></center>
+               </apex:outputPanel> 
+                
+</apex:form>
+<script type="text/javascript">
+window.onload = setFocus
+function setFocus()
+{
+       document.getElementById("sdfocus").focus();
+}
+</script>
+</apex:page>

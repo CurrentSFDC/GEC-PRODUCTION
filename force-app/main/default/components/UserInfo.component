@@ -1,0 +1,290 @@
+<apex:component >
+    <script id="UserInfo-Desktop" type="text/template">
+        <div class="panel panel-default cc_panel cc_checkout_user_info">
+            <div class="panel-heading cc_heading">
+                <h3 class="panel-title cc_title">{{pageLabelMap 'CheckOut_ContactInformation'}}</h3>
+            </div>
+            <div class="panel-body cc_body">
+                <form id="mainform" class="cc_userInfo_form">
+                    <div class="main-messagingSection-Error" style="display: none"></div>
+                    <div class="form-group">
+                        <label for="firstNameField" class="cc_contact_input_firstname_label">{{pageLabelMap 'CheckOut_FirstName'}}</label>
+                        <input id="firstNameField" type="text" class="form-control contactInput cc_contact_input_firstname" name="buyerFirstName" maxlength=40 value="{{this.buyerFirstName}}"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastNameField" class="cc_contact_input_lastname_label">{{pageLabelMap 'CheckOut_LastName'}}</label>
+                        <input id="lastNameField" type="text" class="form-control contactInput cc_contact_input_lastname" name="buyerLastName" maxlength=40 value="{{this.buyerLastName}}"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="homePhoneField" class="cc_contact_input_phone_label">{{pageLabelMap 'CheckOut_PrimaryPhone'}}</label>
+                        <input id="homePhoneField" type="text" class="form-control contactInput cc_contact_input_phone" name="buyerPhone" maxlength=40 value="{{this.buyerPhone}}"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailField" class="cc_contact_input_email_label">{{pageLabelMap 'CheckOut_Email'}}</label>
+                        <input id="emailField" type="email" class="form-control contactInput cc_contact_input_email" name="buyerEmail" maxlength=80 value="{{this.buyerEmail}}"/>
+                    </div>
+                </form>
+
+                <div class="cc_address_entry_billing" style="display:none">
+                    {{> addressEntry this.billingAddress}}
+                </div>
+                {{#ifEquals this.orderType "Purchase Order"}}
+                <div class="cc_address_entry_shipping">
+                    {{> addressEntry this.shippingAddress}}
+                </div>
+                {{else}}
+                <div class="cc_address_entry_shipping" style="display:none">
+                    {{> addressEntry this.shippingAddress}}
+                </div>
+                {{/ifEquals}}
+
+                {{#ifDisplay 'Dspl.CCEmail'}}
+                <form id="ccEmailForm" class="cc_ccemail_new">
+                    <div class="ccemail-messagingSection-Error" style="display: none"></div>
+                    <h3 class="cc_ccemail_title">{{pageLabelMap 'CheckOut_ccEmailAddress'}}</h3>
+                    <p class="cc_ccemail_helptext">{{{pageLabelMap 'CheckOut_ccEmailAddressHelpText'}}}</p>
+                    <div class="form-group">
+                        <label for="ccEmailAddress" class="cc_contact_input_cc_email_label">{{pageLabelMap 'CheckOut_ccEmailAddress'}}</label>
+                        <input id="ccEmailAddress" type="text" class="form-control contactInput ccemail cc_contact_input_cc_email" name="ccEmailAddresses" maxlength=80
+                               value="{{this.ccEmailAddresses}}"/>
+                    </div>
+                </form>
+                {{/ifDisplay}}
+
+                <form class="userInformation cc_user_information">
+                    <div class="elsePurchaseOrder">
+            			<Span class="cc_user_information_helptext">{{{pageLabelMap 'Required_Fields_PA'}}}</Span>
+           			</div>
+                    <!--  {{#ifEquals this.orderType 'Purchase Order'}}
+                    <p class="cc_user_information_helptext">{{{pageLabelMap 'Required_Fields'}}}</p>
+                    {{else}}
+                    <p class="cc_user_information_helptext">{{{pageLabelMap 'Required_Fields_PA'}}}</p>
+                    {{/ifEquals}} -->
+
+                    <p class="link_button cc_link_button">
+                        <input class="btn btn-default btn-sm processBack cc_process_back" type="button" value="{{pageLabelMap 'Back'}}" alt="{{pageLabelMap 'Back'}}"/>
+                        <!-- <input class="btn btn-default btn-sm processUserInfo cc_process_user_info" type="button" value="{{pageLabelMap 'CheckOut_Continue'}}"
+                               alt="{{pageLabelMap 'CheckOut_Continue'}}"/> -->
+                        <input class="btn btn-default btn-sm processUserInfo cc_process_user_info" type="button" value="{{pageLabelMap 'CheckOut_Continue'}}"
+                        alt="{{pageLabelMap 'CheckOut_Continue'}}" {{#ifEquals this.orderType "Purchase Order"}} disabled="disabled" {{/ifEquals}} />
+                    </p>
+                </form>
+            </div>
+        </div>
+    </script>
+
+    <script id="UserInfo-AddressEdit-Desktop" type="text/template">
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="cc_section_title">Select Shipping Type</h3>
+                <ul class="shipping-address-type">
+                <li><input type="radio" name="shippingType" class="shppingType shipZ002" value="Z002" onClick="fetchAdress();" /> Standard Shipping Locations</li>
+                <li><input type="radio" name="shippingType" class="shppingType shipWillCall" value="Will Call" /> Will Call/Pickup</li>
+                <li><input type="radio" name="shippingType" class="shppingType shipDropShip" value="Drop Ship" /> Drop Ship Address</li>
+                </ul>
+            </div>
+        </div>
+        <form id="{{classPrefix}}AddressForm" class="addressForm">
+            <div class="{{classPrefix}}-messagingSection-Error" style="display: none"></div>
+            <!-- <h3 class="cc_section_title">{{pageLabelMap sectionLabel}}</h3> -->
+             <h3 class="cc_section_title">Shipping Address</h3>
+             <div class="ifPurchaseOrder">
+         		<Span  class="cc_user_information_helptext">{{{pageLabelMap 'Required_Fields'}}}</Span>
+         	 </div>
+             <div class="elsePurchaseOrder">
+         		<Span class="cc_user_information_helptext">{{{pageLabelMap 'Required_Fields_PA'}}}</Span>
+             </div>
+            <!-- {{#ifEquals classPrefix 'shipping'}}
+             <a class="copyAddress cc_copy_address">{{pageLabelMap 'Checkout_UseBillingAddress'}}</a>
+            {{/ifEquals}} -->
+            <!-- <p class="change_address cc_change_address">
+          	<a href="#modal_{{classPrefix}}" data-toggle="modal" class="cc_change_address_modal" data-id="{{this.sfid}}" onClick="fetchAdress();" >{{pageLabelMap 'UserInfo_AddressBook'}}</a>
+          	<div>
+		  	<a href="#0" class="clearShippingAddress">{{pageLabelMap 'UserInfo_DropShip'}}</a>                    
+          	</div>
+         	</p>  -->
+             <p class="change_address cc_change_address">
+                <a href="javascript:void(0);" class="clearShippingAddress">{{pageLabelMap 'UserInfo_DropShip'}}</a>
+            </p>
+            
+            {{#ifDisplay 'SO.DsplAddrCompany'}}
+            <div class="form-group">
+           <label for="companyName">{{pageLabelMap 'Profile_CompanyName'}}</label>             
+           <input id="companyName" type="text" class="form-control {{classPrefix}}companyField {{classPrefix}}Field cc_contact_input_company addressFieldInput" name="{{classPrefix}}Address.companyName" maxlength=100 value="{{this.companyName}}" >
+           <span id="companyNameSpan" class="addCompName addressFieldSpan"></span>
+
+           </div>
+            {{/ifDisplay}}
+            <input type="hidden" class="{{classPrefix}}addrReadOnly {{classPrefix}}Field" name="{{classPrefix}}Address.addrReadOnly" maxlength=100 value="{{this.addrReadOnly}}"/>
+            <input type="hidden" class="{{classPrefix}}acctIdField {{classPrefix}}Field" name="{{classPrefix}}Address.partnerId" maxlength=100 value="{{this.partnerId}}"/>
+            <input type="hidden" class="{{classPrefix}}sfid {{classPrefix}}Field" name="{{classPrefix}}Address.sfid" maxlength=100 value="{{this.sfid}}"/>
+            <div class="form-group">
+                <label for="address1">{{pageLabelMap 'Profile_Address'}}*</label>
+                <input id="address1" type="text" class="form-control {{classPrefix}}Address1 {{classPrefix}}Field cc_contact_input_address addressFieldInput" name="{{classPrefix}}Address.address1" value="{{this.address1}}" maxlength="40" >
+                <span id="address1Span" class="addLine1R addressFieldSpan"></span>
+            </div>
+            <div class="form-group">
+                <label for="country">{{pageLabelMap 'DropShip_Country'}}*</label>
+                {{{selectGeo 'country' this.countryList '' 'countryListing form-control addressFieldInput' this.classPrefix}}}
+          		<span id="countrySpan" class="addCountryName addressFieldSpan"></span>
+          		<span id="SAPcustHiddenSpan" class="addSAPcustHiddenSpan addressFieldSpan" style="display:none;"></span>
+           </div>
+            <div class="form-group">
+                <label for="state">{{pageLabelMap 'DropShip_State'}}*</label>
+                <div class="stateSection cc_state_section addressFieldInput" required></div>
+          		<span id="stateSpan" class="addStateName addressFieldSpan"></span>
+           </div>
+            <div class="form-group">
+                <label for="city">{{pageLabelMap 'DropShip_City'}}*</label>
+                <input id="city" type="text" class="form-control {{classPrefix}}City {{classPrefix}}Field cc_contact_input_city addressFieldInput" name="{{classPrefix}}Address.city" maxlength=255 value="{{this.city}}" required>
+               <span id="citySpan" class="addCityName addressFieldSpan"></span>
+            </div>
+            <div class="form-group">
+                <label for="postalCode">{{pageLabelMap 'DropShip_PostalCode'}}*</label>
+                <input id="postalCode" type="text" class="form-control {{classPrefix}}PostalCode {{classPrefix}}Field cc_contact_input_postal_code addressFieldInput" name="{{classPrefix}}Address.postalCode" value="{{this.postalCode}}" maxlength=10 required/>
+               <span id="postalCodeSpan" class="addPostalName addressFieldSpan"></span>
+            </div>
+        </form>
+        <div id="modal_{{classPrefix}}" class="modal fade cc_address_book_modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog cc_modal-dialg" role="document">
+                <div class="modal-content cc_modal-content">
+                    <div class="modal-header cc_modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                        <h4 class="modal-title cc_title">{{pageLabelMap 'UserInfo_AddressBookModal'}}</h4>
+                    </div>
+                     <div class="modal-body cc_modal-body">
+             <!--Effective Account Matching-->
+            <!--{{isEffectiveAccount this.addressList}}-->
+            <!---{{#each this.addressList}}-->
+            <!--{{#if this.isVisible}}-->
+                <div class="search-shipp-container">
+                    <label for="address-search">Search Address</label>
+                    <input class="shipp-addr-search" id="address-search" type="text" value="" autocomplete="off">
+                </div>
+              <div class="soldTOAddress"> </div>
+              <div class="z002Adrress"></div>
+            <hr>
+            <!--{{/if}}-->
+            <!--{{/each}}-->
+           </div>
+          </div>
+         </div>
+        </div>
+    </script>
+          <script type="text/template">
+     console.log("Test123");
+
+</script>
+
+    <script id="AddressDisplay" type="text/template">
+    
+
+    
+        <div class="address_selection_display">
+            {{#ifDisplay 'SO.DsplAddrName'}}
+            {{#if this.firstName }}
+            <p class="cc_addr_name">
+                <span class="cc_firstname">{{this.firstName}}&#160;</span>
+                {{#if this.lastName }}
+                <span class="cc_lastname">{{this.lastName}}</span>
+                {{/if}}
+            </p>
+            {{else}}
+            {{#if this.lastName }}
+            <p class="cc_addr_name">
+                <span class="cc_lastname">{{this.lastName}}</span>
+            </p>
+            {{/if}}
+            {{/if}}
+
+            {{/ifDisplay}}
+            {{#ifDisplay 'SO.DsplAddrCompany'}}
+            {{#if this.companyName}}
+            <p class="cc_addr_company">{{this.companyName}}</p>
+            {{/if}}
+            {{/ifDisplay}}
+            {{#if this.address1}}
+            <span class="addr_line1 cc_addr_line">{{this.address1}}</span><br/>
+            {{else}}
+            {{#if this.addressFirstline}}
+            <span class="addr_line1 cc_addr_line">{{this.addressFirstline}}</span><br/>
+            {{/if}}
+            {{/if}}
+
+            {{#if this.address2}}
+            <span class="addr_line2 cc_addr_line">{{this.address2}}</span><br/>
+            {{else}}
+            {{#if this.addressSecondline}}
+            <span class="addr_line1 cc_addr_line">{{this.addressSecondline}}</span><br/>
+            {{/if}}
+            {{/if}}
+
+            {{#if this.address3}}
+            <span class="addr_line3 cc_addr_line">{{this.address3}}</span><br/>
+            {{else}}
+            {{#if this.addressThirdline}}
+            <span class="addr_line1 cc_addr_line">{{this.addressThirdline}}</span><br/>
+            {{/if}}
+            {{/if}}
+            <span class="cc_addr_city">{{this.city}}</span>
+            {{#if this.state}}
+            <span class="cc_addr_state">&#44;&#160;{{this.state}}</span>
+            {{else}}
+            {{#if this.stateCode}}
+            <span class="cc_addr_state">&#44;&#160;{{this.stateCode}}</span>
+            {{else}}
+            {{#if this.stateISOCode}}
+            <span class="cc_addr_state">&#44;&#160;{{this.stateISOCode}}</span>
+            {{/if}}
+            {{/if}}
+            {{/if}}
+            <span class="cc_addr_postal">&#160;{{this.postalCode}}</span><br/>
+            <span class="cc_addr_country">{{this.country}}</span><br/>
+            <span class="cc_addr_phone">{{this.phone}}</span><br/>
+        </div>
+    </script>
+    
+     <style>
+         #modal_shipping {
+           z-index: 9999 !important;
+         }
+         #modal_shipping .search-shipp-container {
+              width: 100%;
+              float: left;
+              margin: 0 0 15px 0;
+          }
+          #modal_shipping .search-shipp-container label {
+            display: block;
+            color: #000;
+          }
+          #modal_shipping .search-shipp-container input {
+            border-radius: 5px;
+            line-height: 19px;
+            width: 50%;
+            float: left;
+          }
+          .shipping-address-type {
+              display: flex;
+              list-style: none;
+              margin: 0;
+              padding: 0;
+              align-items: center;
+          }
+          .shipping-address-type li {
+              padding: 0 10px 0 0;
+          }
+          .shipping-address-type .shppingType {
+              position: relative;
+              top: 2px;
+          }
+
+          @media (max-width: 767px) {
+            .shipping-address-type {
+              display: block;
+            }
+            .shipping-address-type li {
+              padding: 0;
+            }
+          }
+       </style>
+</apex:component>

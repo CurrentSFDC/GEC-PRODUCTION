@@ -1,0 +1,19 @@
+<apex:page standardController="Dispute_Request__c" showHeader="false" sidebar="false">
+    <apex:includeLightning />    
+    <div id="LightningComponentid" />   
+<!-- the Id of div tag which will be used to render your LWC component  -->
+    <script>
+        $Lightning.use("c:disputeProductsApp", function() {
+            $Lightning.createComponent("c:disputeProducts",
+            { 
+                recordId : '{!$CurrentPage.parameters.id}'
+                
+            },
+            "LightningComponentid", // the Id of div tag where your component will be rendered
+            function(cmp) {
+                console.log('Calling the LWC Component');
+                console.log('Passing Record Id: '+'{!$CurrentPage.parameters.id}');
+            });
+        });
+    </script>
+</apex:page>

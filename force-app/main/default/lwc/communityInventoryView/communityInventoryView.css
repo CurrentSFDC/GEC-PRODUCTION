@@ -1,0 +1,33 @@
+.inventory-modal .slds-modal__container {
+    width: 50%;
+    max-width: 300px;
+}
+.inventory-tbl > tbody > tr > td {
+    font-weight: 700;
+}
+.inventory-tbl > tbody tr[data-id="true"] {
+    background: #5f88b6;
+    color: #fff;
+}
+.inventory-tbl .inv-total {
+    background: #d9dee0;
+}
+.inv-update-msg {
+    font-size: 12px;
+    color: #059;
+    background-color: #BEF;
+    border-radius: 5px;
+}
+.inv-info {
+    --sds-c-icon-color-foreground-default: #059;
+}
+
+@media only screen and (max-width: 767px) {
+    .inventory-modal .slds-modal__container {
+        width: auto;
+        max-width: 100%;
+    }
+    .inventory-modal .slds-modal__content {
+        overflow: auto;
+    }
+}

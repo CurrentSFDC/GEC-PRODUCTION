@@ -1,0 +1,1410 @@
+<template>
+    <!-- PAGE HEADER -->
+    <lightning-record-view-form object-api-name="Case" record-id={recordId} density="comfy">
+        <!--<template if:true={isSpinner}>
+            <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+        </template>-->
+    <div class="slds-page-header">
+        <!-- LAYOUT GRID -->
+        <div class="slds-grid slds-wrap">
+        <!-- GRID COL -->
+        <div class="slds-col slds-has-flexi-truncate">
+            <!-- HEADING AREA -->
+            <div class="slds-media slds-no-space slds-grow">
+                <div class="slds-media__figure">
+                    <lightning-icon icon-name="standard:case"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                  <p class="slds-text-title_caps slds-line-height_reset">Case</p>
+                  <h1 class="slds-page-header__title slds-m-right_medium slds-align-middle slds-truncate"><lightning-output-field variant="label-hidden" field-name="Subject"></lightning-output-field></h1>
+                </div>
+              </div>
+            <!-- / HEADING AREA -->
+            </div>
+
+        <!-- ACTION BUTTONS -->
+        <!--<template if:true={isSpecReg}>
+           
+             <lightning-button variant="brand" label="Convert To Order" onclick={openModal}></lightning-button>
+           
+        </template>-->
+        <!-- / ACTION BUTTONS -->
+        
+        </div>
+        <!-- / LAYOUT GRID -->
+        <!-- PAGE HEADER DETAIL ROW -->
+        <ul class="slds-grid slds-wrap slds-page-header__detail-row case-details-header-row">
+            <li class="slds-page-header__detail-block">
+              <p class="slds-text-title slds-truncate slds-m-bottom_xx-small"><lightning-output-field field-name="CaseNumber"></lightning-output-field></p>
+            </li>
+            <li class="slds-page-header__detail-block">
+              <p class="slds-text-title slds-truncate slds-m-bottom_xx-small"><lightning-output-field field-name="Type"></lightning-output-field></p>
+            </li>
+            <li class="slds-page-header__detail-block">
+                <p class="slds-text-title slds-truncate slds-m-bottom_xx-small"><lightning-output-field field-name="GE_NAS_Sub_Type__c"></lightning-output-field></p>    
+            </li>
+            <li class="slds-page-header__detail-block">
+              <p class="slds-text-title slds-truncate slds-m-bottom_xx-small"><lightning-output-field field-name="CreatedDate"></lightning-output-field></p>
+            </li>
+            <li class="slds-page-header__detail-block">
+                <p class="slds-text-title slds-truncate slds-m-bottom_xx-small"><lightning-output-field field-name="Status"></lightning-output-field></p>
+            </li>
+            <!--<li class="slds-page-header__detail-block">
+                <c-download-r-g-a-document case-id={recordId}>
+                </c-download-r-g-a-document>
+            </li>-->
+          </ul>
+        
+        <!-- / PAGE HEADER DETAIL ROW -->
+    </div>
+    <!-- / PAGE HEADER -->
+        
+       <br>
+            <div class="slds-grid slds-wrap slds-gutters">
+
+        <!--FIRST COLUMN-->
+                <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12" >
+                <!--COMMON FIELDS -->
+                    <template if:true={showCommon}>
+
+                        <h3 class="slds-section-title--divider">Requestor Information</h3>
+                        <div style="height: 300px">
+                                <lightning-card>
+                                    <div class="slds-grid  slds-wrap">
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                            <div class="slds-text-title_caps information">Account:</div><br>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                            <div class="slds-text-title"><text class="information">{accountName}</text></div> <br>
+                                        </div>
+                                    </div>
+
+                                    <template if:false={isDistributor}>
+                                        <div class="slds-grid  slds-wrap">
+                                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                                <div class="slds-text-title_caps information">Sold To:</div><br>    
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                                <div class="slds-text-title"><text class="information">{soldToAccountName}</text></div> <br>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template if:true={isLightingDesign}>
+                                        <template if:false={isDistributor}>
+                                            <div class="slds-grid  slds-wrap">
+                                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                                    <div class="slds-text-title_caps information">Manager:</div><br>    
+                                                </div>
+                                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                                    <div class="slds-text-title"><text class="information">{accountManager}</text></div> <br>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </template>
+
+                                    <template if:true={istechsupp}>
+                                        <template if:false={isDistributor}>
+                                            <div class="slds-grid  slds-wrap">
+                                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                                    <div class="slds-text-title_caps information">Account Manager:</div><br>    
+                                                </div>
+                                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                                    <div class="slds-text-title"><text class="information">{accountManager}</text></div> <br>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </template>
+            
+                                    <div class="slds-grid  slds-wrap">
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                            <div class="slds-text-title_caps information">Name:</div><br>    
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                            <div class="slds-text-title"><text class="information">{requestorName}</text></div> <br>
+                                        </div>
+                                    </div>
+            
+                                    <div class="slds-grid  slds-wrap">
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                                            <div class="slds-text-title_caps information">Phone:</div><br> 
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                            <div class="slds-text-title"><text class="information">{requestorPhone}</text></div> <br>
+                                        </div>
+                                    </div>
+            
+                                    <div class="slds-grid  slds-wrap">
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                                            <div class="slds-text-title_caps information">Email:</div><br>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                            <div class="slds-text-title"><text class="information">{requestorEmail}</text></div> <br>
+                                        </div>
+                                    </div>
+                            </lightning-card>
+                        </div>
+                    </template>
+
+                    <!--SPEC REGISTRATION FIELDS -->
+                    <template if:true={isSpecReg}>
+                        <h3 class="slds-section-title--divider">Agency Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Spec Registration Agency:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{specAgency}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Ordering Agency:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{orderingAgency}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title_caps information">Delivery Agency:</div><br> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{deliverAgency}</text></div> <br>
+                                </div>
+                            </div>
+                    </lightning-card>
+
+
+
+                       <br>
+                        <h3 class="slds-section-title--divider">Bidding Information</h3>
+
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Estimated Bid Order Start:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{estimateBidStart}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Estimated Bid Order End:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{estimateBidEnd}</text></div> <br>
+                                </div>
+                            </div>
+                    </lightning-card>
+                    </template>
+                </div>
+
+        <!--MIDDLE COLUMN-->
+                <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12"> 
+
+                  <!--WHEN CAN I GET IT FIELDS-->
+                  <template if:true={isWhenCanIGet}>
+                    <h3 class="slds-section-title--divider">Additional Information</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Question:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{questions}</text></div> <br>
+                            </div>
+                        </div>
+
+                    </lightning-card>
+                </template>
+
+                <!--PRICING FIELDS -->
+                <template if:true={isPricing}>
+                    <h3 class="slds-section-title--divider">Job Details</h3>
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Subject:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{subject}</text></div> <br>
+                                </div>
+                            </div>
+
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Job Name:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{jobName}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Estimated Job Value:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><lightning-formatted-number class="information" value={estimatedJobValue} format-style="currency" maximum-fraction-digits="2"></lightning-formatted-number></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">comments:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{comments}</text></div> <br>
+                                </div>
+                            </div>
+                    </lightning-card>
+                </template>
+
+                <!--WARRANY FIELDS -->
+                    <template if:true={isWarranty}>
+                        <h3 class="slds-section-title--divider">Warranty Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Requested Action:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{requestedAction}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Warranty Code:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{warrantyCode}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Warranty Sub Code:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{warrantySubCode}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Comments:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{comments}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                <!--STOCK BALANCING FIELDS -->
+                    <template if:true={isStockBalancing}>
+                        <h3 class="slds-section-title--divider">Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Reference #:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{purchaseOrder}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Comments:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{comments}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                <!--RETURN FIELDS -->
+                    <template if:true={isReturns}>
+                        <h3 class="slds-section-title--divider">Return Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Requested Action:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{requestedAction}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Return Reason:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{returnReason}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Secondary Reason:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{secondReason}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Comments:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{comments}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                <!--SPEC REGISTRATION FIELDS -->
+                    <template if:true={isSpecReg}>
+                        <h3 class="slds-section-title--divider">Job Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Requested Action:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{requestedAction}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Job Name:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{jobName}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Job City:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{jobCity}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">ob State/Province:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{jobState}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Spec Agency Role:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{specAgencyRole}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                <!--SHIPPING DISCREPANCY FIELDS -->
+                    <template if:true={isShipping}>
+                        <h3 class="slds-section-title--divider">Discrepancy Information</h3>
+
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Discrepancy:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{discrepancy}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Requested Action:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{requestedAction}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Comments:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{comments}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                <!--LIGHTING DESIGN FIELDS-->
+                <template if:true={isLightingDesign}>
+                    <h3 class="slds-section-title--divider">Important Details</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Short Description:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{subject}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Spec Reg Number:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{specRegNumber}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Due Date:</div><br> 
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><lightning-formatted-date-time class="information" value={dueDate} year="numeric" month="numeric" day="numeric" time-zone="UTC"></lightning-formatted-date-time></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Application Type:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{applicationType}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Desired Services:</div><br>   
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{desiredServices}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Comments:</div><br>   
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{comments}</text></div> <br>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </template>
+
+                 <!--TECH SUPPORT FIELDS-->
+                <template if:true={istechsupp}>
+                    <h3 class="slds-section-title--divider">Additional Details</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Job Name:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{jobName}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Estimated Job Value:</div><br> 
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><lightning-formatted-number class="information" value={estimatedJobValue} format-style="currency" maximum-fraction-digits="2"></lightning-formatted-number></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Product Brand:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{primaryProduct}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Due Date:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><lightning-formatted-date-time class="information" value={dueDate} year="numeric" month="numeric" day="numeric" time-zone="UTC"></lightning-formatted-date-time></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Description:</div><br>   
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{description}</text></div> <br>
+                            </div>
+                        </div>
+
+                    </lightning-card>
+                </template>
+
+                <!--CREDIT/DEBIT FIELDS-->
+                <template if:true={isCredit}>
+                    <h3 class="slds-section-title--divider">Credit Details</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Invoice:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{invoiceNumber}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Purchase Order:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{purchaseOrder}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title_caps information">Requested Credit:</div><br> 
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><lightning-formatted-number value={discrepancyAmount} format-style="currency" maximum-fraction-digits="2"></lightning-formatted-number></div> <br>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </template>
+
+                <!--CONNECT PLATFORM SUPPORT FIELDS-->
+                <template if:true={isPlatformSupport}>
+                    <h3 class="slds-section-title--divider">REQUEST DETAILS</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Category:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{questionCategory}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Sub Category:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{questionSubCategory}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Question:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{questions}</text></div> <br>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </template>
+
+                 <!--MARKETING COLLATERAL FIELDS-->
+                 <template if:true={isMarketing}>
+                    <h3 class="slds-section-title--divider">MARKETING INFORMATION</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Material:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{material}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Material Category:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{materialCategory}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Question:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{questions}</text></div> <br>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </template>
+
+                <!--EXPEDITE FIELDS-->
+                <template if:true={isExpedite}>
+                    <h3 class="slds-section-title--divider">Order Details</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Order:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{orderNumber}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Expected Ship Date:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{orderExpected}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Ship From:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{orderShip}</text></div> <br>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </template>
+
+                <!--CHANGE REQUEST FIELDS-->
+                <template if:true={isChange}>
+                    <h3 class="slds-section-title--divider">Order Details</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Order:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{orderNumber}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Purchase Order:</div><br>    
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{purchaseOrder}</text></div> <br>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </template>
+
+        </div>        
+
+        <!--LAST COLUMN-->
+                <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+                <!--WARRANY FIELDS -->
+                    <template if:true={isWarranty}>
+                        <h3 class="slds-section-title--divider">Site Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Location:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{location}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Address:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{address}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Name:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{contactName}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Phone:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{contactPhone}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Email:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{contactEmail}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                    <!--LIGHTING DESIGN FIELDS -->
+                    <template if:true={isLightingDesign}>
+                        <h3 class="slds-section-title--divider">Job Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Job Name:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{jobName}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Address:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{address}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Name:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{contactName}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Phone:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{contactPhone}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Email:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{contactEmail}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+
+                    <!--SPEC REGISTRATION FIELDS -->
+                    <template if:true={isSpecReg}>
+                        <h3 class="slds-section-title--divider">Influencer Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Influencer:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{influencerName}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Influencer Role:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{influencerRole}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Influencer City:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{influenceCity}</text></div> <br>
+                                </div>
+                            </div>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3"> 
+                                    <div class="slds-text-title_caps information">Influencer State/Province:</div><br>    
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_2-of-3">
+                                    <div class="slds-text-title"><text class="information">{influencerState}</text></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                    <!--MARKETING COLLATERAL FIELDS-->
+                    <template if:true={isMarketing}>
+                        <h3 class="slds-section-title--divider">Job Information</h3>
+
+                        <lightning-card>
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                    <div class="slds-text-title_caps information">Job Name:</div><br>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><text class="information">{jobName}</text></div> <br>
+                                </div>
+                            </div>
+    
+                            <div class="slds-grid  slds-wrap">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title_caps information">Estimated Job Value:</div><br> 
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                    <div class="slds-text-title"><lightning-formatted-number class="information" value={estimatedJobValue} format-style="currency" maximum-fraction-digits="2"></lightning-formatted-number></div> <br>
+                                </div>
+                            </div>
+                        </lightning-card>
+                    </template>
+
+                    <!--EXPEDITE FIELDS-->
+                <template if:true={isExpedite}>
+                    <h3 class="slds-section-title--divider">Expedite Details</h3>
+
+                    <lightning-card>
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Expedite Reason:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{expediteReason}</text></div> <br>
+                            </div>
+                        </div>
+
+                        <div class="slds-grid  slds-wrap">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2"> 
+                                <div class="slds-text-title_caps information">Ship Complete Override:</div><br>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-2">
+                                <div class="slds-text-title"><text class="information">{shipComplete}</text></div> <br>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </template>
+                </div>
+
+
+
+            </div>
+
+        </lightning-record-view-form> <br><br>
+        
+       <lightning-tabset active-tab-value="" class="slds-tabs_medium" variant="scoped">
+            
+            <template if:true={showRequests}>
+                <lightning-tab label="REQUESTS" value="two" class="tabSection" icon-name="standard:work_order_item">
+                    <!--<c-dispute-requests record-id={recordId}></c-dispute-requests>-->
+                    <lightning-accordion class="slds-scrollable_y" active-section-name={activeSections}>
+                
+                        <template if:true={disputes}>
+                            <template for:each={disputes} for:item="dis">
+                                
+                                <lightning-accordion-section onclick={handleSelected} data-id={dis.Id} name={dis.disID} value={dis.Id} label={dis.disName} key={dis.Id}>
+                                    <!--Selected DR ID: {dis.Id}-->
+                                    <lightning-record-view-form record-id={dis.Id} object-api-name="Dispute_Request__c" density="comfy">
+
+                                        <div class="slds-card">
+                                            <div class="slds-card__header slds-grid slds-wrap">
+                                                <div class="slds-col headerSection">
+                                                    <h2>
+                                                        
+                                                        <label class="slds-form-element__label itemFont" for="form-element-01">Invoice #</label> <br>
+                                                        
+                                                    </h2> <lightning-output-field variant="label-hidden" field-name="Invoice__c"></lightning-output-field>
+                                                </div>
+                                                
+                                                <div class="slds-col headerSection">
+                                                    <h2>
+                                                        
+                                                        <label class="slds-form-element__label itemFont" for="form-element-01">Order #</label> <br>
+                                                        
+                                                    </h2> <lightning-output-field variant="label-hidden" field-name="Current_Order__c"></lightning-output-field>
+                                                </div>
+                                                <div class="slds-col headerSection">
+                                                    <h2>
+                                                        
+                                                        <label class="slds-form-element__label itemFont" for="form-element-01">Purchase Order #</label> <br>
+                                                        
+                                                    </h2> <lightning-output-field variant="label-hidden" field-name="Customer_PO__c"></lightning-output-field>
+                                                </div>
+                                                <template if:true={isWarranty}>
+                                                    <div class="slds-col headerSection">
+                                                        <h2>
+                                                        
+                                                            <label class="slds-form-element__label itemFont" for="form-element-01">Site Address</label> <br>
+                                                            
+                                                        </h2>
+                                                        <lightning-output-field variant="label-hidden" field-name="Site_Contact_Address__c"></lightning-output-field>
+                                                    </div>
+                                                </template>
+
+                                                <div class="slds-col headerSection">
+                                                    <h2>
+                                                        
+                                                        <label class="slds-form-element__label itemFont" for="form-element-01">Status</label> <br>
+                                                        
+                                                    </h2> <lightning-badge label={dis.Status__c} data-direct={dis.badgeClass} class=""></lightning-badge>
+                                                </div>
+                                                <template if:true={showRMA}>
+                                                    <div class="slds-col headerSection">
+                                                        <h2>
+                                                        
+                                                            <label class="slds-form-element__label itemFont" for="form-element-01">{dis.Type__c} Order:</label> <br>
+                                                            
+                                                        </h2> <lightning-output-field variant="label-hidden" field-name="Order__c"></lightning-output-field> <br>
+                                                        <template if:true={dis.showRmaPDF}>
+                                                            <template if:true={dis.Order__c}>
+                                                                <c-download-r-g-a-document case-id={dis.Id}>
+                                                                </c-download-r-g-a-document>
+                                                            </template>
+                                                        </template>        
+                                                    </div>
+                                                </template>
+
+                                            </div><br>
+            
+                                            <div class="slds-card__body slds-card__body_inner">
+                                                <template if:true={isLoading}>
+                                                    <lightning-spinner  alternative-text="Loading" variant="brand"></lightning-spinner>
+                                                </template>
+                                             <template if:true={commonColumns}>
+                                                <lightning-datatable 
+                                                    key-field="id"
+                                                    data={disputeProducts}
+                                                    columns={disputeColumns}
+                                                    hide-checkbox-column="true"
+                                                    wrap-text-max-lines="3">
+                                                </lightning-datatable>
+                                            </template>
+
+                                            <template if:true={isStockBalancing}>
+                                                <lightning-datatable 
+                                                    key-field="id"
+                                                    data={disputeProducts}
+                                                    columns={stockDisputeColumns}
+                                                    hide-checkbox-column="true"
+                                                    wrap-text-max-lines="3">
+                                                </lightning-datatable>
+                                            </template>
+
+                                            <template if:true={isWarranty}>
+                                                <lightning-datatable 
+                                                    key-field="id"
+                                                    data={disputeProducts}
+                                                    columns={warrantyColumns}
+                                                    hide-checkbox-column="true"
+                                                    wrap-text-max-lines="3">
+                                                </lightning-datatable>
+                                            </template>
+            
+                                            </div>
+            
+                                        </div>
+
+
+                                        <!--<div class="slds-grid slds-wrap">
+                                            <div class="slds-col slds-size_5-of-12">
+                                                //<lightning-output-field field-name="CreatedDate"></lightning-output-field>
+                                                <lightning-output-field field-name="Current_Order__c"></lightning-output-field>
+                                                <lightning-output-field field-name="Customer_PO__c"></lightning-output-field>
+                                            </div>
+                                            <div class="slds-col slds-size_5-of-12">
+                                                //<lightning-output-field field-name="Status__c"></lightning-output-field>
+                                                &nbsp;<h2><label class="slds-form-element__label" for="form-element-01">Status:</label></h2>&nbsp;
+                                                <lightning-badge label={dis.Status__c} data-direct={dis.badgeClass} class=""></lightning-badge>&nbsp;<br>
+
+                                                &nbsp;<h2><label class="slds-form-element__label" for="form-element-01">{dis.Type__c} Order:</label></h2>
+                                                &nbsp; &nbsp;<lightning-output-field variant="label-hidden" field-name="Order__c"></lightning-output-field> 
+                                                <template if:true={isWarranty}>
+                                                    <lightning-output-field field-name="Site_Contact_Address__c"></lightning-output-field>
+                                                </template>
+                                            </div>
+                                            <div class="slds-col slds-size_2-of-12">
+                                                <template if:true={showRMA}>
+                                                    <c-download-r-g-a-document case-id={dis.Id}>
+                                                    </c-download-r-g-a-document>
+                                                    </template>
+                                            </div>
+                                        </div>   --> 
+
+                                    </lightning-record-view-form>
+                                    <br>
+                                    <!--<lightning-datatable 
+                                                key-field="id"
+                                                data={disputeProducts}
+                                                columns={disputeColumns}
+                                                hide-checkbox-column="true">
+                                                
+                                            </lightning-datatable>-->
+                                    
+                                </lightning-accordion-section>
+                
+                                
+                                </template>
+                                </template>
+                                </lightning-accordion>
+                </lightning-tab>
+            </template>
+            <template if:true={showProducts}>
+                <lightning-tab label="PRODUCT SUMMARY" class="tabSection" value="three" icon-name="standard:products">
+                    <template if:true={isReturns}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={multiColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isShipping}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={multiColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isStockBalancing}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={stockColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isCredit}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={multiColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isExpedite}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={expediteColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isChange}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={changeColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isPricing}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={pricingColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isLightingDesign}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={ldrColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={istechsupp}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={techscuppColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isWhenCanIGet}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={whenCanIGetIt}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isSpecReg}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={columns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isMarketing}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={marketingColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={isWarranty}>
+                        <lightning-datatable 
+                            key-field="id"
+                            data={productLines}
+                            columns={warrantyColumns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                </lightning-tab>
+            </template>
+            <lightning-tab label="ADDITIONAL COMMENTS" icon-name="standard:case_comment" class="tabSection" value="one" action={fetchCaseComments}>
+
+                <div class="slds-card">
+                    <template if:true={caseOpen}> 
+                        <div class="slds-card__header slds-grid slds-wrap">
+                        
+                            <div class="slds-col ">
+                                <lightning-button label="New" variant="brand" onclick={openCommentModal}></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="slds-card__body slds-card__body_inner">
+                        <div if:true={caseComments} >
+                            <div style="height: 240px;">
+                                <lightning-datatable 
+                                    key-field="id"
+                                    data={caseComments}
+                                    columns={commentsColumns}
+                                    hide-checkbox-column="true"
+                                    wrap-text-max-lines="10">
+                                </lightning-datatable>
+                            </div>
+                           
+                            </div>
+                            <div if:false={caseComments}>
+                                <div class="items">No Case Comments</div>
+                            </div>
+                    </div>
+                </div>
+            </lightning-tab>
+
+            <lightning-tab label="FILES" class="tabSection" value="four" style="height:500px;" icon-name="standard:document">
+                <div style="height:500px;">
+                <c-community-case-files case-status={setStatus} record-id={recordId}></c-community-case-files>
+                </div>
+            </lightning-tab>
+        </lightning-tabset>
+
+
+        <!-- MODAL FOR CONVERTING TO ORDER-->
+                <!-- Detail view modal start -->
+                <template if:true={showModal}>
+                    <section role="dialog" tabindex="-1"
+                            aria-labelledby="modal-heading-01"
+                            aria-modal="true"
+                            aria-describedby="modal-content-id-1"
+                            class="slds-modal slds-fade-in-open slds-modal_medium">
+                    <div class="slds-modal__container">
+                        <!-- modal header start -->
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Product Selection</h2>
+                            Spec Registration # - {caseNumber}
+                        </header>
+                        <!-- modal body start -->
+                        <div class="slds-theme_default">
+
+                            <div class="slds-card">
+                                <div class="slds-card__header slds-grid slds-wrap">
+                                    
+                                    <div class="slds-col headerSection">
+                                        <h2>
+                                            
+                                               Spec Agency <br>
+                                            
+                                        </h2> {specAgency}
+                                    </div>
+                                    <div class="slds-col headerSection">
+                                        <h2>
+                                            
+                                               Ordering Agency <br>
+                                            
+                                        </h2> {orderingAgency}
+                                    </div>
+                                    <div class="slds-col headerSection">
+                                        <h2>
+                                            
+                                               Delivery Agency <br>
+                                            
+                                        </h2> {deliverAgency}
+                                    </div>
+                                </div><br>
+
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <lightning-datatable 
+                                    key-field="id"
+                                    data={productLines}
+                                    columns={columns}
+                                    >
+                                </lightning-datatable>
+
+                                </div>
+
+                            </div>
+                                
+                                
+                        </div>
+                            
+                        <!-- modal footer start-->
+                        <footer class="slds-modal__footer">
+                            <lightning-button variant="brand"
+                            label="Create Order"
+                            title="Create Order"
+                            onclick={closeModal}
+                            ></lightning-button>
+                        </footer>
+                    </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
+                <!-- Detail view modal end -->
+
+                <!--END CONVERT TO ORDER MODAL-->
+
+
+                <!-- MODAL FOR CASE COMMENTS-->
+                <!-- Detail view modal start -->
+                <template if:true={showCommentModal}>
+                    <section role="dialog" tabindex="-1"
+                            aria-labelledby="modal-heading-01"
+                            aria-modal="true"
+                            aria-describedby="modal-content-id-1"
+                            class="slds-modal slds-fade-in-open slds-modal_medium">
+                    <div class="slds-modal__container">
+                        <!-- modal header start -->
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeCommentModal}>
+                                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                            </button>
+                            <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">New Case Comment</h2>
+                        </header>
+                        <!-- modal body start -->
+                        <div class="slds-theme_default">
+                            <template if:true={addingSpinner}>
+                                <lightning-spinner class="spins" alternative-text="Loading" variant="brand"></lightning-spinner>
+                            </template>
+                            <div class="slds-card">
+                                <div class="slds-card__header slds-grid slds-wrap">
+                                    
+                                    <div class="slds-col headerSection">
+                                        <h2>
+                                            
+                                               Case # <br>
+                                            
+                                        </h2> {caseNumber}
+                                    </div>
+                                    <div class="slds-col headerSection">
+                                        <h2>
+                                            
+                                                Date/Time<br>
+                                            
+                                        </h2> {timeStamp}
+                                    </div>
+                                    <div class="slds-col headerSection">
+                                        <h2>
+                                            
+                                                <br>
+                                            
+                                        </h2> 
+                                    </div>
+                                </div><br>
+
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <lightning-textarea label="Comment" placeholder="Enter you comments..." class="cb"></lightning-textarea>
+
+                                </div>
+
+                            </div>
+                                
+                                
+                        </div>
+                            
+                        <!-- modal footer start-->
+                        <footer class="slds-modal__footer">
+                            <lightning-button variant="brand-outline"
+                            label="Cancel"
+                            title="Cancel"
+                            onclick={closeCommentModal}
+                            ></lightning-button>
+                            <lightning-button variant="brand"
+                            label="Submit"
+                            title="Submit"
+                            onclick={createComment}
+                            ></lightning-button>
+                        </footer>
+                    </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
+                <!-- Detail view modal end -->
+
+                <!--END CASE COMMENT MODAL-->
+
+    
+</template>

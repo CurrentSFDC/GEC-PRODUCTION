@@ -1,0 +1,308 @@
+<!--> CommunityPortalSelfRegister component
+//  Component for self registering as a new Contact in GE community
+// 
+//  Author                    Date         Description 
+//  Devang Shah	              22/10/2020   Created
+//-->
+<aura:component implements="forceCommunity:availableForAllPageTypes" description="CommunityPortalSelfRegister"
+                access="global" controller="CommunityCreateContactController">
+
+    <aura:attribute name="userData"         type="Map"      default="{contact: {}}"    description="The register user form data" />
+    <aura:attribute name="validity" 	    type="Map"      default="{}"	    description="The attribute for component validation." />
+    <aura:attribute name="inProgress"       type="Boolean"  default="false"     description="The registration in progress" />
+    <aura:attribute name="disable"          type="Boolean"  default="false"     description="Disable the form" />
+    <aura:attribute name="redirectIfLogin"  type="Boolean"  default="false"     description="Redirect if the user is already logged in." />
+    <aura:attribute name="pageMessages"     type="List"     default="[]"        description="Page messages" />
+    <aura:attribute name="preferredLanguageList" type="List"/>
+    <aura:attribute name="countries" type="List" default="['United States', 'Canada']"/>
+    <aura:attribute name="states" type="List" default="[]"/>
+    <aura:attribute name="provinceOptions" type="List" default="[]"/>
+    <aura:attribute name="countryOptions" type="List" default="[{'label': 'United States', 'value': 'US'}]"/>    
+    <aura:attribute name="previousCountry" type="String" default="United States"/>
+    <aura:attribute name="selectedUserTypeValue" type="String" default=""/>
+    
+    <aura:attribute name="Principle1" type="Boolean" default="false"/>
+    <aura:attribute name="Designer1" type="Boolean" default="false"/>
+    <aura:attribute name="OutSales1" type="Boolean" default="false"/>
+    <aura:attribute name="TechService1" type="Boolean" default="false"/>
+    <aura:attribute name="Quotation1" type="Boolean" default="false"/>
+    <aura:attribute name="CustService1" type="Boolean" default="false"/>
+    <aura:attribute name="Admin1" type="Boolean" default="false"/>
+    <aura:attribute name="Own1" type="Boolean" default="false"/>
+    <aura:attribute name="Pm1" type="Boolean" default="false"/>
+    <aura:attribute name="Spec1" type="Boolean" default="false"/>
+    <aura:attribute name="Proc1" type="Boolean" default="false"/>
+    
+    <aura:attribute name="chkTerms" type="Boolean" default="false"/>
+    <aura:attribute name="selectedLanguage" type="String" default="English"/>
+    <aura:attribute name="cbaseURLTerms" type="String"/>
+    <aura:attribute name="mandatory" type="Boolean" default="false"/>
+    <aura:handler name="init"	value="{!this}" 	action="{!c.doInit}"	description="Initialise event." />
+
+    <div>
+        <!-- PAGE MESSAGES -->
+        <aura:if isTrue="{!not(empty(v.pageMessages))}">
+            <div class="{!'slds-align_absolute-center slds-wrap '}">
+                <aura:iteration items="{!v.pageMessages}" var="item">
+                    <ui:message severity="{!item.severity}" title="{!if(and(v.showIcon, not(empty(item.severity))), '', item.title)}"
+                                closable="{!item.closable ne false}" class="{!'slds-size_1-of-1 ' + if(v.showIcon, 'pg-msg ', '') + v.severity}">
+                        <lightning:layout verticalAlign="center">
+                            <lightning:layoutItem flexibility="no-grow" class="{!if(and(v.showIcon, not(empty(item.severity))), 'slds-p-right_small', 'slds-hide')}">
+                                <lightning:icon size="medium" iconName="{!if(item.severity eq 'confirm', 'utility:success', if(item.severity eq 'error', 'utility:clear',
+                                                if(item.severity eq 'warning', 'utility:warning', if(item.severity eq 'info', 'utility:info', ''))))}" class="pg-msg-icon" />
+                            </lightning:layoutItem>
+                            <lightning:layoutItem flexibility="auto">
+                                <ul>
+                                    <aura:iteration items="{!item.messages}" var="message">
+                                        <li>  <aura:unescapedHtml value="{!message}" /></li>
+                                    </aura:iteration>
+                                </ul>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                    </ui:message>
+                </aura:iteration>
+            </div>
+        </aura:if>
+        
+        <div class="slds-p-around_medium slds-m-bottom_medium">
+            <lightning:card variant="Base">
+                <aura:set attribute="title">
+                    <h2>Register</h2>
+                </aura:set>
+                <aura:set attribute="body">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_FirstName}" name="FirstName" value="{!v.userData.firstName}"
+                                        required="true" class="input-fields hide-abbr" placeholder="e.g. Jane" disabled="{!v.disable}" />
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_LastName}" name="LastName" value="{!v.userData.lastName}"
+                            required="true" class="input-fields hide-abbr" placeholder="e.g. Smith" disabled="{!v.disable}" />
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="email" label="{!$Label.c.SelfRegistration_EmailAddress}" name="Email" value="{!v.userData.email}"
+                                        required="true" class="input-fields hide-abbr" placeholder="Email" disabled="{!v.disable}" />
+                        </div>
+
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1" name="Country"  required="true">
+                            <lightning:select aura:id="type" label="{!$Label.c.SelfRegistration_Country}" value="{!v.userData.country}" onchange="{!c.updateProvinces }">
+                                <aura:iteration items="{!v.countries}" var="option">
+                                    <option value="{!option}" text="{!option}"/>
+                                </aura:iteration>
+                            </lightning:select>
+                        </div>
+
+                        <!--W-000686 Changed Phone number format and placeholder added-->
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_Phone}" name="Phone" pattern="[0-9()]{5} [0-9]{3}-[0-9]{4}" value="{!v.userData.phone}"
+                                        required="true" class="input-fields hide-abbr" placeholder="(xxx) xxx-xxxx" maxlength="25" disabled="{!v.disable}" 
+                                        messageWhenPatternMismatch="{!$Label.c.SelfRegistration_PhoneInvalid}"/>
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_CompanyName}" name="CompanyName" value="{!v.userData.companyName}"
+                                            required="true" class="input-fields hide-abbr"  maxlength="80" disabled="{!v.disable}" />
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_Address1}" name="Address1" value="{!v.userData.address1}"
+                                            required="true" class="input-fields hide-abbr"  maxlength="100" disabled="{!v.disable}" />
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_Address2}" name="Address2" value="{!v.userData.address2}"
+                                            required="false" class="input-fields hide-abbr"  maxlength="100" disabled="{!v.disable}" />
+                        </div>
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_City}" name="City" value="{!v.userData.city}"
+                                            required="true" class="input-fields hide-abbr"  maxlength="100" disabled="{!v.disable}" />
+                        </div>
+
+
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <lightning:select aura:id="type" label="{!$Label.c.SelfRegistration_State}" name="State" value="{!v.userData.state}" >
+                                <aura:iteration items="{!v.states}" var="option">
+                                    <option value="{!option}" text="{!option}"/>
+                                </aura:iteration>
+                            </lightning:select>
+                        </div>
+
+                        <div class="slds-p-around_xx-small slds-size_1-of-2 slds-max-small-size_1-of-1">
+                            <lightning:input aura:id="form-field" type="text" label="{!$Label.c.SelfRegistration_Postalcode}" name="PostalCode" value="{!v.userData.postalCode}"
+                                            required="true" class="input-fields hide-abbr"  maxlength="100" disabled="{!v.disable}" />
+                        </div>
+
+
+                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                            <lightning:select aura:id="form-field" label="{!$Label.c.SelfRegistration_LanguageSelector}" name="preferredLanguage" value="{!v.userData.preferredLanguage}" required="true"
+                            onchange="{!c.handleSelectedLanguage}"
+                            class="input-fields hide-abbr" disabled="{!v.disable}" >
+                                            
+                            <aura:iteration items="{!v.preferredLanguageList}" var="option">                                
+                                <option value="{!option.value}" text="{!option.label}" selected="{!option.value == v.selectedLanguage}" />
+                            </aura:iteration>
+                            </lightning:select>
+                        </div>
+
+
+
+                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                            <div class="slds-form-element">
+                                <fieldset class="slds-form-element">
+                                    <legend class="slds-form-element__legend slds-form-element__label">
+                                        <abbr class="slds-required" title="required">*</abbr>
+                                        {!$Label.c.SelfRegistration_UserType}
+                                    </legend>
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-radio">
+                                            <!--<input type="radio" id="ragent" value="Agent" name="usertype" onchange="{!c.handleSelected}" checked="true" />-->
+                                            <input type="radio" id="ragent" value="Agent" name="usertype" onchange="{!c.handleSelected}" />
+                                            <label class="slds-radio__label" for="ragent">
+                                            <span class="slds-radio_faux"></span>
+                                            <span class="slds-form-element__label">{!$Label.c.SelfRegistration_UserTypeAgent}</span>
+                                            </label>
+                                        </span>
+                                        <aura:if isTrue="{!v.selectedUserTypeValue == 'Agent'}">                                            
+                                            <legend class="slds-form-element__legend slds-form-element__label">{!$Label.c.SelfRegistration_User_SubType}</legend>
+                                            <div class="slds-form-element__control">
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="ragent1" name="principle" value= "{!v.userData.principle}" onchange="{!c.onCheck1}"></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_AgentPersonaPrinciple}  </label>
+                                            </div> 
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="ragent3" name="outSales" value=  "{!v.userData.outSales}" onchange="{!c.onCheck3}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_AgentPersonaOutSales}</label>
+                                            </div>  
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="ragent4" name="techService" value=  "{!v.userData.techService}" onchange="{!c.onCheck4}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_AgentPersonaTechService}</label>
+                                            </div>
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="ragent2" name="designer" value= "{!v.userData.designer}" onchange="{!c.onCheck2}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_AgentPersonaDesigner}</label>
+                                            </div>
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="ragent5" name="quotation" value=  "{!v.userData.quotation}" onchange="{!c.onCheck5}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_AgentPersonaQuotations}</label>
+                                            </div>                                                
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="ragent6" name="custService" value= "{!v.userData.custService}" onchange="{!c.onCheck6}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_AgentPersona_Cust_Service}</label>
+                                            </div>
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="ragent7" name="admin" value= "{!v.userData.admin}" onchange="{!c.onCheck7}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_AgentPersona_Admin}</label>
+                                            </div>
+                                            </div>
+                                            <div class="slds-form-element__control">
+                                            {!$Label.c.SelfRegistration_AgentRepCodeMsg1} <abbr class="slds-required" title="required">*</abbr><br></br>
+                                            <I>{!$Label.c.SelfRegistration_AgentRepCodeMsg2}</I>
+                                            </div>                                            
+                                            <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                                                <div class="slds-form-element">                                
+                                                    <div class="slds-form-element__control">
+                                                        <ui:inputTextArea aura:id="registrationAccounts" maxlength="250" class="slds-textarea" value="{!v.userData.registrationRepCodes}" rows="3" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </aura:if>
+                                        <span class="slds-radio">
+                                            <input type="radio" id="rcustomer" value="Distributor" name="usertype" onchange="{!c.handleSelected}" />
+                                            <label class="slds-radio__label" for="rcustomer">
+                                            <span class="slds-radio_faux"></span>
+                                            <span class="slds-form-element__label">{!$Label.c.SelfRegistration_UserTypeCustomer}</span>
+                                            </label>
+                                        </span>
+                                        <aura:if isTrue="{!v.selectedUserTypeValue == 'Distributor'}">                                            
+                                            <legend class="slds-form-element__legend slds-form-element__label">{!$Label.c.SelfRegistration_User_SubType}</legend>
+                                            <div class="slds-form-element__control">
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rcustomer1" name="own" value= "{!v.userData.own}" onchange="{!c.onCheck8}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_DistPersona_Owner}</label>
+                                            </div> 
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rcustomer2" name="outSales" value= "{!v.userData.outSales}" onchange="{!c.onCheck3}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_DistPersona_Out_Sales}</label>
+                                            </div>  
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rcustomer3" name="pm" value= "{!v.userData.pm}" onchange="{!c.onCheck9}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_DistPersona_Proj_Manager}</label>
+                                            </div>
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rcustomer4" name="spec" value= "{!v.userData.spec}" onchange="{!c.onCheck10}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_DistPersona_Specification}</label>
+                                            </div>
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rcustomer5" name="quotation" value= "{!v.userData.quotation}" onchange="{!c.onCheck5}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_DistPersona_Quotation}</label>
+                                            </div>                                                
+                                            <div>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" id="rcustomer6" name="proc" value= "{!v.userData.proc}" onchange="{!c.onCheck11}" ></input>
+                                                <label for="usertype">&nbsp;{!$Label.c.SelfRegistration_DistPersona_Procurement}</label>
+                                            </div>                                        
+                                            </div>
+                                            <div class="slds-form-element__control">
+                                                {!$Label.c.SelfRegistration_CustomerAccountMsg1} <abbr class="slds-required" title="required">*</abbr><br></br>
+                                            <I>{!$Label.c.SelfRegistration_CustomerAccountMsg2}</I>
+                                            </div>
+                                            <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                                                <div class="slds-form-element">                                
+                                                    <div class="slds-form-element__control">
+                                                        <ui:inputTextArea aura:id="registrationAccounts"  maxlength="250" class="slds-textarea" value="{!v.userData.registrationAccounts}" rows="3" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </aura:if>
+                                        <span class="slds-radio">
+                                            <input type="radio" id="rother" value="Other" name="usertype"  onchange="{!c.handleSelected}"/>
+                                            <label class="slds-radio__label" for="rother">
+                                            <span class="slds-radio_faux"></span>
+                                            <span class="slds-form-element__label">{!$Label.c.SelfRegistration_UserTypeOther}</span>
+                                            </label>
+                                            <!--//Added for W-000476-->
+                                            <aura:if isTrue="{!v.selectedUserTypeValue == 'Other'}">                                            
+                                            <div class="slds-form-element__control">
+                                                    <I>{!$Label.c.SelfRegistration_Primary_Roles}</I> <abbr class="slds-required" title="required">*</abbr><br></br>                                            
+                                            </div> 
+                                                <div class="slds-form-element__control">
+                                                        <ui:inputTextArea aura:id="registrationRepCodes"  maxlength="250" class="slds-textarea" value="{!v.userData.registrationAccounts}" rows="3" />
+                                                </div>
+                                            </aura:if>
+                                        </span>
+                                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                                            <div class="slds-form-element">                                
+                                                <div class="slds-form-element__control">
+                                                    <ui:inputTextArea aura:id="registrationComments" required="{!v.mandatory}" label="{!$Label.c.SelfRegistration_Comments}"  maxlength="250" class="slds-textarea" value="{!v.userData.registrationComments}" rows="3" />
+                                                </div>                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+
+        
+                        <div class="slds-p-around_xx-small slds-size_1-of-1 slds-max-small-size_1-of-1">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+
+                                    <div>
+                                        <abbr class="slds-required" title="required">*</abbr>
+                                        <input type="checkbox" id="terms" name="terms" value="{!v.chkTerms}" onchange="{!c.termsChanged}" ></input>
+                                        <label for="terms">&nbsp;{!$Label.c.SelfRegistration_Terms_Msg1} <a href="{!v.cbaseURLTerms}" target = "_blank">&nbsp;{!$Label.c.SelfRegistration_Terms_Msg2}</a></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="slds-m-top_large">
+                        <lightning:button label="{!$Label.c.SelfRegistration_ButtonRegister}" variant="brand" onclick="{!c.createUser}" disabled="{!or(v.disable, v.inProgress)}"
+                                        class="slds-align_absolute-center primary-button"/>
+                    </div>
+                </aura:set>
+            </lightning:card>
+        </div>
+
+        <aura:if isTrue="{!v.inProgress}">
+            <lightning:spinner variant="brand" size="medium" class="slds-is-fixed" />
+        </aura:if>
+    </div>
+</aura:component>

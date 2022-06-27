@@ -1,0 +1,53 @@
+<aura:component controller="DeliveryNotesPDFController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+	<aura:attribute name="pdfData" type="String"/>
+	
+    <aura:html tag="style">.toastMessage.forceActionsText{white-space : pre-line !important;}</aura:html>
+    <aura:attribute name="bShowModal" type="Boolean"  default="false"     description="Display Delivery Notes" />
+    <aura:attribute name="inProgress"       type="Boolean"  default="false"     description="Getting the Delivery Notes Pdf data." />
+    <aura:attribute name="pageMessages"     type="List"     default="[]"        description="Page messages" />
+    <aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}"/>
+    <aura:attribute name="showSpinner" type="boolean" default="false"/>
+
+    <aura:method name="deliveryNotesPdfMethod" action="{!c.showModal}"    description="Delivery Notes Pdf method">
+        <aura:attribute name="deliveryNotesNumber" type="String" default=""/>
+	</aura:method>
+	<aura:attribute name="pdfContainer" type="Aura.Component[]"/>	
+	
+    <div class="slds-p-around_medium slds-m-bottom_medium">
+		<!-- Other component markup here -->		
+		<lightning:card variant="Base">
+			<aura:set attribute="body">
+				<!-- Detail view modal start -->
+				<aura:if isTrue="{!v.bShowModal}">
+					<section role="dialog" tabindex="-1"
+							aria-labelledby="modal-heading-01"
+							aria-modal="true"
+							aria-describedby="modal-content-id-1"
+							class="slds-modal slds-fade-in-open">
+						<div class="slds-modal__container">
+
+							<header class="slds-modal__header"> 
+								<lightning:buttonIcon iconName="utility:close" alternativeText="close" variant="inverse" size="small" 
+								class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.closeModal}"/>
+								<!--h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">"Delivery Notes"</h2--> 
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Packing List</h2> 
+
+							</header>
+							{!v.pdfContainer}
+							<!-- add page labels below, once indexed -->
+							<footer class="slds-modal__footer">
+								<lightning:button variant="brand"
+								label="{!$Label.c.ModalClose}"
+								title="Button Close"
+								onclick="{!c.closeModal}" >
+								</lightning:button>
+							</footer>
+						</div>
+					</section>
+					<div class="slds-backdrop slds-backdrop_open"></div>    
+				</aura:if>
+			<!-- Detail view modal end -->
+			</aura:set>
+		</lightning:card>
+	</div>
+</aura:component>

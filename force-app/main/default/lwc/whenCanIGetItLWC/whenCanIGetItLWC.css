@@ -1,0 +1,88 @@
+.border{
+    border-color: #070707;
+}
+
+h4{
+    font-style: italic;
+    font-size: 12px;
+}
+
+
+h3{
+    background: #6082B6;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+}
+
+h2{
+    
+    font-weight: bold;
+    font-family: "Segoe UI";
+}
+
+h2{
+    font-family: "Segoe UI";
+}
+
+
+
+.confirmation{
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.spins::after {
+    position: absolute;
+    content: 'Submitting Your Request...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    font-weight: bold;
+}
+
+.cartNumber{
+    border-radius: 0%;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    background: #6082B6;
+    border: 0px solid #000;
+    color: white;
+    text-align: center;
+    font: 15px Segoe UI;
+}
+
+.THIS .disabled {
+    color: lightgray;
+}
+
+.cartSpin::after {
+    position: absolute;
+    content: 'Adding to Cart...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    font-weight: bold;
+}
+
+.message{
+    font-style: italic;
+    font-size: 12px;
+    font-family: "Segoe UI";
+    color: red;
+}
+
+.session{
+    font-size: 15px;
+    color: black;
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.timer{
+    font-size: 50px;
+    color: #5c5c5c;
+    font-family: "Segoe UI";
+    text-align: center;
+}

@@ -1,0 +1,70 @@
+<!--
+ - Created by emorrison on 4/8/2020.
+ -->
+
+<apex:component id="General_Modal">
+
+    <apex:attribute name="modalId" type="String" required="true" description="Represents ID of modal." />
+    <apex:attribute name="header" type="String" required="false" description="Header of modal" />
+
+    <!-- Modal -->
+    <div class="modal fade general-modal" id="{!modalId}" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-close clearfix">
+                    <p class="close-btn" data-dismiss="modal"><u>Close</u></p>
+                </div>
+                <h3 class="modal-title {!IF(ISBLANK(header), 'hide', '')}">{!header}</h3>
+                <div class="modal-body">
+                    <apex:componentBody />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .general-modal .modal-close {
+            font-size: 14px;
+            color: #333333;
+        }
+        .general-modal .close-btn {
+            float: right;
+            cursor: pointer;
+            color: #333333;
+            font-size: 14px;
+            font-weight: 400;
+            margin-right: 2px;
+        }
+        .general-modal .modal-close .close-btn:after {
+            content: '\02715';
+            padding-left: 5px;
+        }
+        .general-modal .modal-title {
+            color: #1A1A1A;
+            font-weight: 400;
+            padding: 0px 15px 25px 15px;
+        }
+        .general-modal .modal-content {
+            border-radius: 10px;
+            box-shadow: 1px 1px 4px 1px rgba(0, 0, 0, 0.15);
+        }
+        .general-modal .modal-body {
+            padding-top: unset;
+            padding-bottom: unset;
+        }
+        .general-modal .hide {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .general-modal .modal-dialog {
+                width: auto;
+                min-width: 400px;
+                max-width: 750px;
+                min-height: 300px;
+                top: 20%;
+            }
+        }
+    </style>
+</apex:component>

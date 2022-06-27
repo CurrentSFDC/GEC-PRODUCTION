@@ -1,0 +1,148 @@
+@media (min-width: 1400px) {
+    .container.cc_main_container {
+        width: 1370px!important;
+    }
+}
+
+.spreadsheet {
+    margin-bottom: 16px;
+    display: table;
+    position: relative;
+    width: 1024px;
+}
+
+.spreadsheet .table-header-row{
+    z-index: 2;
+}
+
+.spreadsheet .table-header-row,
+.spreadsheet .cc_product_container{
+    width: 1024px;
+}
+
+.spreadsheet .table-header-cell,
+.spreadsheet .table-cell {
+    padding: 4px 6px;
+    display: table-cell;
+}
+
+.spreadsheet .table-header-cell:first-child,
+.spreadsheet .table-cell:first-child{
+    width: 170px;
+}
+
+.spreadsheet .table-header-cell:nth-child(2),
+.spreadsheet .table-cell:nth-child(2){
+    width: 130px;
+}
+
+.spreadsheet .table-header-cell:nth-child(3),
+.spreadsheet .table-cell:nth-child(3){
+    width: 68px;
+}
+.spreadsheet .table-header-cell:nth-child(4),
+.spreadsheet .table-cell:nth-child(4){
+    width: 60px;
+}
+.spreadsheet .table-header-cell:nth-child(5),
+.spreadsheet .table-cell:nth-child(5){
+    width: 60px;
+}
+.spreadsheet .table-header-cell:nth-child(6),
+.spreadsheet .table-cell:nth-child(6){
+    width: 80px;
+}
+.spreadsheet .table-header-cell:nth-child(7),
+.spreadsheet .table-cell:nth-child(7){
+    width: 60px;
+}
+.spreadsheet .table-header-cell:nth-child(8),
+.spreadsheet .table-cell:nth-child(8){
+    width: 80px;
+}
+.spreadsheet .table-header-cell:nth-child(9),
+.spreadsheet .table-cell:nth-child(9){
+    width: 70px;
+}
+.spreadsheet .table-header-cell:nth-child(10),
+.spreadsheet .table-cell:nth-child(10){
+    width: 60px;
+}
+.spreadsheet .table-header-cell:nth-child(11),
+.spreadsheet .table-cell:nth-child(11){
+    width: 105px;
+}
+.spreadsheet .table-header-cell:nth-child(12),
+.spreadsheet .table-cell:nth-child(12){
+    width: 50px;
+}
+.spreadsheet .table-header-cell:nth-child(13),
+.spreadsheet .table-cell:nth-child(13){
+    width: 20px;
+}
+
+.spreadsheet .cc_product_container, .spreadsheet .table-header-row {
+    display: table-row;
+}
+
+.spreadsheet .table-header-cell {
+    background-color: #E9EAE9;
+    font-weight: bold;
+    color: #212322;
+}
+
+.uom-select {
+    width: 25%;
+}
+
+.spreadsheet .uom-select, .cc_grid_item .uom-select {
+    width: 100%;
+}
+
+.spreadsheet .typemark-button, .spreadsheet .cc_add_to_btn {
+    font-size: 10px;
+}
+
+#accountSearch {
+    background-image: url('images/search.svg');
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    width: 60%;
+    font-size: 16px;
+    padding: 5px 5px 5px 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 12px;
+    margin-left: 30px;
+}
+
+.alignedRight {
+    float: right;
+}
+
+.typemark-button {
+    font-size: 11px;
+    font-family: sans serif;
+    margin-right: 20px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 9px 17px 7px;
+    border: 0;
+    outline: 0;
+    background: none;
+    color: #5F82B6;
+    font-weight: bold;
+}
+
+.typemark-button:hover {
+    color: #F16850;
+    text-decoration: underline;
+}
+
+.spreadsheet .typemark-button {
+    margin: 0;
+    padding: 0;
+}
+
+.text-align-right{
+    text-align: right;
+}

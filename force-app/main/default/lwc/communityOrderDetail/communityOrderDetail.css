@@ -1,0 +1,120 @@
+.pa-heading-label {
+    display: block;
+    font-weight: 700;
+}
+.pa-heading-value {
+    display: block;
+}
+.pa-line-label {
+    width: 50%;
+    float: left;
+}
+.pa-line-value {
+    width: 50%;
+    float: left;
+    padding: 4px 0;
+    word-wrap: break-word;
+}
+.assigned-msg > abbr {
+    display: block;
+}
+
+.pa-heading-label > lightning-helptext {
+    position: relative;
+    top: -2px;
+    padding-left: 2px;
+}
+
+.line-container p {
+    width: 100%;
+    float: left;
+}
+
+.pack-list-pdf-modal .slds-modal__container {
+    width: 60%;
+}
+
+.shipment-tracking-modal .slds-modal__container {
+    max-width: 40rem;
+    width: 50%;
+}
+
+.pack-list-pdf-modal .slds-modal__container .slds-modal__content {
+    height: 500px;
+}
+
+.ship-tracking-record {
+    padding: 5px 0;
+    border: 1px solid rgb(31, 31, 31) !important;
+}
+
+.tracking-flags > div {
+    display: inline-block;
+    font-size: 12px;
+    padding: 0 5px;
+}
+
+.tracking-flags > div > span {
+    font-weight: 700;
+}
+
+.tracking-flags .shipment-status {
+    display: block;
+    width: 100%;
+    padding: 5px;
+    background: rgb(197, 200, 197);
+    margin: 0 auto;
+}
+
+.tracking-flags .shipment-status-success {
+    background: rgb(8, 246, 91) !important;
+}
+
+.order-tabset {
+    position: relative;
+}
+
+.shipment-tracking-info {
+    position: absolute;
+    top: 24px;
+    left: 255px;
+}
+
+.page-loader {
+    position: fixed;
+}
+
+@media only screen and (max-width: 767px) {
+    .pa-heading-label, .pa-heading-value {
+        padding: 6px 0;
+    }
+    .pa-line-label, .pa-line-value {
+        display: block;
+        width: 100%;
+    }
+    .pa-line-value {
+        padding: 7px 10px 7px 0;
+    }
+    .pack-list-pdf-modal .slds-modal__container {
+        width: auto;
+    }
+    .pack-list-pdf-modal .slds-modal__container .slds-modal__content {
+        height: 50%;
+    }
+    .shipment-tracking-modal .slds-modal__container {
+        width: auto;
+    }
+    .tracking-flags > div {
+        display: block;
+        font-size: 12px;
+        padding: 0 5px;
+        margin-bottom: 10px;
+    }
+    .ship-tracking-record .ship-tracking-row {
+        display: block !important;
+    }
+    .order-actions > span {
+        display: block;
+        margin-bottom: 10px;
+    }
+}

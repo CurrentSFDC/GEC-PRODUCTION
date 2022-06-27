@@ -1,0 +1,22 @@
+<template>
+    <div class="container slds-is-relative">
+        <div>
+            <lightning-input if:false={hasSelectedValue} type="text" id="lookup-input" label={label} class={inputClass} variant={variant}
+                             placeholder={placeholder} required={required}  is-loading={isSearching}
+                             autocomplete='off'></lightning-input>
+            <lightning-input if:true={hasSelectedValue} type="text" icon-name="standard:form" label={label} class={inputClass} variant={variant} value={selectedValue} required={required} 
+            disabled={disabled}></lightning-input>
+            <!--<lightning-input if:true={hasSelectedOrdValue} type="search" icon-name="standard:form" label={label} class={inputClass} variant={variant} value={selectedOrdValue} required={required} onchange={handleReset}
+                             read-only></lightning-input>-->
+        </div>
+        <template if:false={hasSelectedValue}>
+            <div if:true={hasOptions} class="slds-combobox_container">
+                <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open" data-id="resultBox" role="combobox">
+                    <div class="slds-dropdown slds-dropdown_fluid" role="listbox">
+                        <ul class="dropdown-result slds-listbox slds-listbox_vertical" role="presentation"></ul>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

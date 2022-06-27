@@ -1,0 +1,14 @@
+<apex:page standardController="Account" extensions="GE_LGT_inlinecontrol_childacc" >
+<apex:form >
+<apex:pageBlock title="Child  Accounts">
+<apex:outputPanel style="overflow:scroll;width:100%;height:150px;" layout="block">
+<apex:pageBlockTable value="{!acclist}" var="a" style="overflow:scroll;" border="1" align="left">
+  <apex:column headerValue="Name"> <apex:outputLink target="_top" value="{!URLFOR($Action.Account.View,a.id)}">{!a.Name}</apex:outputLink></apex:column>
+   <apex:column headerValue="Record Type" value="{!a.Recordtype.Name}"/>
+  <apex:column headerValue="Customer Active Flag" value="{!a.GE_LGT_EM_CustomerActiveFlag__c}" />
+</apex:pageBlockTable> 
+</apex:outputPanel>   
+</apex:pageBlock>
+</apex:form>
+ <c:TLS_NiceWarningJquery />
+</apex:page>

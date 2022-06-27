@@ -1,0 +1,27 @@
+@import 'c/communityCSS';
+
+a {
+    display: inline-block;
+    font-size: 12px;
+    color: #5f82b6;
+    line-height: 2.5rem;
+    margin: 4px 0;
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+    font-family: 'Segoe UI';
+    border-color: rgb(247, 246, 246);
+}
+
+a:hover {
+    background-color: rgb(248, 166, 43);
+}
+
+a:active {
+    opacity: 0.7;
+}
+
+.grid{
+    height: 308px;
+    background: white;
+}

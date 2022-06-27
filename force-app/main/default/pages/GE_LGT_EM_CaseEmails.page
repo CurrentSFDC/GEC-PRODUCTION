@@ -1,0 +1,63 @@
+<apex:page controller="GE_LGT_EM_CaseEmails_Controller" sidebar="false" showHeader="false">
+   <html>
+   <head>
+       <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css"/>
+       <script type="text/javascript" src="https:////code.jquery.com/jquery-1.12.0.min.js"></script>
+       <script type="text/javascript" src="https://cdn.datatables.net/1.10.0/js/jquery.dataTables.js"></script>
+       <script type="text/javascript">
+       
+            $(document).ready( function() {
+            $('table.display').DataTable(
+                                        {
+                                          "columnDefs": 
+                                          [{
+                                              "defaultContent": "-",
+                                              "targets": "_all"
+                                          }]
+                                       
+                                        }
+                                        );
+            } );
+       </script>        
+            
+      
+        </head>
+        
+        <body>
+            <apex:form >
+            <apex:PageBlock title="Case Emails" >
+            <div class="full_width">          
+                <table cellpadding="0" cellspacing="0" border="0" class="display"  style="width:100%">
+                    <thead>
+                    <apex:outputPanel >
+                         <tr>
+                            <th>Email ID</th>
+                            <th>Subject</th>
+                            <th>Body</th>
+                        </tr>
+                    </apex:outputPanel>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <apex:repeat value="{!emails }" var="e">
+                                <tr>
+                                   <td id ="class" >
+                                        <apex:outputLink value="/{!e.Id}">{!e.Id}</apex:outputLink> 
+                                    </td>
+                                    <td id ="class">
+                                        <apex:outputText value="{!e.subject}" />
+                                    </td>
+                                    <td id ="class">
+                                        <apex:outputText value="{!e.textbody}" />
+                                    </td>                              
+                                </tr>
+                            </apex:repeat>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </apex:PageBlock>
+            </apex:form>
+            </body>
+            </html>
+</apex:page>

@@ -1,0 +1,52 @@
+<!--
+ - Created by gipolysz on 2021. 03. 18..
+ -->
+
+<apex:component id="HeaderBIE">
+    <script id="EffAcctSel-Head-View-Desktop" type="text/template">
+        <ul class="list-inline navbar-nav cc_navbar-nav">
+            {{#if this.ro}}
+            <li class="effAccount cc_eff_account">
+                <a href="#">
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                </a>
+            </li>
+            {{else}}
+            <!--{{#if this.agent}}
+            <li>{{this.agent.Name}}</li>
+            {{/if}}-->
+            <li class="effAccount cc_eff_account" data-toggle="modal" data-target="#effAccounts">
+                <a href="#">
+                    {{#if this.workingEffAccount }}
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                    {{else}}
+                    {{pageLabelMap 'SELECT_ACCOUNT' }}
+                    {{/if}}
+                    <span class="launchSel cc_launch_sel" aria-hidden="true"></span>
+                </a>
+            </li>
+            {{/if}}
+        </ul>
+        <div class="modal fade cc_modal cc_effective_accounts_modal" id="effAccounts" tabindex="-1" role="dialog" aria-labelledby="effAccountsLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content cc_modal_content">
+                    <div class="modal-header cc_modal_header">
+                        <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                        <h4 class="modal-title cc_modal_title" id="effAccountsLabel">{{pageLabelMap 'EFFECTIVE_ACCOUNT_TITLE'}}</h4>
+                    </div>
+                    <div class="modal-body cc_modal_body">
+                        <div class="table-responsive">
+                            <div class="search-input-container">
+                                <label for="account-search">Search Accounts</label>
+                                <input id="account-search" type="text" value="{{this.searchText}}" autocomplete="off">
+                            </div>
+                            <div class="dynamic-content">
+                                <!--Account list gets injected here-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+</apex:component>

@@ -1,0 +1,12 @@
+<apex:page id="myPage"  standardController="Opportunity_Support_Request__c" extensions="GE_LGT_Emea_current_Approvalupdate" action="{!approavalfunction}" showHeader="false" sidebar="false" >
+    
+    
+    
+    
+    
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;<apex:outputLabel value="Current Approving Function" for="theCheckbox" style="font-weight:500"/> &nbsp;&nbsp;&nbsp;&nbsp;
+    <apex:outputField id="theCheckbox" value="{!osrs[0].EMEA_Approving_Function__c}"/>
+    
+    
+    
+</apex:page>

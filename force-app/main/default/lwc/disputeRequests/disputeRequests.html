@@ -1,0 +1,92 @@
+<template>
+
+    <lightning-accordion>
+            
+        <template if:true={disputes}>
+            <template for:each={disputes} for:item="dis">
+                
+                <lightning-accordion-section onclick={handleSelected} data-id={dis.Id} name={dis.Name} value={dis.Id} label={dis.Connect_Request__c} key={dis.Id}>
+                    <!--Selected DR ID: {dis.Id}-->
+                    <lightning-record-view-form record-id={dis.Id} object-api-name="Dispute_Request__c" density="comfy">
+                        <div class="slds-grid slds-wrap">
+                            <div class="slds-col slds-size_4-of-8">
+                                <lightning-output-field field-name="CreatedDate"></lightning-output-field>
+                                <lightning-output-field field-name="Customer_PO__c"></lightning-output-field>
+                                <lightning-output-field field-name="Original_Order__c"></lightning-output-field>
+                            </div>
+                            <div class="slds-col slds-size_4-of-8">
+                                <lightning-output-field field-name="Status__c"></lightning-output-field>
+                                &nbsp;<label class="slds-form-element__label" for="form-element-01">{dis.Type__c} Order:</label>
+                                &nbsp; &nbsp;<lightning-output-field variant="label-hidden" field-name="Order__c"></lightning-output-field> 
+                                <lightning-output-field field-name="Site_Contact_Address__c"></lightning-output-field>
+                            </div>
+                        </div>      
+                    </lightning-record-view-form>
+                    <br>
+                    <lightning-datatable 
+                                key-field="id"
+                                data={disputeProducts}
+                                columns={columns}
+                                hide-checkbox-column="true">
+                                
+                            </lightning-datatable>
+
+                    <!-- <template if:true={disputes}>
+                        
+                            <table class="tablecls">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate"  title="Title">CATALOG #</div>
+                                        </th>
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate"  title="Title">INVOICED PRICE</div>
+                                        </th>
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate"  title="Body">QUANTITY</div>
+                                        </th>
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate" title="Owner">TOTAL</div>
+                                        </th>
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate" title="Owner">TYPE</div>
+                                        </th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                     
+                                    <template for:each={dis.Case_Products__r} for:item="dp">
+                                        <tr class="slds-hint-parent" key={dp.Id}>
+                                            <td data-label="Title">
+                                                <div class="slds-truncate" >{dp.Material_Description__c}</div>
+                                            </td>
+                                            <td data-label="Title">
+                                                <div class="slds-truncate currency" >{dp.Invoiced_Price__c}</div>
+                                            </td>
+                                            <td data-label="Body">
+                                                <div class="slds-truncate" >{dp.Discrepancy_Qty__c}</div>
+                                            </td>
+                                            <td data-label="Owner">
+                                                <div class="slds-truncate" >{dp.Discrepancy_Total__c}</div>
+                                            </td>
+                                            <td data-label="Owner">
+                                                <div class="slds-truncate" >{dp.GE_NAS_Type_of_Problem1__c}</div>
+                                            </td>
+                                            
+                                        </tr>
+                                    </template>
+                                
+                                </tbody>
+                            </table>
+                        </template> -->
+                    
+                </lightning-accordion-section>
+
+                
+                </template>
+                </template>
+                </lightning-accordion>
+
+    
+</template>

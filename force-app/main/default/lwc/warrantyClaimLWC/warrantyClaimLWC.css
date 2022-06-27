@@ -1,0 +1,73 @@
+.border{
+    border-color: #070707;
+}
+
+h4{
+    font-style: italic;
+    font-size: 12px;
+}
+
+h3{
+    background: #6082B6;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+}
+
+h2{
+    font-family: "Segoe UI";
+}
+
+.confirmation{
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.spins::after {
+    position: absolute;
+    content: 'Submitting Claim...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    font-weight: bold;
+}
+
+@media only screen and (max-width: 767px) {
+    .mb-mr-t18 {
+        margin-top: 18px;
+    }
+
+    .mb-mr-t20 {
+        margin-top: 20px;
+    }
+
+    .mb-pd-l0 {
+        padding-left: 0;
+    }
+
+    .mb-br-top {
+        border-left: none;
+        border-top: 1px solid rgba(187, 189, 191, 0.95);
+    }
+}
+
+.message{
+    font-style: italic;
+    font-size: 12px;
+    font-family: "Segoe UI";
+    color: red;
+}
+
+.session{
+    font-size: 15px;
+    color: black;
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.timer{
+    font-size: 50px;
+    color: #5c5c5c;
+    font-family: "Segoe UI";
+    text-align: center;
+}

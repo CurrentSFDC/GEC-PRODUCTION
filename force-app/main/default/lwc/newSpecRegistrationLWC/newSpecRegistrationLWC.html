@@ -1,0 +1,579 @@
+<template>
+    <div class={flexipageRegionWidth}>
+        <div class="slds-media__body">
+            <div class="slds-page-header__name">
+                <div class="slds-page-header__name-title">
+                    <h1>
+                        <span class="slds-page-header__title slds-truncate" title="New Spec Registration">New Spec Registration</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+        <br>  
+    <lightning-progress-indicator
+        current-step={currentStep}
+        type="path"
+        variant="base"
+    >
+    <lightning-progress-step
+        label="1. Account Selection"
+        value="1"
+    ></lightning-progress-step>
+    <lightning-progress-step
+        label="2. Job Information"
+        value="2"
+    ></lightning-progress-step>
+    <lightning-progress-step
+        label="3. Job Value and Product Selection"
+        value="3"
+    ></lightning-progress-step>
+    <lightning-progress-step
+        label="4. Review"
+        value="4"
+    ></lightning-progress-step>
+    <lightning-progress-step
+        label="5. Confirmation"
+        value="5"
+    ></lightning-progress-step>
+            
+    </lightning-progress-indicator>
+    <br>
+
+    <lightning-messages> </lightning-messages>
+        <!--STEP ONE-->
+        <div class="stepOne">
+        <div class="slds-box">
+            <!--<div class="slds-text-title--caps"><b><i>Account Selection</i></b></div> <br>-->
+            <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Search Accounts</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <lightning-record-edit-form object-api-name="Case"  >  
+                                        <!--lightning-input-field field-name='Spec_Reg_Agency__c' value={accountID} class = "mn" required></lightning-input-field-->
+                                        <!--<lightning-input-field field-name='Ordering_Agency__c' onchange={handleChange} class = "op" required></lightning-input-field>-->
+                                        <!--<c-lwc-lookup-demo onordagensel={confirmchange} ondelagensel={confirmchangeNew}></c-lwc-lookup-demo>-->
+                                        
+                                        
+                                        <!--<c-lwc-lookup-demo  required object-api-name="account" icon-name="standard:account"  
+                                            filter-field-name = "Account_Group__c" filter-field-val = "ZEAG" filter-field-val-spec ={contactID} variant="label-hidden" onrecordselection={confirmchange} onrecordselectionnew={confirmchangeNew} onrecordselectionspec={handleChange}></c-lwc-lookup-demo>
+                                        -->
+
+                                    <c-account-lookup-l-w-c
+                                        label="Spec Reg Agency"
+                                        disabled={accountSearchDisabled}
+                                        all-agents="false"
+                                        place-holder="Search Accounts..."
+                                        object-api-name="Account"
+                                        pre-selected-account={preSelectedAccount}
+                                        onaccountselect={handleAccountSelected}
+                                        onclearselection={clearResults}
+                                    
+                                    ></c-account-lookup-l-w-c>  
+
+                                    <c-account-lookup-l-w-c
+                                        label="Ordering Agency"
+                                        
+                                        all-agents="true"
+                                        place-holder="Search Accounts..."
+                                        object-api-name="Account"
+                                        
+                                        onaccountselect={handleOrderingAccountSelected}
+                                        onclearselection={clearOrderingResults}
+                                    
+                                    ></c-account-lookup-l-w-c>  
+                                <template if:true={showDelivery}>
+                                    <c-account-lookup-l-w-c
+                                        label="Delivery Agency"
+                                        
+                                        all-agents="true"
+                                        place-holder="Search Accounts..."
+                                        object-api-name="Account"
+                                        pre-selected-account={preSelectedDelivery}
+                                        onaccountselect={handleDeliveryAccountSelected}
+                                        onclearselection={clearDeliveryResults}
+                                    ></c-account-lookup-l-w-c>  
+                                    </template>
+                                                                               
+                                    </lightning-record-edit-form>                                                                        
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Enter Bidding Dates</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <lightning-input 
+                                        type="Date" 
+                                        
+                                        label="Estimated bidding/ordering Start Date"
+                                        required
+                                        onchange={validateStart}
+                                        date-style="short" 
+                                         class="ln validValue">
+                                        </lightning-input>
+                                        <template if:true={invalidStart}>
+                                            <div class="slds-text-color_error slds-p-left_x-small">
+                                                Date must be in present or in future..
+                                            </div>
+                                        </template>
+                                    <lightning-input 
+                                        type="Date" 
+                                        
+                                        date-style="short"
+                                        label="Estimated bidding/ordering End Date"                                         
+                                        required
+                                        onchange={validateEnd}
+                                        class="km validValue">
+                                    </lightning-input>
+                                    <template if:true={invalidEnd}>
+                                        <div class="slds-text-color_error slds-p-left_x-small">
+                                            Date must be in present or in future..
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><br>
+                <div class="slds-col slds-size_8-of-8">
+                    <h3 class="slds-section-title--divider">Documentation</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_2-of-8">
+                                <lightning-file-upload
+                                    label="Attach Files"
+                                    class="fileupload"
+                                    name="uploadFile"
+                                    accept={acceptedFormats}  
+                                    onuploadfinished={handleUploadFinished} multiple>
+                                </lightning-file-upload>
+                                <h4>Accepted Formats and Max file size: <lightning-helptext content={message}></lightning-helptext></h4>
+                            </div>
+                            <div class="slds-col slds-border_left slds-size_6-of-8">
+                                    <div class="slds-p-left_medium">
+                                        <h2 class="slds-section-title--divider">Uploaded Files</h2>
+                                        <template if:true={files}>
+                                            <!-- <lightning-datatable data={files} columns={columns} key-field="Id">
+                                            </lightning-datatable> -->
+                                            <c-file-list files={files} onfiledelete={handleActionFinished}></c-file-list>
+                                        </template>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div class="slds-align_absolute-center">
+                <lightning-button
+                    class="slds-m-top_small"
+                    label="Next"
+                    disabled={stepOneButton}
+                    onclick={handleValidation}
+                    variant="brand" 
+                ></lightning-button>
+            </div>
+        </div>
+    </div>
+    <!--END OF STEP ONE-->
+        <!--STEP TWO-->
+        <div class="stepTwo slds-hide">
+            <div class="slds-box"> 
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Job Information</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <lightning-input 
+                                        type="text" 
+                                        placeholder="Name..." 
+                                        label="Job Name" 
+                                        required
+                                        class="rn validVal">
+                                    </lightning-input>
+                                    <lightning-input 
+                                        type="text" 
+                                        placeholder="Role..." 
+                                        label="Specifying Agency's Role" 
+                                        required
+                                        class="lm validVal">
+                                    </lightning-input>                                  
+                                    <lightning-input 
+                                        type="text" 
+                                        placeholder="City..." 
+                                        label="Job City" 
+                                        required
+                                        class="em validVal">
+                                    </lightning-input>
+                                    <!--<template if:true={PicklistValues.data}>
+                                        <lightning-combobox 
+                                                        label="Job State/Province"
+                                                        value={values}
+                                                        placeholder="-Select States-"
+                                                        options={PicklistValues.data.values}
+                                                        required
+                                                        class = "aa validVal"
+                                                        onchange={handlePick1}
+                                                         >
+                                        </lightning-combobox>
+                                    </template>  -->
+                                    <c-job-state-lookup-lwc 
+                                     required 
+                                        object-api-name="State__mdt" 
+                                        icon-name="standard:account"  
+                                        variant="label-hidden" 
+                                        onjobstatelookupchange={handleJobstatelookupchange}>
+                                    </c-job-state-lookup-lwc>                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Influencer Information</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                        <lightning-input 
+                                                        name="influencer"
+                                                        type="text" 
+                                                        placeholder="Name..." 
+                                                        label="Influencer" 
+                                                        value={influencer}
+                                                        required
+                                                        class="lq validVal">
+                                        </lightning-input>
+                                    <template if:true={RolePicklistValues.data}>
+                                        <lightning-combobox 
+                                                        label="Influencer Role"
+                                                        value={values}
+                                                        placeholder="-Select-"
+                                                        options={RolePicklistValues.data.values}
+                                                        required
+                                                        class = "cc validVal"
+                                                        onchange={handlePick} >
+                                        </lightning-combobox>
+                                    </template> 
+                                    <template if:true={otherVal}>
+                                        <lightning-input type="text" 
+                                                         label="Other"  
+                                                         required                                                        
+                                                         class="cd validVal">
+                                        </lightning-input>  
+                                    </template>                          
+                                        <lightning-input 
+                                                        name="influencerCity"
+                                                        type="text" 
+                                                        placeholder="City..." 
+                                                        label="Influencer City" 
+                                                        value={influencerCity}
+                                                        required=""
+                                                        class="gm validVal">
+                                        </lightning-input>
+                                   <!-- <template if:true={InfluencerPicklistValues.data}>
+                                        <lightning-combobox 
+                                                        name="influencerState"
+                                                        label="Influencer State/Province"
+                                                        value={values}
+                                                        placeholder="-Select States-"
+                                                        options={InfluencerPicklistValues.data.values}
+                                                        required
+                                                        class = "bb validVal"
+                                                        onchange={handleState} >
+                                        </lightning-combobox>
+                                    </template>  -->  
+                                    
+                                    <c-state-lookup-lwc 
+                                     required 
+                                        object-api-name="State__mdt" 
+                                        icon-name="standard:account"  
+                                        variant="label-hidden" 
+                                        oninvoicedatachange1={handleInvoiceDataChange1}>
+                                    </c-state-lookup-lwc>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+            <div class="slds-align_absolute-center">
+                <lightning-button-group>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepOne}
+                    ></lightning-button>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Next"
+                        onclick={handleValid}
+                        variant="brand"
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+        </div>   
+        <!--END OF STEP TWO-->     
+        <!--STEP Three-->
+        <div class="stepThree slds-hide">
+            <div class="slds-box"> 
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Value and Comments</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <lightning-input 
+                                    type="number" 
+                                    formatter="currency"
+                                    step="0.01" 
+                                    placeholder="currency..." 
+                                    label="Estimated Job Value" 
+                                    required
+                                    class="pn validV">
+                                    </lightning-input>
+                                    <lightning-textarea 
+                                        name="input1" 
+                                        label="Job Description"  
+                                        class="qm">
+                                    </lightning-textarea>                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+                </div>  <br>                                   
+                <div class="slds-col slds-border_left slds-size_8-of-8">
+                        <!--<h3 class="slds-section-title--divider">Product Selection - (Optional)</h3>-->
+                        <c-material-lookup-container-l-w-c
+                        transaction-i-d={transactionID}
+                        prod-families={prodFamilies}
+                        cart-columns={cartColumns}
+                        case-type={caseType}
+                        onlineupdate={setReviewLines}></c-material-lookup-container-l-w-c>
+                          <!--<c-c-c-product-data-table transaction-i-d={transactionID} onlineupdate={confirmUpdate}></c-c-c-product-data-table>-->                                                                   
+                </div>
+            </div>            
+            <div class="slds-align_absolute-center">
+                <lightning-button-group>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepTwo}
+                    ></lightning-button>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Next"
+                        variant="brand"
+                        disabled={showNextButton}
+                        onclick={handleVal}
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>            
+        </div>
+         <!--END OF STEP THREE-->
+         <!--STEP FOUR-->
+         <div class="stepFour slds-hide">
+            <template if:true={isSpinner}>
+                <lightning-spinner class="spins" alternative-text="Loading" variant="brand"></lightning-spinner>
+            </template>
+            <div class="slds-box">
+                <div class="slds-text-title_caps">Confirmation</div> <br>   
+            
+        
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Job Information</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <b>Specifying Agency Name: </b>{specifyingAgency}<br>
+                                    <b>Specifying Agency Role       : </b>{specifyingAgencyRole}<br> 
+                                    <b>Ordering Agency Name: </b>{orderingAgency}<br>
+                                    <b>Delivery Agency Name: </b>{deliveryAgency}<br>
+                                    <b>Job Name: </b>{jobName}<br>
+                                    <b>Job City: </b>{jobCity}<br>
+                                    <b>Job State/Province: </b>{jobStateInput}<br>                                                                                
+                                    <b>Job Description: </b>{comments}<br>
+                                    <b>Estimated Job Value          : </b><lightning-formatted-number value={estimatedSalesPrice} format-style="currency" maximum-fraction-digits="2"></lightning-formatted-number> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Influencer Info</h3>
+                        <div class="slds-box slds-theme_shade border">
+                            <div class="slds-grid">
+                                <div class="slds-col">
+                                    <b>Estimated Bidding Start Date : </b>{estimatedBiddingStartDate}<br>  
+                                    <b>Estimated Bidding End Date   : </b>{estimatedBiddingEndDate}<br>  
+                                    <b>Influencer                   : </b> {influencer}<br>
+                                    <b>Influencer Role              : </b> {influencerRole}<br>
+                                    <b>Influencer City              : </b> {influencerCity}<br>
+                                    <b>Influencer State/Province    : </b> {influencerStateInput}<br>                
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-box">
+                <h3 class="slds-section-title--divider">Products Selected</h3> 
+                <div class="slds-box slds-theme_shade border">
+                    <template if:true={storedLines}>
+                        <lightning-datatable data={storedLines} columns={reviewColumns} key-field="Id" hide-checkbox-column>
+                        </lightning-datatable>
+                    </template>
+                </div>
+            </div>
+            <br> 
+            <div class="slds-align_absolute-center">
+                <lightning-button-group>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepThree}
+                    ></lightning-button>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label= {toggleSubmitLabel}
+                        type="submit"
+                        variant="brand"
+                        onclick={handleSave}
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+        </div>
+        <!--END OF STEP FOUR--> 
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         
+         <!--STEP FOUR-->
+         <!--<div class="stepFour slds-hide">
+            <template if:true={isSpinner}>
+                <lightning-spinner class="spins" alternative-text="Loading" variant="brand"></lightning-spinner>
+            </template>
+            <c-new-spec-reg-child-l-w-c></c-new-spec-reg-child-l-w-c>
+            <template if:true={prodLines}>
+                <c-confirmation-details item={prodLines}></c-confirmation-details>
+            </template>
+            <div class="slds-align_absolute-center">
+                <lightning-button-group>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepThree}
+                    ></lightning-button>
+                    <lightning-button
+                        class="slds-m-top_small"
+                        label= {toggleSubmitLabel}
+                        type="submit"
+                        variant="brand"
+                        onclick={handleSave}
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+        </div>-->
+         <!--END OF STEP FOUR-->
+        <!--STEP 5-->
+        <div class="stepFive slds-hide">
+            <div class="slds-col slds-size_8-of-8">
+            <h3 class="slds-section-title--divider">Confirmation Page</h3>
+                <div class="slds-box slds-theme_shade border confirmation">
+                    <h2><b>THANK YOU -- YOUR CASE IS NOW SUBMITTED! </b><br/><br/>
+                        CASE NUMBER FOR YOUR REQUEST IS:  {caseNumberNew}</h2>  <br>
+                        <div class="slds-align_absolute-center">
+                            <div style="text-align:center;">
+                                <lightning-button variant="brand"
+                                        label="Home"
+                                        title="Home"
+                                        onclick={goHome}>
+                                    </lightning-button>
+                                <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                        variant="brand-outline"
+                                        onclick={goToCase}
+                                        label="Go To Case"
+                                        title="Go To Case">
+                                    </lightning-button>
+                            
+                            </div>
+                        </div>                                          
+                </div> 
+            </div>           
+        </div> 
+         <!--END OF STEP FIVE--> 
+    </div> 
+    
+     <!-- MODAL FOR SHOWING THE SESSION MODAL-->
+                <!-- Detail view modal start -->
+                <template if:true={sessionModal}>
+                    <section role="dialog" tabindex="-1"
+                            aria-labelledby="modal-heading-01"
+                            aria-modal="true"
+                            aria-describedby="modal-content-id-1"
+                            class="slds-modal slds-fade-in-open slds-modal_small">
+                    <div class="slds-modal__container">
+                        <!-- modal header start -->
+                        <header class="slds-modal__header">
+                           
+                            <h2 id="modal-heading-13" class="slds-text-heading_medium slds-hyphenate">Are you still there?</h2>
+                            
+                        </header>
+                        <!-- modal body start -->
+                        <div class="slds-theme_default">
+                            <div class="slds-card">
+                                <div class="slds-card__header slds-grid slds-wrap">
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <h2 class="session">Please note your session will end in:</h2>
+                                    </div><br>
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <h2 class="timer">{timeVal}</h2>    
+                                    </div><br>
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <h2 class="session">Note: Upon timeout, you will lose your entered data and your cart will be cleared.</h2>
+                                    </div><br>
+                                </div>
+                            </div>
+                        </div>
+                            
+                        <!-- modal footer start-->
+                        <footer class="slds-modal__footer">
+                            <lightning-button variant="success"
+                            label="Continue"
+                            title="Close"
+                            onclick={resetTimeout}
+                            ></lightning-button>
+                            <!--<lightning-button variant="brand"
+                            label="Close"
+                            title="Close"
+                            onclick={closeDeleteModal}
+                            ></lightning-button>-->
+                        </footer>
+                    </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
+                <!-- Detail view modal end -->
+</template>

@@ -1,0 +1,110 @@
+.THIS #shipmentTable button.slds-button {
+    padding: 0; 
+    border: none; 
+    background: none;
+}
+
+.THIS .orderFieldFix {
+    display: block;
+    margin-bottom: 10px;
+    padding-left: 4px;
+    /* min-height: 23px;
+    max-width: 90%; */
+    /*border-bottom: var(--lwc-borderWidthThin,1px) solid var(--lwc-colorBorder,rgb(212, 212, 212));*/
+}
+
+.THIS .slds-form-element__control{
+    padding-left: 0; 
+    clear: none;
+}
+
+.THIS .pdfbutton {
+    border: none;
+    height: 12px;
+    text-align: right;
+    padding: 0;
+}
+
+.THIS .ordCfmPdfbutton {   
+    text-align: right;
+    float: right;
+    margin-top: 20px;
+}
+
+.THIS .pdf-view-link {
+    text-decoration: none;
+}
+
+@media (min-width: 48em){
+    .THIS .fieldFormatting {
+        float: right;
+        padding-right: 33%;
+        clear: none;
+    }
+}
+
+.THIS .fixTitle .slds-card__header.slds-grid {
+    padding-left: 0%;
+}
+
+.THIS .slds-form-element__label.orderFieldSpacing{
+    /* margin-bottom: var(--lwc-spacingXSmall,0.5rem);
+    padding-bottom: 4px; */
+    padding-left: 4px;
+    padding-top: 10px;
+}
+
+.THIS lightning-output-field.slds-form-element.slds-form-element_horizontal {
+    /*border-bottom: var(--lwc-borderWidthThin,1px) solid var(--lwc-colorBorder,rgb(212, 212, 212));*/
+    min-height: 55px;
+    max-width: 90%;
+}
+.THIS .slds-button.slds-button_reset.slds-accordion__summary-action span.slds-truncate {
+    white-space: break-spaces;
+    /* font-family: monospace;
+    font-size: 18px; */
+}
+
+.THIS .slds-card{
+    border:none;
+}
+
+.THIS .custom-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+@media (max-width: 48em){
+    .THIS .custom-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+    }
+}
+
+.THIS.custom-tabset-for-info-text {
+    position: relative;
+}
+
+.THIS .custom-shipping-info {
+    position: absolute;
+    top: 0;
+    left: 250px;
+    padding: 10px;
+}
+
+.THIS.custom_order_details {
+    margin-left: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    /*border: 1px solid silver;
+    box-shadow: 0px 0px 5px black;*/
+    max-width: 50%;
+    overflow: hidden;
+    padding: 0 10px;
+}

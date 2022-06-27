@@ -1,0 +1,70 @@
+<apex:page standardController="GE_LGT_EM_ComplaintLineItem__c" extensions="GE_LGT_EM_ApproveReject" recordSetVar="ComplaintLineItems">
+    <apex:form >
+        <apex:pageBlock id="test">   
+            
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Approve / Reject" action="{!selRecs}" rendered="{!IF(selProsInss.size<=0,true,false)}" />
+                <apex:commandButton value="Back" action="{!BackToParent}" rendered="{!IF(selProsInss.size<=0,true,false)}"/>
+                <apex:commandButton value="Approve All" action="{!approveAll}" rendered="{!IF(selProsInss.size>0,true,false)}"/>
+                <apex:commandButton value="Reject All" action="{!rejectAll}" rendered="{!IF(selProsInss.size>0,true,false)}"/>                
+                <apex:commandButton value="Cancel" action="{!cancel}" rendered="{!IF(selProsInss.size>0,true,false)}"/>
+            </apex:pageBlockButtons>
+            
+            
+            
+            
+            
+            <apex:pageblockTable value="{!ProsInsts}" var="appRecs" rendered="{!IF(selProsInss.size<=0,true,false)}">
+                <apex:column >      
+                    <apex:facet name="header">
+                        <apex:inputCheckbox id="sdfdsf" >
+                            <apex:actionSupport event="onclick" onsubmit="checkAll(this)" rerender="Selected_PBS"/>
+                            
+                        </apex:inputCheckbox>
+                    </apex:facet>
+                    <apex:inputCheckbox value="{!appRecs.selected}" id="checkedone"> 
+                        <apex:actionSupport event="onclick" rerender="Selected_PBS"/>
+                        
+                    </apex:inputCheckbox>
+                </apex:column>
+                
+                
+                <apex:column headerValue="Complaint Item No" value="{!appRecs.proInstce.Name}"/>
+                <apex:column headerValue="SAP Invoice Number" value="{!appRecs.proInstce.GE_LGT_EM_SAPInvoiceNumber__c}"/>
+                <apex:column headerValue="SAP Material Number" value="{!appRecs.proInstce.GE_LGT_EM_SAP_Material_Number__c}"/>
+                <apex:column headerValue="Status" value="{!appRecs.proInstce.GE_LGT_EM_Status__c}"/>
+                <apex:column headerValue="Approving Function" value="{!appRecs.proInstce.GE_LGT_EM_ApprovingFunction__c}"/>
+                <apex:column headerValue="Category" value="{!appRecs.proInstce.GE_LGT_EM_Category__c}"/>
+                <apex:column headerValue="Approved Quantity" value="{!appRecs.proInstce.GE_LGT_EM_ApprovedQuantity__c}"/>
+                
+                <apex:column headerValue="CreatedDate">
+                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                        <apex:param value="{!appRecs.proInstce.CreatedDate}" /> 
+                    </apex:outputText>  
+                </apex:column>    
+            </apex:pageblockTable>
+            
+            
+            <apex:pageBlockSection columns="1" collapsible="false" title="Approve/Reject Approval Request" rendered="{!IF(selProsInss.size>0,true,false)}" id="test1">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Comments"/>
+                    <apex:inputTextArea style="width:600px;height:100px" value="{!comments}"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        
+    </apex:form>
+    
+    <script>
+    function checkAll(cb)
+    {
+        var inputElem = document.getElementsByTagName("input");
+        for(var i=0; i<inputElem.length; i++)
+        {
+            if(inputElem[i].id.indexOf("checkedone")!=-1)
+                inputElem[i].checked = cb.checked;
+        }
+    }    
+    </script>
+    
+</apex:page>

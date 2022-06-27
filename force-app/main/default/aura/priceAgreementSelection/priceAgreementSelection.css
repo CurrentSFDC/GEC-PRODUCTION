@@ -1,0 +1,9 @@
+.THIS #myPATable button[name='PriceAgreement'] {
+    padding: 0; 
+    border: none; 
+    background: none;
+}
+
+.THIS #myPATable button[name='PriceAgreement']:hover {
+    text-decoration: underline;
+}

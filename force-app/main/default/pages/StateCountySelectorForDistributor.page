@@ -1,0 +1,97 @@
+<apex:page standardController="Distributor__c" extensions="StateCountyControllerforDistributor" >
+    
+    
+    <apex:form style="overflow:auto; height:300px;margin: 0 2px" >
+        <div align="center" draggable="false" >
+            <apex:commandButton value="Add New" action="{!showAddNewBlock}" rerender="NewStateCountyBlock,stateCountyItems,USStates"/>
+        </div>
+        <apex:outputPanel id="stateCountyItems" title="Coverage(Please select all that apply and comment and excution)">
+            <apex:pageBlock rendered="{!showStateCountyItems}" >
+                <apex:pageBlockSection id="state1" rendered="{!showState1}" >
+                    <apex:outputPanel >
+                        <apex:commandLink value="Edit" action="{!editState}" style="margin-right: 5px">     
+                            <apex:param name="stateNumber" assignTo="{!stateNumber}" value="1"/>
+                        </apex:commandLink>      
+                        <apex:commandLink value="Delete" action="{!deleteState}" style="margin-right: 5px">
+                            <apex:param name="stateNumber" assignTo="{!stateNumber}" value="1"/>
+                        </apex:commandLink>
+                        <b>
+                            <apex:outputlabel value="{!$ObjectType.Distributor__c.fields.State_Province_1__c.label}" style="margin-right: 5px" />
+                        </b>
+                        <apex:outputField value="{!agent.State_Province_1__c}" />
+                    </apex:outputPanel>
+                    <apex:outputField value="{!agent.Counties_State_1__c}"/>
+                    
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:outputPanel>
+        <apex:outputPanel id="NewStateCountyBlock">
+            <apex:PageBlock Rendered="{!showAddNew}">
+                
+                <div>
+                    <div style="width:100%;">
+                        <div style="width:35%; float:left;">
+                            <b><apex:outputLabel value="Step 1: Please select State or Province that the Distributor is located in." style="font:bold" /></b>
+                            <br/><br/>
+                            &emsp;&emsp;&emsp;&emsp;<b><apex:outputLabel value="State / Province : "></apex:outputLabel></b>
+                            <apex:selectList id="USStates" value="{!state}" title="States" size="1"  required="true" >
+                                <apex:actionSupport event="onchange" action="{!selectedState}" reRender="showCounties" />
+                                <apex:selectOptions value="{!stateCodes}" />
+                            </apex:selectList>
+                            
+                            <br/><br/>
+                            
+                            
+                            
+                            <br/>      
+                        </div>
+                        <div style="width:35%; float:left; margin-left:10px;">
+                            
+                            <b> <apex:outputLabel value="Step 2: Please select County that the Distributor is located in."/> </b>
+                            <br/> <br/>
+                            <apex:panelGrid columns="3"  id="showCounties" rendered="{!isState}">
+                                <apex:panelGroup >
+                                    <apex:selectList id="sel1" value="{!leftselected}" multiselect="true" style="min-width:100px" size="5">
+                                        <apex:selectOptions value="{!unselectedvalues}" />
+                                    </apex:selectList>
+                                    <br/><br/>
+                                    <apex:outputLabel value="Available Counties"/>
+                                </apex:panelGroup>
+                                <apex:panelGroup >                    
+                                    <apex:commandButton value=">>" action="{!selectclick}" reRender="showCounties"/>
+                                    <br/>
+                                    <apex:commandButton value="<<" action="{!unselectclick}" reRender="showCounties"/>
+                                    <br/><br/>
+                                </apex:panelGroup>
+                                <apex:panelGroup >
+                                    <apex:selectList id="sel2" value="{!rightselected}" multiselect="true" style="min-width:100px" size="5">
+                                        <apex:selectOptions value="{!SelectedValues}" />
+                                    </apex:selectList>
+                                    <br/><br/>
+                                    <apex:outputLabel value="Selected Counties"/>
+                                </apex:panelGroup>
+                            </apex:panelGrid>    
+                        </div>
+                        <div style="width:25%; float:left; margin-left:5px;">
+                            
+                        </div>
+                    </div>
+                    
+                    <div style="width:100%;  margin-top:20px;clear:both;">
+                        <b><apex:outputLabel style="color:RED;" value="Step #3: Click Save and then Submit for approval "/></b>
+                        <apex:outputPanel >                   
+                            <apex:commandButton value=" Save "  style="margin-left:10px" action="{!saveStateAndCounties}" reRender="NewStateCountyBlock,stateCountyItems"/>
+                            <apex:commandButton value="Cancel"  style="margin-left:10px" action="{!hideAddNewBlock}" reRender="stateCountyItems,NewStateCountyBlock" />
+                        </apex:outputPanel>
+                        
+                    </div>
+                </div>
+                
+                <apex:pageBlockSection >               
+                    
+                </apex:pageBlockSection>
+                
+            </apex:pageBlock>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

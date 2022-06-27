@@ -1,0 +1,126 @@
+<apex:page standardController="Opportunity_Support_Request__c" extensions="OSRcontactExtension">
+<apex:pageMessages />
+
+<apex:form >
+<apex:pageBlock >
+  <apex:pageBlockButtons >
+    <apex:commandButton value="TAS20 Save" action="{!saveAll}"/>
+
+  </apex:pageBlockButtons> 
+  <apex:pageBlockSection title=" " columns="4" collapsible="false">
+     <apex:outputtext > xxxxxxxxxxxx </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.GE_Competitor_name__c}" label="GE/Competitor" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.Competitor1__c}" label="Competitor2" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.Competitor2__c}" label="Competitor3" />              
+  </apex:pageblocksection>
+  <apex:pageBlockSection title="IS THERE AN OPPORTUNITY? " columns="4" collapsible="false">
+     <apex:outputtext >1     Customer’s application or project </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.EME_Customer_s_application_or_projec_del__c}"   label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X1_c1_CUSTOMER_S_APPLICATION_OR_PROJECT__c    }"   label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X1_c2_CUSTOMER_S_APPLICATION_OR_PROJECT__c    }"   label="" />    
+     
+     <apex:outputtext >2     Customer’s business profile </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.EME_2Customer_s_business_profile_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X2_c1_CUSTOMER_S_BUSINESS_PROFILE__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X2_c2_CUSTOMER_S_BUSINESS_PROFILE__c}"  label="" />  
+     
+     <apex:outputtext >3     Customer’s financial condition </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.EME_3_CUSTOMER_S_FINANCIAL_CONDITION_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X3_c1_CUSTOMER_S_FINANCIAL_CONDITION__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X3_c2_CUSTOMER_S_FINANCIAL_CONDITION__c}"  label="" />  
+
+     <apex:outputtext >4     Access to funds </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.EME_4_ACCESS_TO_FUNDS_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X4_c1_ACCESS_TO_FUNDS__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X4_c2_ACCESS_TO_FUNDS__c}"  label="" />  
+     
+     <apex:outputtext >5     Compelling event </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.EME_5_COMPELLING_EVENT_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X5_c1_COMPELLING_EVENT__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X5_c2_COMPELLING_EVENT__c}"  label="" />  
+              
+  </apex:pageblocksection>    
+  <apex:pageBlockSection title="CAN WE COMPETE? " columns="4" collapsible="false">
+     <apex:outputtext >6     Formal decision criteria </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X6_FORMAL_DECISION_CRITERIA_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X6_c1_FORMAL_DECISION_CRITERIA__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X6_c2_FORMAL_DECISION_CRITERIA__c}"  label="" />    
+     
+     <apex:outputtext >7     Solution fit </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X7_SOLUTION_FIT_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X7_c1_SOLUTION_FIT__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X7_c2_SOLUTION_FIT__c}"  label="" />  
+     
+     <apex:outputtext >8     Resource requirements </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X8_RESOURCE_REQUIREMENTS_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X8_c1_RESOURCE_REQUIREMENTS__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X8_c2_RESOURCE_REQUIREMENTS__c}"  label="" />  
+
+     <apex:outputtext >9     Current relationship </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X9_CURRENT_RELATIONSHIP_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X9_c1_CURRENT_RELATIONSHIP__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X9_c2_CURRENT_RELATIONSHIP__c}"  label="" />  
+     
+     <apex:outputtext >10    Unique business value </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X10_UNIQUE_BUSINESS_VALUE_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X10_c1_UNIQUE_BUSINESS_VALUE__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X10_c2_UNIQUE_BUSINESS_VALUE__c}"  label="" />  
+              
+  </apex:pageblocksection>  
+  <apex:pageBlockSection title="CAN WE WIN? " columns="4" collapsible="false">
+     <apex:outputtext >11     Inside support </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X11_INSIDE_SUPPORT_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X11_c1_INSIDE_SUPPORT__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X11_c2_INSIDE_SUPPORT__c}"  label="" />  
+     
+     <apex:outputtext >12     Executive credibility </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X12_EXECUTIVE_CREDIBILITY_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X12_c1_EXECUTIVE_CREDIBILITY__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X12_c1_EXECUTIVE_CREDIBILITY__c}"  label="" />    
+     
+     <apex:outputtext >13     Cultural compatibility </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X13_CULTURAL_COMPATIBILITY_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X13_c1_CULTURAL_COMPATIBILITY__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X13_c2_CULTURAL_COMPATIBILITY__c}"  label="" />  
+
+     <apex:outputtext >14     Informal decision criteria </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X14_INFORMAL_DECISION_CRITERIA_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X14_c1_INFORMAL_DECISION_CRITERIA__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X14_c2_INFORMAL_DECISION_CRITERIA__c}"  label="" />  
+     
+     <apex:outputtext >15     Political alignment </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X15_POLITICAL_ALIGNMENT_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X15_c1_POLITICAL_ALIGNMENT__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X15_c2_POLITICAL_ALIGNMENT__c}"  label="" />  
+              
+  </apex:pageblocksection>  
+  <apex:pageBlockSection title="IS IT WORTH WINNING? " columns="4" collapsible="false">
+     <apex:outputtext >16     Short term revenue </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X16_SHORT_TERM_REVENUE_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X16_c1_SHORT_TERM_REVENUE__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X16_c2_SHORT_TERM_REVENUE__c}"  label="" />   
+     
+     <apex:outputtext >17     Future revenue </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X17_FUTURE_REVENUE_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X17_c1_FUTURE_REVENUE__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X17_c2_FUTURE_REVENUE__c}"  label="" />   
+     
+     <apex:outputtext >18     Profitability </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X18_PROFITABILITY_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X18_c1_PROFITABILITY__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X18_c2_PROFITABILITY__c}"  label="" />  
+
+     <apex:outputtext >19     Degree of risk </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X19_DEGREE_OF_RISK_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X19_c1_DEGREE_OF_RISK__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X19_c2_DEGREE_OF_RISK__c}"  label="" />  
+     
+     <apex:outputtext >20     Strategic value </apex:outputtext>  
+     <apex:inputField value="{!Opportunity_Support_Request__c.X20_STRATEGIC_VALUE_del__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X20_c1_STRATEGIC_VALUE__c}"  label="" />
+     <apex:inputField value="{!Opportunity_Support_Request__c.X20_c2_STRATEGIC_VALUE__c}"  label="" />  
+              
+  </apex:pageblocksection>        
+</apex:pageblock>
+</apex:form>
+</apex:page>

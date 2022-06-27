@@ -1,0 +1,19 @@
+<apex:page standardController="GE_LGT_EM_ComplaintLineItem__c" extensions="GE_LGT_EM_CaseDescription" action="{!searchDescription}">
+  <style type="text/css">
+        body {background: #F3F3EC; padding-top: 15px}
+    </style>
+    
+   <apex:form >
+   <apex:pageBlock >
+   <apex:pageBlockSection > </apex:pageBlockSection>
+  
+   <table>
+   <tr>
+   <td>
+   <apex:inputTextarea value="{!searchDescription.GE_LGT_EM_CaseNumber__r.Description}" rows="6" cols="90" disabled="true"/>
+   </td>
+   </tr>
+   </table>
+   </apex:pageBlock>
+   </apex:form>
+</apex:page>

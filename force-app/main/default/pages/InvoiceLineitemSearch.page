@@ -1,0 +1,99 @@
+<apex:page standardController="RMA__c" Extensions="InvoiceLineitemSearch" action="{!onLoadPage_Invoice}" readOnly="false">    
+    
+    <apex:form >  
+            <center><apex:commandButton value="Return To RMA" action="{!CancelRMA}" /> </center>     
+        <apex:pageBlock Title="Order Search">      
+            <apex:pageBlock Title="Search for Order#">
+                            <b> Order Number: </b><input id="Invoice" value="{!searchStr}"/><br/><br/>
+                            <apex:inputhidden id="searchStr" value="{!searchStr}"/>
+                            <apex:actionFunction name="searchStr" action="{!searchInvoice}"/>
+                            <input type="button" value="Search" onclick="search();"/><br/>  <br/>                   
+            </apex:pageBlock>
+        </apex:pageBlock>       
+        <apex:pageBlock title="Invoice Selections">
+             <apex:pageBlockSection columns="1" >
+                <apex:outputPanel id="pnlProds" rendered="{!check}">
+                    <apex:pageBlockTable value="{!InvoiceSearchList}" var="inv" cellpadding="10" width="10" >     
+                          <apex:column headerValue="Select">
+                          <apex:inputfield value="{!inv.GE_LGT_EM_Dispute_Flag__c}" />
+                          </apex:column>
+                          <apex:column value="{!inv.GE_LGT_EM_SAP_Invoice_Number__c}"/>
+                          <apex:column value="{!inv.GE_LGT_EM_Order_Number__c}"/>
+                          <apex:column value="{!inv.GE_LGT_EM_Material__r.GE_LGT_EM_SAP_MaterialNumber__c}"/>
+                          <apex:column value="{!inv.GE_LGT_EM_Invoiced_Quantity__c}"/>
+                          <apex:column value="{!inv.GE_LGT_EM_Invoiced_Price__c}"/> 
+                          <apex:column value="{!inv.GE_LGT_EM_Invoiced_Price_Unit__c}"/>                 
+                    </apex:pageBlockTable>
+                          <apex:commandButton value="Add" action="{!addLines}" disabled="pnlLines" /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="First Page" action="{!firstcmd}" disabled="{! inte == 0}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Previous Page" action="{!prevcmd}" disabled="{! inte == 0}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Next Page" action="{!nextcmd}" disabled="{! OR(inte == integ, integ <0)}"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <apex:commandButton value="Last Page" action="{!lastcmd}" disabled="{! OR(inte == integ,integ <0)}"/>
+                </apex:outputPanel> 
+             </apex:pageBlockSection>     
+        </apex:pageBlock>
+    </apex:form>     
+    <apex:form >
+        <apex:outputpanel id="pnlLines">
+            <apex:pageBlock title="Configure RMA Line Items" >
+                    <apex:pageBlockSection >
+                            <apex:pageBlockTable value="{!RMAlineitemlist}" var="rm">  
+                                  <apex:column headerValue="Select"><apex:inputfield value="{!rm.Is_Active__c}"/></apex:column>
+                                  <apex:column headerValue="SAP Invoice Number"><apex:outputfield value="{!rm.SAP_Invoice_Number__c }"/></apex:column>
+                                  <apex:column headerValue="Order Number"><apex:outputfield value="{!rm.GE_LGT_EM_Order_Number__c}"/></apex:column>
+                                  <apex:column headerValue="Material Number"><apex:outputfield value="{!rm.Material_Number__c}"/></apex:column>
+                                  <apex:column headerValue="Invoiced Qty"> <apex:inputfield value="{!rm.Invoiced_Qty__c}"  /></apex:column>
+                                  <apex:column headerValue="Invoiced Price"> <apex:inputfield value="{!rm.Invoiced_Price__c}"  /></apex:column>
+                                  <apex:column headerValue="Invoiced Unit Price"> <apex:inputfield value="{!rm.Invoiced_Unit_Price__c}" /></apex:column> 
+                                  <apex:column headerValue="Return Qty"> <apex:inputfield value="{!rm.Return_Qty__c}" required="true" /></apex:column>
+                                  <apex:column headerValue="Comments"> <apex:inputfield value="{!rm.Comments__c}" required="true"/></apex:column>
+                                  <apex:column headerValue="Invoiced UM"> <apex:inputfield value="{!rm.Invoiced_UM__c}"  /></apex:column>
+                                  <apex:column headerValue="Invoiced Extended Amount"> <apex:inputfield value="{!rm.Invoiced_Extended_Amount__c}" /></apex:column>
+                                  <apex:column headerValue="Product Code"> <apex:inputfield value="{!rm.Product_Code__c}"  /></apex:column>
+                                  <apex:column headerValue="Return Extended Amount"> <apex:outputfield value="{!rm.Return_Extended_Amount__c}" /></apex:column>
+                            </apex:pageBlockTable>
+                    </apex:pageBlockSection>
+                        <apex:commandButton value="Save" action="{!SaveRMA}" />&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Delete RMA Lineitems" action="{!DeleteRMALineitems}" reRender="pnlLines"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Cancel & Go To RMA" action="{!CancelRMA}" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<apex:commandButton value="Save & Go To RMA" action="{!savegtoRMA}"/>
+                        <apex:outputPanel id="clearMsg">
+                        <apex:pageMessage summary="Records deleted Successfully" severity="info" strength="3"  rendered="{!deletecheckflag}"/>
+                          <apex:pageMessage summary="Records inserted Successfully" severity="info" strength="3"  rendered="{!b}"/>
+                        <apex:pageMessage summary="Records inserted successfully" severity="info" strength="3"  rendered="{!insertcheckflag}"/>
+                        <apex:pagemessages rendered="{!checkflag}"/>
+                        </apex:outputPanel> 
+            </apex:pageBlock>
+        </apex:outputpanel>
+    </apex:form>
+     
+      <script src="//code.jquery.com/jquery-1.8.2.js"></script>
+      <script src="//code.jquery.com/ui/1.9.0/jquery-ui.js"></script>
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css"/>
+      <script type="text/javascript">
+    
+      
+      function test()
+      {
+          alert('Test:'+document.getElementById('Invoice').value);
+      }
+      function f(){
+ 
+      document.getElementById('j_id0:j_id1:j_id2:j_id3:searchStr').value = document.getElementById('Invoice').value;
+      
+       
+      }
+      var j$ = jQuery.noConflict();
+      var productsavailable = {!JSONString};
+      j$(document).ready(function(){
+            j$("#Invoice").autocomplete({
+                source : productsavailable
+            });
+        });
+   
+    function search() 
+    {
+        document.getElementById('j_id0:j_id1:j_id5:j_id6:searchStr').value = document.getElementById('Invoice').value;
+        searchStr();
+    }
+
+    </script>
+    
+</apex:page>

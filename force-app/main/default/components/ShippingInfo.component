@@ -1,0 +1,536 @@
+<apex:component id="ShippingInfo" controller="CheckoutActions">
+    <style>
+        #shipNotesModalBody {
+            max-width: 100%;
+        }
+
+        #shipNotesLeftCol {
+            text-align: right;
+            padding-right: 10%;
+        }
+
+        #shipNotesLeftCol input {
+            margin-bottom: 20px;
+        }
+        .shipForm {
+            margin: 0 !important;
+        }
+        .ship-req-date {
+			padding: 0 15px 0 0;
+		}
+
+		@media (max-width: 767px) {
+			.ship-contact-no {
+				padding-left: 0;
+			}
+		}
+    </style>
+    <script id="Shipping-Desktop" type="text/template">
+		<div class="panel panel-default cc_panel cc_checkout_user_info">
+			<div class="panel-heading cc_heading">
+				<h3 class="panel-title cc_title">{{pageLabelMap 'CheckOut_ShipmentInformation'}}</h3>
+			</div>
+			<div class="panel-body cc_body">
+				<form id="shipForm" class="shipForm cc_ship_form">
+					<input type="text" id="shippingNotesConcat" name="shippingNotesConcat" style="display:none;" />
+
+					<div class="messagingSection-Error" style="display: none"></div>
+					<div class="messagingSection-Info" style="display: none"></div>
+					<div class="messagingSection-Warning" style="display: none"></div>
+					<div class="shipping_payment cc_shipping_payment">
+						<p class="coso_ship_guide_text cc_ship_guide_text">
+							{{pageLabelMap 'CheckOut_ShippingGuidingText'}}
+						</p>
+						{{#ifDisplay 'SO.DsplShipOptions'}}
+						{{#if this.shippingMethods}}
+						<div class="coso_ship_method cc_coso_ship_method">
+							<div class="form-group">
+								<label for="shippingMethod" class="cc_shipping_method_label">{{pageLabelMap 'CheckOut_ShippingMethod'}}</label>
+								<select id="shippingMethod" class="form-control shippingOptions cc_shipping_method" name="shippingMethod">
+									{{#each this.shippingMethods}}
+									<option value="{{this.uniqueId}}" {{#ifEquals ../shippingMethod this.uniqueId}} selected {{/ifEquals}}>
+									{{this.provider}} - {{pageLabelMap this.serviceName}}
+									</option>
+									{{/each}}
+								</select>
+							</div>
+						</div>
+						<div class="coso_est_shipping form-group cc_coso_est_shipping">
+							<label for="estShipping" class="cc_est_shipping_label">{{pageLabelMap 'CheckOut_EstimatedShipping'}}</label>
+							<span id="estShipping" class="shippingCost cc_est_shipping"></span>
+						</div>
+						{{/if}}
+						{{/ifDisplay}}
+						<div class="checkbox">
+							{{#ifDisplay 'SO.DsplShipComplete'}}
+							<div class="coso_ship_complete cc_coso_ship_complete form-group">
+								<div class="checkbox">
+									<label for="estShipping" class="cc_est_shipping_label">
+										<!-- <input id="estShipping1" type="checkbox" name="shippingBlockZ3" class="boxes cc_ship_complete"{{#ifEquals this.shippingBlock 'Z3'}} checked {{/ifEquals}} onclick="clearCheckbox(this);" /> -->
+                                        <input id="estShipping1" type="checkbox" name="shippingBlockZ3" class="boxes cc_ship_complete"{{#if this.shipComplete}} checked="checked" {{/if}} onclick="clearCheckbox(this);" />
+										{{pageLabelMap 'CheckOut_ShipComplete'}}
+									</label>
+								</div>
+							</div>
+							{{/ifDisplay}}
+							{{log this}}
+							<div class="coso_ship_complete cc_coso_ship_complete form-group">
+								<div class="checkbox">
+									<label for="partialShip" class="cc_est_shipping_label">
+										<!-- <input id="partialShip" type="checkbox" name="shippingBlockZ5" class="boxes cc_ship_complete" {{#ifEquals this.shippingBlock 'Z5'}} checked {{/ifEquals}} onclick="clearCheckbox(this);" /> -->
+                                        <input id="partialShip" type="checkbox" name="shippingBlockZ5" class="boxes cc_ship_complete" {{#if this.partialShip}} checked="checked" {{/if}} onclick="clearCheckbox(this);" />
+										{{pageLabelMap 'CheckOut_PartialShip'}}
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="container">
+							<div class="row">
+								<!--
+                                <div class="coso_ship_notes form-group cc_coso_ship_notes col-sm-4" style="padding-left:0;">
+                                    <label for="carrierAccount" class="cc_shipnotes_label" >{{pageLabelMap 'CheckOut_CarrierAccount'}}</label>
+                                    <input type="text" id="carrierAccount" name="carrierAccount" class="shipnotes form-control cc_shipnotes" value="{{this.carrierAccount}}" />
+                                </div>
+                                -->
+								<div class="coso_ship_notes form-group cc_coso_ship_notes col-sm-4" style="padding-left:0;">
+									<label for="carrierAccount" class="cc_shipnotes_label">{{pageLabelMap 'CheckOut_DeliveryContactName'}}<span style="color:red;"><b>*</b></span></label>
+									<input type="text" id="deliveryContactName" name="deliveryContactName" class="shipnotes form-control cc_shipnotes" value="{{this.deliveryContactName}}" onchange="checkProceedDisabled()"/>
+								</div>
+								<div class="coso_ship_notes form-group cc_coso_ship_notes ship-contact-no col-sm-4">
+									<label for="carrierAccount" class="cc_shipnotes_label">{{pageLabelMap 'CheckOut_DeliveryContactPhone'}}<span style="color:red;"><b>*</b></span></label>
+									<input type="text" id="deliveryContactPhone" name="deliveryContactPhone" class="shipnotes form-control cc_shipnotes" value="{{this.deliveryContactPhone}}" onchange="checkProceedDisabled()"/>
+								</div>
+							</div>
+						</div>
+						<div class="container">
+							<div class="row">
+								<div class="coso_ship_notes form-group cc_coso_ship_notes ship-req-date col-sm-4">
+                                    <label for="requestedDeliveryDate" class="cc_shipnotes_label">{{pageLabelMap 'CheckOut_RequestedDeliveryDate'}}</label>
+                                    <input type="date" id="requestedDeliveryDate" name="requestedDeliveryDate" class="shipnotes form-control cc_shipnotes" value="{{formatDate this.requestedDeliveryDate}}" onclick="setMinDate()" />
+						        </div>
+                            </div>
+                        </div>        
+
+						<div id="location-selector">
+							{{pageLabelMap 'CheckOut_DeliveryBlock'}}
+							<div class="checkbox">
+								<label>
+									<!-- <input type="checkbox" id="deliveryBlockZ3" name="deliveryBlockZ3" data-method="shipNotBefore" onchange="clearCheckbox(this);"> -->
+                                    <input type="checkbox" id="deliveryBlockZ3" name="deliveryBlockZ3" data-method="shipNotBefore" {{#if this.shipNotBeforeDate}} checked="checked" {{/if}} onchange="clearCheckbox(this);">
+									{{pageLabelMap 'ShipNotBeforeDate'}}
+								</label>
+							</div>
+							<!--
+							<div class="checkbox">
+								<label>
+									<input type="checkbox" id="deliveryBlockZ5" name="deliveryBlockZ5" data-method="shipConsolidation" onchange="clearCheckbox(this);">
+									{{pageLabelMap 'ShipmentConsolidation'}}
+								</label>
+							</div>
+							-->
+						</div>
+
+						{{#ifDisplay 'SO.ShowReqDate'}}
+						<p class="deliveryDateMessages cc_delivery_date_messages" id="deliveryDateMessages"></p>
+						{{#unless this.requestedDateData.ApiError}}
+						<div class="coso_ship_delivery_date cc_coso_ship_delivery_date from-group">
+							<label for="requestedDateStr" class="cc_requested_date_label">{{pageLabelMap 'Checkout_RequestedDeliveryDt'}}</label>
+							<div class="input-group date">
+								<input id="requestedDateStr" name="requestedDateStr" value="{{this.requestedDateStr}}" class="requestedDate cc_requested_date form-control" readonly="true">
+								<div class="input-group-addon">
+									<span class="glyphicon glyphicon-th"></span>
+								</div>
+							</div>
+						</div>
+						{{/unless}}
+						{{/ifDisplay}}
+						<!-- <p class="cc_shipping_conditions">{{pageLabelMap 'Checkout_Shipping_Conditions' }}</p> -->
+
+						<!-- {{#if this.terms}}
+                         <h4 class="coso_footer_tc cc_coso_footer_tc">{{pageLabelMap 'Footer_TermsAndConditions'}}</h4>
+                         <div class="shipping_payment cc_shipping_payment">
+                          {{#each this.terms}}
+                           <div class="checkbox shiping_payment_term">
+                            <label for="terms cc_ship_terms_label">
+                             <input id="terms" type="checkbox" name="#" class="boxes terms cc_ship_terms">
+                             <span class="cc_terms_title">{{this.title}}&#58;&#160;</span>
+                             <p class="cc_terms_description">{{unescape this.description}}</p>
+                            </label>
+                           </div>
+                          {{/each}}
+                         </div>
+                        {{/if}} -->
+				</form>
+
+				{{#ifDisplay 'SO.DsplShipNotes'}}
+				<!-- <div class="coso_ship_notes form-group cc_coso_ship_notes">
+                </div> -->
+                <h4>{{pageLabelMap 'CheckOut_ShippingNotes'}}</h4>
+                <p>Fill out shipping notes?<span style="color:red;"><b>*</b></span></p>
+                <input type="radio" id="shippingNoteYes" name="shippingNoteRadio" value="yes" onclick="showShippingNoteModal()">
+                <label for=shippingNoteYes>Yes</label><br>
+                <input type="radio" id="shippingNoteNo" name="shippingNoteRadio" value="no" onclick="setNoShippingNotesChecked()">
+                <label for=shippingNoteNo>No</label><br>
+				<!-- <a href="#shipNotes" id="shipNotesLink cc_comments_link" data-toggle="modal" style="font-size:14px;" onclick=>{{pageLabelMap 'CheckOut_ShippingNotes'}}</a>-->
+                <div id="shipNotes" class="modal fade cc_modal cc_cart_comments_modal in" tabindex="-1" role="dialog" aria-labelledby="TypeMarks" style="display: none;">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content cc_modal_content">
+							<div class="modal-header cc_modal_header">
+								<button type="button" class="close cc_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+								<h4 class="modal-title cc_modal_title" id="shipNotes">
+									{{pageLabelMap 'CheckOut_ShippingNotes'}}
+								</h4>
+							</div>
+							<div id="shipNotesModalBody" class="modal-body cc_modal_body container form-group">
+								<form id="shipNotesModalForm" class="cc_comments_form">
+                                    <div class="alert alert-danger shipping-notes-err"><b>FedEx #</b> is mandatory.</div>
+									<div class="row">
+										<div id="shipNotesLeftCol" class="col-sm-6">
+											<!-- <label for="willCall" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_WillCall'}}</label>
+											<input type="checkbox" id="willCall" name="willCall" value="Will Call"><br> -->
+											<label for="doNotDoubleStack" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Donotdoublestackpallets'}}</label>
+											<input type="checkbox" id="doNotDoubleStack" name="doNotDoubleStack" value="Do not double stack pallets" {{#if this.shippingNotes.doNotDoubleStack}} checked {{/if}}><br>
+											<label for="doNotShipDoubles" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Donotshipdoubles'}}</label>
+											<input type="checkbox" id="doNotShipDoubles" name="doNotShipDoubles" value="Do not ship doubles" {{#if this.shippingNotes.doNotShipDoubles}} checked {{/if}}><br>
+											<label for="doNotSlipSheet" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Donotslipsheetfluorlamps'}}</label>
+											<input type="checkbox" id="doNotSlipSheet" name="doNotSlipSheet" value="Do not slip sheet fluor lamps" {{#if this.shippingNotes.doNotSlipSheet}} checked {{/if}}><br>
+											<label for="userHampers" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_UseHampers'}}</label>
+											<input type="checkbox" id="userHampers" name="userHampers" value="Use Hampers" {{#if this.shippingNotes.userHampers}} checked {{/if}}><br>
+											<label for="useCornerGuards" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_UseCornerGuards'}}</label>
+											<input type="checkbox" id="useCornerGuards" name="useCornerGuards" value="Use Corner Guards" {{#if this.shippingNotes.useCornerGuards}} checked {{/if}}><br>
+											<label for="mixedSkus" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_MixedSKUs'}}</label>
+											<input type="checkbox" id="mixedSkus" name="mixedSkus" value="Mixed SKUs?" {{#if this.shippingNotes.mixedSkus}} checked {{/if}}><br>
+											<label for="liftGate" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Liftgate'}}</label>
+											<input type="checkbox" id="liftGate" name="liftGate" value="Lift gate" {{#if this.shippingNotes.liftGate}} checked {{/if}}><br>
+											<label for="palletJack" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Palletjack'}}</label>
+											<input type="checkbox" id="palletJack" name="palletJack" value="Pallet jack" {{#if this.shippingNotes.palletJack}} checked {{/if}}><br>
+											<label for="dockHeightTruck" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Dockheighttruck'}}</label>
+											<input type="checkbox" id="dockHeightTruck" name="dockHeightTruck" value="Dock height truck" {{#if this.shippingNotes.dockHeightTruck}} checked {{/if}}><br>
+											<label for="makeAppointment" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Makeappointment'}}</label>
+											<input type="checkbox" id="makeAppointment" name="makeAppointment" value="Make appointment" {{#if this.shippingNotes.makeAppointment}} checked {{/if}}><br>
+											<label for="signatureOnPOD" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_SignatureonPOD'}}</label>
+											<input type="checkbox" id="signatureOnPOD" name="signatureOnPOD" value="Signature on POD" {{#if this.shippingNotes.signatureOnPOD}} checked {{/if}}><br>
+											<!-- <label for="useScanGun" class="cc_shipnotes_label" value="">{{pageLabelMap 'shipNotes_Usescangun'}}</label>
+                                            <input type="checkbox" id="useScanGun" name="useScanGun" value="Use scan gun"><br> -->
+											<label for="includePackingList" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_IncludePackingList'}}</label>
+											<input type="checkbox" id="includePackingList" name="includePackingList" value="Include Packing List" {{#if this.shippingNotes.includePackingList}} checked {{/if}}><br>
+											<!-- <label for="edisonElite" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_EdisonEliteCustomer'}}</label>
+                                            <input type="checkbox" id="edisonElite" name="edisonElite" value="Edison Elite Customer"><br> -->
+											<label for="receivingHoursFrom" data-id="Receiving Hours" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_ReceivingHours'}}</label>
+											<input type="time" id="receivingHoursFrom" data-id="Receiving Hours" name="receivingHoursFrom" value="{{this.shippingNotes.receivingHoursFrom}}"><br>
+											<input type="time" id="receivingHoursTo" name="receivingHoursTo" value="{{this.shippingNotes.receivingHoursTo}}"><br>
+											<label for="deliverOnText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_DeliverOn'}}</label>
+											<select name="deliverOnText" data-id="Deliver On" id="deliverOn">
+												<option disabled selected value> -- </option>
+												<option value="monday" {{#ifEquals 'monday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Monday</option>
+												<option value="tuesday" {{#ifEquals 'tuesday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Tuesday</option>
+												<option value="wednesday" {{#ifEquals 'wednesday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Wednesday</option>
+												<option value="thursday" {{#ifEquals 'thursday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Thursday</option>
+												<option value="friday" {{#ifEquals 'friday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Friday</option>
+											</select><br>
+										</div>
+										<div class="col-sm-6">
+											<label for="palletHeightText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Palletheightrestriction'}}</label>
+											<input type="text" data-id="Pallet Height" id="palletHeightText" name="palletHeightText" class="shipnotes form-control cc_shipnotes" maxlength="10" value="{{this.shippingNotes.palletHeightText}}"/><br>
+											<label for="useOverwrapText"  class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_UseOverwrapon'}}</label>
+											<input type="text" id="useOverwrapText" data-id="Use Overwrap on" name="useOverwrapText" class="shipnotes form-control cc_shipnotes" maxlength="10" value="{{this.shippingNotes.useOverwrapText}}"/><br>
+											<label for="maxLayersHighText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Maxlayershigh'}}</label>
+											<input type="text" data-id="Max layers High" id="maxLayersHighText" name="maxLayersHighText" class="shipnotes form-control cc_shipnotes" maxlength="10" value="{{this.shippingNotes.maxLayersHighText}}"/><br>
+											<label for="maxTruckHeightText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Maxtruckheight'}}</label>
+											<input type="text" data-id="Max truck height" id="maxTruckHeightText" name="maxTruckHeightText" class="shipnotes form-control cc_shipnotes" maxlength="10" value="{{this.shippingNotes.maxTruckHeightText}}"/><br>
+											<label for="maxTruckLengthText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Maxtrucklength'}}</label>
+											<input type="text" data-id="Max truck length" id="maxTruckLengthText" name="maxTruckLengthText" class="shipnotes form-control cc_shipnotes" maxlength="10" value="{{this.shippingNotes.maxTruckLengthText}}"/><br>
+											<label for="callAheadText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Callahead'}}</label>
+											<input type="text" data-id="Call Ahead" id="callAheadText" name="callAheadText" class="shipnotes form-control cc_shipnotes" maxlength="20" value="{{this.shippingNotes.callAheadText}}"/><br>
+											<label for="emailAheadText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Emailaheadaddress'}}</label>
+											<input type="text" data-id="Email ahead address" id="emailAheadText" name="emailAheadText" class="shipnotes form-control cc_shipnotes" maxlength="50" value="{{this.shippingNotes.emailAheadText}}"/><br>
+                                            {{#if this.showDayAirBoxes}}
+                                                <div class="form-group">
+                                                    <label for="nextDayAir" class="cc_shipnotes_label">Next Day Air</label>
+                                                    <input type="checkbox" class="airShipChkbox" id="nextDayAir" name="nextDayAir" value="Next Day Air" {{#if this.shippingNotes.nextDayAir}} checked {{/if}}>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="secondDayAir" class="cc_shipnotes_label">2nd Day Air</label>
+                                                    <input type="checkbox" class="airShipChkbox" id="secondDayAir" name="secondDayAir" value="2nd Day Air" {{#if this.shippingNotes.secondDayAir}} checked {{/if}}>
+                                                </div>
+                                            {{/if}}
+                                            <label for="fedexText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_FedEx'}}</label>
+											<input type="text" data-id="FedEx #" id="fedexText" name="fedexText" class="shipnotes form-control cc_shipnotes" maxlength="20" value="{{this.shippingNotes.fedexText}}"/><br>
+											<label for="otherText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Other'}}</label>
+											<textarea id="otherText" data-id="Other" name="otherText" rows="6" maxlength="300" class="shipnotes form-control cc_shipnotes" onkeyup="document.getElementById('otherCharacterCounter').innerHTML = (this.maxLength - this.value.length) + '/' + this.maxLength +' characters remaining'">{{this.shippingNotes.otherText}}</textarea>
+											<label for="otherText" class="cc_shipnotes_label" id="otherCharacterCounter"></label>
+										</div>
+									</div>
+
+									<!-- <textarea placeholder="Type Marks" name="typeMarks" class="commentField form-control cc_comment_field" maxlength="255" data-id="" value=""></textarea> -->
+									<!-- <input type="text" name="typeMarks" class="cc_value" data-id="{{this.sfid}}" value="{{this.typeMarks}}"> -->
+								</form>
+							</div>
+							<div class="modal-footer cc_modal_footer">
+								<input type="button" class="saveShipNotes btn btn-default btn-sm cc_save_comment" value="Save">
+							</div>
+						</div>
+					</div>
+				</div>
+				{{/ifDisplay}}
+			</div>
+
+			<p class="link_button coso_proceed shippingDetails cc_shipping_details">
+				<input class="btn btn-default btn-sm processBack cc_process_back" type="button" value="{{pageLabelMap 'Back'}}" alt="{{pageLabelMap 'Back'}}" />
+				<input class="btn btn-default btn-sm proceed processShippingInfo disabled cc_proceed" type="button" disabled value="{{pageLabelMap 'CheckOut_AcceptAndProceed'}}" alt="{{pageLabelMap 'CheckOut_AcceptAndProceed'}}" />
+			</p>
+
+		</div>
+		</div>
+	</script>
+    <script>
+        //W-000493
+        //"5. Requested delivery date allows user to enter dates before today. "
+        //DONE
+        function setMinDate() {
+            var today = new Date();
+            var year = today.getFullYear();
+            var month = '' + (today.getMonth() + 1);
+            var day = '' + (today.getDate());
+            if (month.length < 2) {
+                month = '0' + month;
+            }
+            if (day.length < 2) {
+                day = '0' + day;
+            }
+            document.getElementById("requestedDeliveryDate").min = [year, month, day].join('-');
+            var valueOfField = document.getElementById("requestedDeliveryDate").min;
+        }
+		Handlebars.registerHelper("formatDate", function formatDate(dateTime) {
+            let date = dateTime == null ? new Date() : new Date(dateTime);
+            return date.toISOString().split('T')[0];
+        });
+        Handlebars.registerHelper("formatDateForDisplay", function formatDate(dateTime) {
+            let date = dateTime == null ? new Date() : new Date(dateTime);
+            return (date.getUTCMonth() + 1) + '/' + date.getUTCDate() + '/' + date.getUTCFullYear();
+        });
+        /*Handlebars.registerHelper("formatDate", function (datetime) {
+            if (datetime == undefined) {
+                datetime = new Date();
+                //datetime.setDate(datetime.getDate() - 1);
+                datetime.setDate(datetime.getDate());//Removed -1 as it was not giving correct date
+            }
+            var d = new Date(datetime),
+                month = '' + (d.getMonth() + 1),
+                day = '' + (d.getDate()),
+                year = d.getFullYear();
+            if (month.length < 2)
+                month = '0' + month;
+            if (day.length < 2)
+                day = '0' + day;
+
+            return [year, month, day].join('-');
+        });*/
+        function clearCheckbox(thisSel) {
+            if (thisSel.id == "deliveryBlockZ5") {
+                $('#deliveryBlockZ3').prop('checked', false);
+            }
+            if (thisSel.id == "deliveryBlockZ3") {
+                $('#deliveryBlockZ5').prop('checked', false);
+            }
+            if (thisSel.id == "partialShip") {
+                $('#estShipping1').prop('checked', false);
+            }
+            if (thisSel.id == "estShipping1") {
+                $('#partialShip').prop('checked', false);
+            }
+        }
+        CCRZ.Checkout = _.extend(CCRZ.Checkout || {}, {
+            shipping: {
+                register: function (registrar) {
+                    registrar.registerViewNew(CCRZ.pagevars.pageLabels['CheckOut_ShippingStep'], new CCRZ.views.ShippingView(), 'images/shipping_payment_header.png');
+                }
+            }
+        });
+        jQuery(function ($) {
+            'use strict';
+            var z002add;
+
+            CCRZ.pubSub.on('view:cartCheckoutView:refresh', (myModel) => {
+                var orderType = CCRZ.cartCheckoutModel.attributes.orderType;
+                if (myModel.currStep === 2) {
+                    $("#shipNotes").on("hidden.bs.modal", function () {
+                        console.log('modal hidden');
+                        clearRadioButtons();
+                    });
+                    checkProceedDisabled();
+                }
+
+            });
+            CCRZ.pubSub.once('view:cartCheckoutView:refresh', () => {
+                CCRZ.views.ShippingView.prototype.processShippingInfo = function () {
+                    var formData = form2js('shipForm', '.', false, function (node) { }, false, true);
+                    var isNoClicked = $('#shippingNoteNo').is(':checked');
+                    var pageMessages;
+                    var errorMessage = '';
+                	var ispartialShipClicked = $('#partialShip').is(':checked');
+					console.log("ispartialShipClicked",ispartialShipClicked );
+                    var isestShippingClicked = $('#estShipping1').is(':checked');
+					console.log("isestShippingClicked",isestShippingClicked );
+
+                var ShipNotBeforeDate = $('#deliveryBlockZ3').is(':checked');
+					console.log("ShipNotBeforeDate",ShipNotBeforeDate );
+
+                    if (formData.deliveryContactName.length == 0 && formData.deliveryContactPhone.length == 0) {
+                        errorMessage += 'Delivery Contact Name and Phone Must Be Populated.';
+                    }
+                    else if (formData.deliveryContactName.length == 0) {
+                        errorMessage += 'Delivery Contact Name Must Be Populated.';
+                    }
+                    else if (formData.deliveryContactPhone.length == 0) {
+                        errorMessage += 'Delivery Contact Phone Must Be Populated.';
+                    }
+                    if (!isNoClicked && (!formData.shippingNotesConcat || formData.shippingNotesConcat == 'No Special Shipping Instructions')) {
+                        if (errorMessage) {
+                            errorMessage += '<br>';
+                        }
+                        errorMessage += 'You must either fill out the shipping notes, or waive by clicking no under Shipping Notes.';
+                    }
+                    if (errorMessage) {
+                        CCRZ.pubSub.trigger("pageMessage", CCRZ.createPageMessage('ERROR', "messagingSection-Error", errorMessage));
+                    }
+                    else if (!errorMessage && isNoClicked) {
+                        $('#shippingNotesConcat').val('No Special Shipping Instructions');
+                    }
+
+                    if (this.validateInfo(formData) && formData.deliveryContactName.length > 0 && formData.deliveryContactPhone.length > 0 && (formData.shippingNotesConcat || isNoClicked)) {
+                        let rqDate = formData.requestedDeliveryDate != null ? new Date(formData.requestedDeliveryDate) : '';
+                        CCRZ.cartCheckoutModel.attributes.requestedDeliveryDateStr = rqDate == '' ? '' : (rqDate.getUTCMonth() + 1) + '/' + rqDate.getUTCDate() + '/' + rqDate.getUTCFullYear();
+                        var deliveryBlock = '';
+                        if ($('.deliveryBlockZ3').prop('checked') == true) {
+                            deliveryBlock = 'Z3';
+                        } else if ($('.deliveryBlockZ5').prop('checked') == true) {
+                            deliveryBlock = 'Z5';
+                        }
+                        $("#isAgeSelected").is(':checked')
+                console.log("partialShip",formData.partialShip);
+                        var remoteCall = _.extend(CCRZ.RemoteInvocation, { className: 'CheckoutActions' });
+                        remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'updateShipFields', ispartialShipClicked, formData.carrierAccount, deliveryBlock, formData.requestedDeliveryDate, formData.shippingInst, formData.deliveryContactName, formData.deliveryContactPhone, formData.shippingNotesConcat, ShipNotBeforeDate, isestShippingClicked,  (res, err) => {
+                            if (res.success) {
+                                CCRZ.cartCheckoutView.slideRight();
+                            } else {
+                                console.log('failed');
+                            }
+                        }, {
+                            nmsp: false, escape: false
+                        });
+                    }
+                };
+
+
+                CCRZ.views.ShippingView.prototype.events['click .saveShipNotes'] = 'saveShipNotes';
+                CCRZ.views.ShippingView.prototype.events['click .airShipChkbox'] = 'checkAirShip';
+                CCRZ.views.ShippingView.prototype.saveShipNotes = function (event) {
+					CCRZ.cartCheckoutModel.attributes.shippingNotes = {};
+                    $(".shipping-notes-err").hide();
+                    if (CCRZ.cartCheckoutModel.attributes.shippingType !== "Will Call") {
+                        if (($('#nextDayAir').is(':checked') || $('#secondDayAir').is(':checked')) &&
+                            $('#fedexText').val() == '') {
+                            $(".shipping-notes-err").show();
+                            $('#shipNotesModalBody')[0].scrollIntoView();
+                            return;
+                        }
+                    }
+					let shipNotesFormElements = document.getElementById('shipNotesModalForm').elements;
+					for(let element of shipNotesFormElements){
+						console.log(element);
+						if (element.type === 'checkbox') {
+							CCRZ.cartCheckoutModel.attributes.shippingNotes[element.name] = element.checked;
+						}
+						else{
+							CCRZ.cartCheckoutModel.attributes.shippingNotes[element.name] = element.value;
+						}
+					}
+					console.log(`CCRZ.cartCheckoutModel.attributes.shippingNotes`,CCRZ.cartCheckoutModel.attributes.shippingNotes);
+                    var formData = form2js('shipNotesModalForm', '.', false, function (node) { }, false, true);
+                    var shipNotesStr = '';
+                    for (const shipField in formData) {
+
+                        if (formData[shipField]) {
+                            if (shipField.includes('deliverOnText')) {
+                                shipNotesStr += $('select[name="' + shipField + '"]').attr('data-id') + ': ';
+                            }
+                            else if (shipField.includes('receivingHoursFrom')) {
+                                shipNotesStr += $('input[name="' + shipField + '"]').attr('data-id') + ': ' + formData[shipField] + '-' + formData['receivingHoursTo'] + ', ';
+                                continue;
+                            }
+                            else if (shipField.includes('receivingHoursTo')) continue;
+                            else if (shipField.includes('Text')) {
+                                if ($('input[name="' + shipField + '"]').attr('data-id') == undefined) {
+                                    shipNotesStr += $('textarea[name="' + shipField + '"]').attr('data-id') + ': ';
+                                } else {
+                                    shipNotesStr += $('input[name="' + shipField + '"]').attr('data-id') + ': ';
+                                }
+                            }
+
+                            shipNotesStr += formData[shipField] + ', ';
+                        }
+                    }
+                    if (!shipNotesStr) {
+                        clearRadioButtons();
+                    }
+                    else {
+                        $('#shippingNotesConcat').val(shipNotesStr);
+                    }
+                    $("#shipNotes").modal("hide");
+                    checkProceedDisabled();
+                }
+
+                CCRZ.views.ShippingView.prototype.checkAirShip = function(event) {
+                    if (event.target.name == "nextDayAir") {
+                        $("#secondDayAir").prop('checked', false);
+                    } else {
+                        $("#nextDayAir").prop('checked', false);
+                    }
+                }
+
+
+            });
+        });
+
+        function showShippingNoteModal() {
+            $('input[name="shippingNoteRadio"]').change(function () {
+                if ($(this).is(':checked') && $(this).val() == 'yes') {
+                    $('#shipNotes').modal('show');
+                    document.getElementById('otherCharacterCounter').innerHTML = (document.getElementById('otherText').maxLength - document.getElementById('otherText').value.length) + '/' + document.getElementById('otherText').maxLength +' characters remaining'
+                }
+            });
+        }
+
+        function clearRadioButtons() {
+            if ($('#shippingNoteYes').is(':checked')) {
+                var formData = form2js('shipForm', '.', false, function (node) { }, false, true);
+                if (!formData.shippingNotesConcat || formData.shippingNotesConcat == 'No Special Shipping Instructions') {
+                    $('#shippingNoteYes').prop("checked", false);
+                    if (formData.shippingNotesConcat == 'No Special Shipping Instructions') {
+                        $('#shippingNoteNo').prop("checked", true);
+                    }
+                }
+            }
+        }
+
+        function setNoShippingNotesChecked() {
+            $('#shippingNotesConcat').val('No Special Shipping Instructions');
+            checkProceedDisabled();
+			CCRZ.cartCheckoutModel.attributes.shippingNotes = {};
+        }
+
+        function checkProceedDisabled() {
+            if ($('form.shipForm').length == 1) {
+                var formData = form2js('shipForm', '.', false, function (node) { }, false, true);
+                var isFormFilled = $('#shippingNoteNo').is(':checked') || (formData.shippingNotesConcat && formData.shippingNotesConcat != 'No Special Shipping Instructions');
+                if (formData.deliveryContactName.length == 0 || formData.deliveryContactPhone.length == 0 || !isFormFilled) {
+                    $('[type=button].proceed').prop("disabled", true).addClass('disabled');
+                }
+                else {
+                    $('[type=button].proceed').prop("disabled", false).removeClass('disabled');
+                }
+            }
+        }
+    </script>
+</apex:component>

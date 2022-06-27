@@ -1,0 +1,419 @@
+<template>
+
+    <div class="slds-box">
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col slds-size_8-of-8">
+                    <lightning-button variant="brand" label="Add Product" onclick={addProduct}></lightning-button>
+                    
+                        <div class="slds-box slds-theme_shade border">
+                        
+                        <template if:true={isLoading}>
+                            <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                        </template>
+
+                    <template if:false={isLoading}>
+                        <div if:true={showReturnItems}>
+                        <template if:true={returnLines}>
+                        <lightning-datatable wrap-text-max-lines="2" data={returnLines} columns={columns} key-field="Id" onrowaction={handleRowAction} suppress-bottom-bar="true" hide-checkbox-column>
+                        </lightning-datatable>
+                        </template>
+                        </div>
+                    </template>
+                        
+
+                    
+                    </div>
+            </div>
+        </div>
+    </div>
+
+ <!--ADD PRODUCT MANUALLY MODAL-->
+        <!-- MODAL FOR ADDING PRODUCTS -->
+        <template if:true={addProductModal}>
+            <section role="dialog" tabindex="-1"
+                    aria-labelledby="modal-heading-01"
+                    aria-modal="true"
+                    aria-describedby="modal-content-id-1"
+                    class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- modal header -->
+                <header class="slds-modal__header">
+                    <!--<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeAddModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button>-->
+                    <h2 id="modal-heading-04" class="slds-text-heading_medium slds-hyphenate">Add to Warranty Claim</h2>
+                    <p class="error">{errorMessage}</p>
+                </header>
+                <!-- modal body -->
+               
+                
+                <!-- showing record edit form -->
+                <lightning-messages></lightning-messages>
+                <div class="slds-modal__content slds-p-around_medium">
+                        <div class="slds-box"> <!-- BOX 1 UPPER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    <h4><lightning-helptext content="Content for Text"></lightning-helptext></h4>
+                                    <lightning-input
+                                        label="NoCAT Input"
+                                        type="toggle"
+                                        message-toggle-active = ''
+                                        message-toggle-inactive = ''
+                                        onchange={handleNoCatChecked}
+                                        class="nci"
+                                        field-level-help="Enter required information"
+                                    ></lightning-input>
+                                    <div if:false={noCatInput}>
+                                        <c-material-lookup-l-w-c object-name="GE_LGT_EM_MaterialMaster__c" field-name="GE_LGT_EM_MaterialDescription__c" label="CAT#" placeholder="Search..." icon-name="standard:products" onselected={handleMaterialSelected} class="mat"></c-material-lookup-l-w-c> 
+                                        <!--<c-lookup-l-w-c unique-key="Id" obj-name="GE_LGT_EM_MaterialMaster__c" icon-name="standard:products" label-name="Material Master"
+                                            display-fields="GE_LGT_EM_SAP_MaterialNumber__c, GE_LGT_EM_MaterialDescription__c" display-format="GE_LGT_EM_SAP_MaterialNumber__c - GE_LGT_EM_MaterialDescription__c"
+                                            onvalueselect={handleSelection} placeholder="Search" value-id="" create-record="false"  class="custom-lookup">
+                                        </c-lookup-l-w-c>-->
+                                        <!--<div class="slds-box">
+                                            Selected Material ID: {materialDescription}
+                                            
+                                        </div> -->
+                                    </div>
+                                    <div if:true={noCatInput}>
+                                        <lightning-input
+                                            label="NoCAT #"
+                                            type="text"
+                                            value={NoCAT}
+                                            class="nc"
+                                            onchange={onNoCatChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                                <div class="slds-col">
+                                    <lightning-combobox
+                                        name="action"
+                                        label="Requested Action - Line Item Override"
+                                        placeholder="Select Action"
+                                        options={RAoptions}
+                                        onchange={handleRAction}
+                                        class="ra"></lightning-combobox>
+                                    <lightning-combobox
+                                        name="progress"
+                                        label="Warranty Code - Line Item Override"
+                                        placeholder="Select Warranty Code"
+                                        options={warOptions}
+                                        onchange={handlePick}
+                                        class="wc"></lightning-combobox>
+                                    <lightning-combobox
+                                        name="progress"
+                                        label="Warranty Sub Code - Line Item Override"
+                                        placeholder="Select Warranty Sub Code"
+                                        options={warSubOptions}
+                                        class="wsc"></lightning-combobox>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="slds-box"> <!-- BOX 2 LOWER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    <lightning-input 
+                                        label="Shipment Date"
+                                        type="date"
+                                        date-style="short" 
+                                        required 
+                                        class="sd validValue"></lightning-input>
+                                    <lightning-input 
+                                        label="Date Installed"
+                                        type="date"
+                                        date-style="short" 
+                                        required 
+                                        class="di validValue"></lightning-input>
+                                    <lightning-input 
+                                        label="PO"
+                                        type="text" 
+                                        required 
+                                        class="po validValue"></lightning-input>
+                                        <!--<template if:true={paPrice}>
+                                            <lightning-input 
+                                                label="Price Agreement Price"
+                                                type="currency"
+                                                onchange={onPaPriceChange} 
+                                                required 
+                                                class="pa"></lightning-input>
+                                        </template>-->
+                                </div>
+    
+                                <div class="slds-col">
+                                    <lightning-input 
+                                        label="Installed Qty" 
+                                        type="number"
+                                        onchange={handleValueChange}
+                                        value={numInstalled}
+                                        required 
+                                        class="iq validValue"></lightning-input>
+                                    <lightning-input 
+                                        label="No. of Products Failed"
+                                        type="number"
+                                        onchange={handleFailedValueChange}
+                                        value={numFailed} 
+                                        required 
+                                        class="nf validValue"></lightning-input>
+                                        <!--<lightning-input 
+                                        label="No. of Hours Used"
+                                        type="number" 
+                                        required 
+                                        class="hu validValue"></lightning-input>
+                                        <lightning-input 
+                                        label="Hours Per Start"
+                                        type="number" 
+                                        required 
+                                        class="hs validValue"></lightning-input>-->
+    
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class="slds-box"> <!-- BOX 3 LOWER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    
+                                    <lightning-textarea 
+                                        name="comments" 
+                                        label="Comments" 
+                                        placeholder="type here..."
+                                        class="cm"></lightning-textarea>
+                                    
+                                    <br>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer">
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+                            <lightning-button variant="brand-outline"
+                                    label="Close"
+                                    title="Close"
+                                    onclick={closeAddModal}>
+                                </lightning-button>
+                            <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                    variant="brand"
+                                    onclick={handleManualSave}
+                                    label={addLabel}>
+                                </lightning-button>
+                        
+                        </div>
+                    </div>
+                
+                </footer>
+            </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+           
+        </template>
+        <!--END ADD PRODUCT MANUALLY MODAL-->
+    
+    
+         <!--EDIT PRODUCT MANUALLY MODAL-->
+            <!-- MODAL FOR EDITING PRODUCTS -->
+            <template if:true={editProductModal}>
+                <section role="dialog" tabindex="-1"
+                        aria-labelledby="modal-heading-01"
+                        aria-modal="true"
+                        aria-describedby="modal-content-id-1"
+                        class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <!-- modal header -->
+                    <header class="slds-modal__header">
+                        <!--<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                        </button>-->
+                        <h2 id="modal-heading-06" class="slds-text-heading_medium slds-hyphenate">Update Item</h2>
+                        <p class="error">{errorMessage}</p>
+                    </header>
+                    <!-- modal body -->
+                
+                    
+                    <!-- showing record edit form -->
+                    <div if:true={isEditForm} class="slds-theme_default">
+                        <lightning-record-edit-form layout-type="Full" record-id={currentRecordId} draft-values={draftValues} object-api-name="Return_Order_Item__c" onload={handleManualLoad} >
+                    <lightning-messages></lightning-messages>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <div class="slds-box"> <!-- BOX 1 UPPER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    <h4><lightning-helptext content="Content for Text"></lightning-helptext></h4>
+                                    <lightning-input
+                                        label="NoCAT Input"
+                                        type="toggle"
+                                        message-toggle-active = ''
+                                        message-toggle-inactive = ''
+                                        onchange={handleNoCatChecked}
+                                        class="nci"
+                                        field-level-help="Enter required information"
+                                    ></lightning-input>
+                                    <div if:false={noCatInput}>
+                                        <c-material-lookup-l-w-c object-name="GE_LGT_EM_MaterialMaster__c" field-name="GE_LGT_EM_MaterialDescription__c" label="CAT#" placeholder="Search..." icon-name="standard:products" onselected={handleMaterialSelected} class="mat"></c-material-lookup-l-w-c> 
+                                        <!--<c-lookup-l-w-c unique-key="Id" obj-name="GE_LGT_EM_MaterialMaster__c" icon-name="standard:products" label-name="Material Master"
+                                            display-fields="GE_LGT_EM_SAP_MaterialNumber__c, GE_LGT_EM_MaterialDescription__c" display-format="GE_LGT_EM_SAP_MaterialNumber__c - GE_LGT_EM_MaterialDescription__c"
+                                            onvalueselect={handleSelection} placeholder="Search" value-id="" create-record="false"  class="custom-lookup">
+                                        </c-lookup-l-w-c>-->
+                                        <!--<div class="slds-box">
+                                            Selected Material ID: {materialDescription}
+                                            
+                                        </div> -->
+                                    </div>
+                                    <div if:true={noCatInput}>
+                                        <lightning-input
+                                            label="NoCAT #"
+                                            type="text"
+                                            value={NoCAT}
+                                            class="nc"
+                                            onchange={onNoCatChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                                <div class="slds-col">
+                                    <lightning-combobox
+                                        name="action"
+                                        label="Requested Action - Line Item Override"
+                                        placeholder="Select Action"
+                                        options={RAoptions}
+                                        value={reqAction}
+                                        onchange={handleRAction}
+                                        class="ra"></lightning-combobox>
+                                    <lightning-combobox
+                                        name="progress"
+                                        label="Warranty Code - Line Item Override"
+                                        value={warCode}
+                                        placeholder="Select Warranty Code"
+                                        options={warOptions}
+                                        onchange={handlePick}
+                                        class="wc"></lightning-combobox>
+                                    <lightning-combobox
+                                        name="progress"
+                                        label="Warranty Sub Code - Line Item Override"
+                                        value={warSubCode}
+                                        placeholder="Select Warranty Sub Code"
+                                        options={warSubOptions}
+                                        class="wsc"></lightning-combobox>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="slds-box"> <!-- BOX 2 LOWER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    <lightning-input 
+                                        label="Shipment Date"
+                                        value={shipmentDate}
+                                        type="date"
+                                        date-style="short"
+                                        required 
+                                        class="sd"></lightning-input>
+                                    <lightning-input 
+                                        label="Date Installed"
+                                        value={dateInstalled}
+                                        type="date"
+                                        date-style="short" 
+                                        required 
+                                        class="di validValue"></lightning-input>
+                                    <lightning-input 
+                                        label="PO"
+                                        value={PO}
+                                        type="text" 
+                                        required 
+                                        class="po validValue"></lightning-input>
+                                        <!--<template if:true={paPrice}>
+                                            <lightning-input 
+                                                label="Price Agreement Price"
+                                                value={priceAgrmtPrice}
+                                                onchange={onPaPriceChange} 
+                                                type="currency" 
+                                                required 
+                                                class="pa"></lightning-input>
+                                        </template>-->
+                                </div>
+    
+                                <div class="slds-col">
+                                    <lightning-input 
+                                        label="Installed Qty" 
+                                        value={numInstalled}
+                                        onchange={handleFieldChange}
+                                        type="number"
+                                        required 
+                                        class="iq validValue"></lightning-input>
+                                    <lightning-input 
+                                        label="No. of Products Failed"
+                                        value={numFailed}
+                                        onchange={handleFailedFieldChange}
+                                        type="number" 
+                                        required 
+                                        class="nf validValue"></lightning-input>
+                                        <!--<lightning-input 
+                                        label="No. of Hours Used"
+                                        value={hoursUsed}
+                                        type="number" 
+                                        required 
+                                        class="hu validValue"></lightning-input>
+                                        <lightning-input 
+                                        label="Hours Per Start"
+                                        value={hoursPerStart}
+                                        type="number" 
+                                        required 
+                                        class="hs validValue"></lightning-input>-->
+    
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class="slds-box"> <!-- BOX 3 LOWER-->
+                            <div class="slds-grid slds-gutters">
+                                <div class="slds-col">
+                                    
+                                    <lightning-textarea 
+                                        name="comments" 
+                                        value={comments}
+                                        label="Comments" 
+                                        placeholder="type here..."
+                                        class="cm"></lightning-textarea>
+                                    
+                                    <br>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                    </lightning-record-edit-form>
+                    </div>
+                    
+                    <!-- modal footer start-->
+                    <footer class="slds-modal__footer">
+                        <div class="slds-align_absolute-center">
+                            <div style="text-align:center;">
+                                <lightning-button variant="brand-outline"
+                                    label="Close"
+                                    title="Close"
+                                    onclick={closeEditModal}>
+                                </lightning-button>
+                                <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                    variant="brand"
+                                    type="submit"
+                                    onclick={handleSaveForm}
+                                    label={editLabel}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                    
+                    </footer>
+                </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            
+            </template>
+        <!--END EDIT PRODUCT MANUALLY MODAL-->
+
+  </template>

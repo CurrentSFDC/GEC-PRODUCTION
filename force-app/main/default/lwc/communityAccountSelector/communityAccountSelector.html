@@ -1,0 +1,476 @@
+<template>
+    <div class="comp1 slds-grid slds-wrap mobile-acc-selector">
+        <lightning-button-icon
+            icon-name="utility:change_owner" 
+            class="mobile-acc-button" 
+            onclick={showAccountModal}               
+            variant="brand" 
+            alternative-text="Account Selector">
+        </lightning-button-icon>
+    </div>
+    <template if:true={isAgent}>
+    <div class="comp slds-grid slds-wrap desktop-acc-selector">
+        <div class="comp slds-align_absolute-center">
+        <!--<lightning-button-icon class="slds-m-left_xx-small"
+                                        variant="border-inverse"
+                                        icon-name="utility:change_owner"
+                                        size="small"
+                                        onclick={showAccountModal}
+                                        title="Select Account">
+                                    
+                                    </lightning-button-icon> -->
+                                    <!--<p><b>&nbsp; Agent:</b>&nbsp; <a onclick={showAccountModal}>{selectedAgentAccount} - {accountAgentNumber} - {customerAgentSegment}</a> &nbsp; | &nbsp; <b>Customer:</b> &nbsp; <a onclick={custAccount}> {selectedAccount} - {accountNumber} - {customerSegment}</a></p>
+                                
+                                
+                                </div> -->
+                                    
+            <div class="slds-col slds-align_absolute-right slds-small-size_1-of-1 slds-medium-size_6-of-12">
+                <p class="agent"><b>Agent:</b> &nbsp; <a onclick={showAccountModal}>{selectedAgentAccount} - {accountAgentNumber} - {customerAgentSegment}</a></p>
+            </div>
+
+            <div class="slds-col slds-align_absolute-left slds-border_left slds-small-size_1-of-1 slds-medium-size_6-of-12">
+                <p class="customer"><b>Customer:</b> &nbsp; <a onclick={custAccount}> {selectedAccount} - {accountNumber} - {customerSegment}</a></p>
+            </div>
+
+            
+
+                                        
+        </div>
+    </div>
+    <!--<template if:true={mobile}>
+    <div class="comp slds-grid">
+        <div class="comp slds-align_absolute-center">
+            <div class="slds-col slds-align_absolute-center slds-small-size_1-of-1">
+                <lightning-button-icon class="slds-m-left_xx-small"
+                variant="border-inverse"
+                icon-name="utility:change_owner"
+                size="small"
+                onclick={showAccountModal}
+                title="Select Account">
+            
+            </lightning-button-icon> </div>
+        </div>
+    </div>
+    </template>-->
+
+    </template>
+    <template if:false={isAgent}>
+        <div class="comp slds-grid slds-wrap desktop-acc-selector">
+            <div class="comp slds-align_absolute-center">
+           <!--<lightning-button-icon class="slds-m-left_xx-small"
+                                            variant="border-inverse"
+                                            icon-name="utility:change_owner"
+                                            size="small"
+                                            onclick={showAccountModal}
+                                            title="Select Account">
+                                        
+                                        </lightning-button-icon> -->
+                                        <p><b>&nbsp; Customer:</b> &nbsp; <a onclick={showAccountModal}> {selectedAccount} {persistDistributor} - {accountNumber} - {customerSegment}</a></p>
+                                    
+                                    
+                                    </div> 
+                                        
+                    <!--<div class="slds-col slds-border_left slds-size_1-of-1 slds-medium-size_10-of-12">
+                                        <p><b>&nbsp; Selected Agent:</b> {selectedAgentAccount} - {accountAgentNumber} - {customerAgentSegment}</p>
+                                        <p><b>&nbsp; Selected Customer:</b> &nbsp; &nbsp; {selectedAccount} - {accountNumber} - {customerSegment}</p>
+                                        </div>-->
+            </div>
+        </template>
+    <!--<div class="slds-grid slds-wrap">
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12">
+    <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                    variant="brand"
+                                    onclick={showAccountModal}
+                                    label="Select Account">
+                                
+                                </lightning-button> </div> 
+                                
+            <div class="slds-col slds-border_left slds-size_1-of-1 slds-medium-size_10-of-12">
+                                <p><b>&nbsp; Selected Agent:</b> {selectedAgentAccount} - {accountAgentNumber} - {customerAgentSegment}</p>
+                                <p><b>&nbsp; Selected Customer:</b> &nbsp; &nbsp; {selectedAccount} - {accountNumber} - {customerSegment}</p>
+                                </div>
+    </div>-->
+
+
+
+
+
+<!-- NEW AGENT MODAL -->
+        <template if:true={selectAccountModal}>
+
+            <template if:true={isAgent}>
+                <section role="dialog" tabindex="-1"
+                aria-labelledby="modal-heading-01"
+                aria-modal="true"
+                aria-describedby="modal-content-id-1"
+                class="slds-modal slds-fade-in-open slds-modal_medium">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                        </button>
+                        <h1 id="modal-heading-Agent" class="slds-text-heading_medium slds-hyphenate">Effective Account Selection</h1>
+                        <div if:true={impersonate} class="slds-grid">
+                            <div class="slds-col">
+                                <h4 class="slds-section-title--divider">*** You are an Imposter ***</h4>
+                            </div>
+                        </div>
+                        
+                    </header>
+                    <div class="slds-modal__content slds-p-around_small slds-p-around_medium">
+                    <div class="slds-card">
+                        <div class="slds-card__header slds-grid slds-wrap">
+                            
+                            <div class="slds-col searchBox search-inputs">
+                                
+                                    <lightning-input type="search" onchange={searchDataTable}  class="slds-m-bottom_small searchBox" label="Search Accounts"></lightning-input>
+                                	<template if:true={showFooter}>
+                                        <lightning-button variant="brand"
+                                                            label="Change Agent"
+                                                            title="Back"
+                                                            onclick={goBackToStepOne}
+                                                            icon-name="utility:back" class="slds-m-left_x-small">
+                                                        </lightning-button>
+                                                        </template>	
+                            </div>
+                            <div class="slds-col">
+                                <h2>
+                                    
+                                       Agent <br>
+                                    
+                                </h2> <h3>{selectedAgentAccount} - {accountAgentNumber} - {customerAgentSegment} </h3>
+                            </div>
+                            <div class="slds-col">
+                                <h2>
+                                    
+                                       Customer <br>
+                                    
+                                </h2> <h3>{selectedAccount} - {accountNumber} - {customerSegment}</h3>
+                            </div>
+                        </div>
+                        <div class="stepOne">
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-table--header-fixed_container" style="height:350px;">
+                                    <div class="slds-scrollable_y" style="height:100%;">
+                                        <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-max-medium-table_stacked-horizontal slds-table--header-fixed">
+                                            <thead>
+                                                <tr class="slds-text-heading_label tableHeader">
+                                                    <th class="slds-cell-wrap tableHeader" scope="col"  data-sort-by="Name">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Name</div>
+                                                        
+                                                    </th>
+                                                    <th scope="col" class="tableRow" data-sort-by="Customer_Segmentation__c">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Segmentation</div>
+                                                       
+                                                    </th>
+                                                    <th scope="col" class="tableRow"  data-sort-by="GE_LGT_EM_SAP_Customer_Number__c">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Account #</div>
+                                                        
+                                                    </th>
+                                                    <th scope="col" data-sort-by="ShippingAddress">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Address</div>
+                                                        
+                                                    </th>
+                                                    <th scope="col"></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <template for:each={searchable} for:item="record" for:index="index">
+                                                    <tr key={record.Id} data-id="agentRows" data-direct={record.isDirect} class="">
+                                                        <td data-label="Name" class="slds-cell-wrap">
+                                                            {record.Name}
+                                                        </td>
+                                                        <td data-label="Segmentation">
+                                                            {record.segment}
+                                                        </td>
+                                                        <td data-label="Account #">
+                                                            {record.GE_LGT_EM_SAP_Customer_Number__c}
+                                                        </td>
+                                                        <td data-label="Address">
+                                                            <lightning-formatted-address
+                                                                    street={record.ShippingStreet}
+                                                                    city={record.ShippingCity}
+                                                                    country={record.ShippingCountry}
+                                                                    province={record.ShippingState}
+                                                                    postal-code={record.ShippingPostalCode}
+                                                                ></lightning-formatted-address>
+                                                        </td>
+                                                        <td>
+                                                            <lightning-button  variant="brand" label="Select Agent" value={index} onclick={setSelectedAgentOnly}></lightning-button>
+                                                        </td>
+                                                        <td>
+                                                            <lightning-button variant="brand" label="Select Customer" value={index} onclick={setSelectedAgent}></lightning-button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                                </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    <!--STEP TWO-->
+                        <div class="stepTwo slds-hide">               
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-table--header-fixed_container" style="height:300px;">
+                                    <div class="slds-scrollable_y" style="height:100%;">                 
+                                        <table if:true={distributorAccounts} class="slds-table slds-table--header-fixed slds-table_cell-buffer slds-table_fixed-layout slds-max-medium-table_stacked-horizontal slds-table_bordered">
+                                            <thead>
+                                                <tr class="slds-text-heading_label tableHeader">
+                                                    <th class="slds-cell-wrap tableHeader" scope="col"  data-sort-by="Name">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Name</div>
+                                                        
+                                                    </th>
+                                                    <th scope="col"  data-sort-by="Customer_Segmentation__c">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Segmentation</div>
+                                                       
+                                                    </th>
+                                                    <th scope="col"  data-sort-by="GE_LGT_EM_SAP_Customer_Number__c">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Account #</div>
+                                                        
+                                                    </th>
+                                                    <th scope="col" data-sort-by="ShippingAddress">
+                                                        <div class="slds-p-right_small slds-truncate slds-cell-fixed">Address</div>
+                                                        
+                                                    </th>
+                                                    <th scope="col"></th>
+                                                </tr>
+                                                </thead>
+                                            <tbody>
+                                            <template for:each={distributorAccounts} for:item="record" for:index="index">
+                                                <tr key={record.Id}>
+                                                    <td data-label="Name" class="slds-cell-wrap">
+                                                        {record.Name}
+                                                    </td>
+                                                    <td data-label="Segmentation">
+                                                        {record.segment}
+                                                    </td>
+                                                    <td data-label="Account #">
+                                                        {record.GE_LGT_EM_SAP_Customer_Number__c}
+                                                    </td>
+                                                    <td data-label="Address">
+                                                        <lightning-formatted-address
+                                                                street={record.ShippingStreet}
+                                                                city={record.ShippingCity}
+                                                                country={record.ShippingCountry}
+                                                                province={record.ShippingState}
+                                                                postal-code={record.ShippingPostalCode}
+                                                            ></lightning-formatted-address>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-button variant="brand" label="Select Account" value={index} onclick={setSelectedDistributorAccount}></lightning-button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <!--END OF STEP TWO-->
+
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+                            <lightning-button variant="brand"
+                                    label="Close"
+                                    title="Close"
+                                    onclick={closeModal}>
+                                </lightning-button>
+                        
+                        </div>
+                    </div>
+                
+                </footer>
+                </div>
+            </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!-- END NEW AGENT MODAL -->
+
+    <!-- NEW DISTRIBUTOR MODAL-->
+        <template if:false={isAgent}>
+            <section role="dialog" tabindex="-1"
+            aria-labelledby="modal-heading-01"
+            aria-modal="true"
+            aria-describedby="modal-content-id-1"
+            class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button>
+                    <h1 id="modal-heading-Distributor" class="slds-text-heading_medium slds-hyphenate">Effective Account Selection</h1>
+                    <div if:true={impersonate} class="slds-grid">
+                        <div class="slds-col">
+                            <h4 class="slds-section-title--divider">*** You are an Imposter ***</h4>
+                        </div>
+                    </div>
+                </header>
+                <div class="slds-modal__content slds-p-around_small slds-p-around_medium">
+                <div class="slds-card">
+                    <div class="slds-card__header slds-grid slds-wrap">
+                        
+                        <div class="slds-col searchBox search-inputs">
+                            
+                                <lightning-input type="search" onchange={searchDataTable}  class="slds-m-bottom_small searchBox" label="Search Accounts"></lightning-input>
+                            
+                        </div>
+                        <div class="slds-col">
+                            <h2>
+                                
+                                Customer <br>
+                                
+                            </h2> <h3>{selectedAccount} - {accountNumber} - {customerSegment}</h3>
+                        </div>
+                    </div>
+                
+                <!--STEP ONE-->
+                                
+                        <div class="slds-card__body slds-card__body_inner">
+                            <div class="slds-table--header-fixed_container" style="height:300px;">
+                                <div class="slds-scrollable_y" style="height:100%;">                 
+                                    <table if:true={distributorAccounts} class="slds-table slds-table--header-fixed slds-table_cell-buffer slds-table_fixed-layout slds-max-medium-table_stacked-horizontal slds-table_bordered">
+                                        <thead>
+                                            <tr class="slds-text-heading_label tableHeader">
+                                                <th class="slds-cell-wrap tableHeader" scope="col"  data-sort-by="Name">
+                                                    <div class="slds-p-right_small slds-truncate slds-cell-fixed">Name</div>
+                                                    
+                                                </th>
+                                                <th scope="col"  data-sort-by="Customer_Segmentation__c">
+                                                    <div class="slds-p-right_small slds-truncate slds-cell-fixed">Segmentation</div>
+                                                
+                                                </th>
+                                                <th scope="col"  data-sort-by="GE_LGT_EM_SAP_Customer_Number__c">
+                                                    <div class="slds-p-right_small slds-truncate slds-cell-fixed">Account #</div>
+                                                    
+                                                </th>
+                                                <th scope="col" data-sort-by="ShippingAddress">
+                                                    <div class="slds-p-right_small slds-truncate slds-cell-fixed">Address</div>
+                                                    
+                                                </th>
+                                                <th scope="col"></th>
+                                            </tr>
+                                            </thead>
+                                        <tbody>
+                                        <template for:each={distributorAccounts} for:item="record" for:index="index">
+                                            <tr key={record.Id} data-id="customerRows" data-direct={record.isDirect} class="">
+                                                <td data-label="Name" class="slds-cell-wrap">
+                                                    {record.Name}
+                                                </td>
+                                                <td data-label="Segmentation">
+                                                    {record.segment}
+                                                </td>
+                                                <td data-label="Account #">
+                                                    {record.GE_LGT_EM_SAP_Customer_Number__c}
+                                                </td>
+                                                <td data-label="Address">
+                                                    <lightning-formatted-address
+                                                            street={record.ShippingStreet}
+                                                            city={record.ShippingCity}
+                                                            country={record.ShippingCountry}
+                                                            province={record.ShippingState}
+                                                            postal-code={record.ShippingPostalCode}
+                                                        ></lightning-formatted-address>
+                                                </td>
+                                                <td>
+                                                    <lightning-button variant="brand" label="Select Account" value={index} onclick={setSelectedDistributorAccount}></lightning-button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    
+                <!--END OF STEP ONE-->
+
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+                <div class="slds-align_absolute-center">
+                    <div style="text-align:center;">
+                        <lightning-button variant="brand"
+                                label="Close"
+                                title="Close"
+                                onclick={closeModal}>
+                            </lightning-button>
+                    </div>
+                </div>
+            
+            </footer>
+            </div>
+        </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+
+    </template>
+
+    <!-- END NEW DISTRIBUTOR MODAL -->
+
+    <!-- ALERT MODAL START-->
+    <template if:true={showAlertBar}>
+        <section role="dialog" tabindex="-1"
+                            aria-labelledby="modal-heading-01"
+                            aria-modal="true"
+                            aria-describedby="modal-content-id-1"
+                            class="slds-modal slds-fade-in-open slds-modal_medium">
+                    <div class="slds-modal__container">
+                        <!-- modal header start -->
+                            <!--<header class="slds-modal__header">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeAlertBar}>
+                                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                                </button>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate"></h2>
+                            
+                            </header>-->
+                        <!-- modal body start -->
+                        <div class="slds-theme_default">
+
+                            <div class="slds-card">
+                                <div class="slds-card__header slds-grid slds-wrap">
+                                    
+                                    <!--<div class="slds-col slds-size_2-of-8 headerSection">
+                                    <img src={companyLogo} style="float: left;">
+                                    </div>-->
+                                    <div class="slds-col slds-size_8-of-8 headerSection">
+                                        <h2>
+                                            
+                                            *** IMPORTANT MESSAGE ***<br>
+                                            
+                                        </h2> 
+                                    </div>
+                            
+                                </div><br>
+
+                                <div class="slds-card__body slds-card__body_inner message">
+                                
+                                    <lightning-formatted-rich-text value={message}></lightning-formatted-rich-text>
+                                </div>
+
+                            </div>
+                                
+                                
+                        </div>
+                            
+                        <!-- modal footer start-->
+                        <footer class="slds-modal__footer">
+                            <lightning-button variant="brand"
+                            label="Acknowledge"
+                            title="Acknowledge"
+                            onclick={closeAlertBar}
+                            ></lightning-button>
+                        </footer>
+                    </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!--ALERT MODAL END-->
+        
+</template>

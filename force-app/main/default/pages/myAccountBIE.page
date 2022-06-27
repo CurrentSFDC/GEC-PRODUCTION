@@ -1,0 +1,354 @@
+<apex:page applyHtmlTag="false" sidebar="false" showHeader="false" standardStylesheets="false" controller="MyAccountActions" id="myAccountBIE">
+    <c:myOrdersCommunity />
+    <c:myInvoicesCommunity />
+    <c:manageDropShipLocations />
+    <c:MenuBIE ></c:MenuBIE>
+    <script type="text/javascript">
+        //CCRZ.uiProperties.Menu.desktop.tmpl = 'menu-desktop-template-override';
+        var theColl;
+        jQuery(function ($) {
+            CCRZ.pubSub.on('view:myaccountView:awaitingSubViewInit', function
+                (viewRef) {
+                //pubSub listener function, viewRef is the Backbone view for My Account
+                if (CCRZ.MyAccount.contactInfo) {
+                    CCRZ.MyAccount.contactInfo.register(viewRef);
+                }
+                if (CCRZ.MyAccount.changePassword) {
+                    CCRZ.MyAccount.changePassword.register(viewRef);
+                }
+                    /*if (CCRZ.MyAccount.addressBooks) {
+                    CCRZ.MyAccount.addressBooks.register(viewRef);
+                }*/
+                if (CCRZ.MyAccount.myCarts) {
+                    CCRZ.MyAccount.myCarts.register(viewRef);
+                }
+                    /*if (CCRZ.MyAccount.myOrders) {
+                    CCRZ.MyAccount.myOrders.register(viewRef);
+                }*/
+                    /*if (CCRZ.MyAccount.myWishlists) {
+                    CCRZ.MyAccount.myWishlists.register(viewRef);
+                }*/
+                if (CCRZ.MyAccount.mySubscriptions) {
+                    CCRZ.MyAccount.mySubscriptions.register(viewRef);
+                }
+                  
+                    /*if (CCRZ.MyAccount.SubscibeMyInvoicesCommunity) {
+                    CCRZ.MyAccount.SubscibeMyInvoicesCommunity.register(viewRef);
+                }
+                //New section
+                if (CCRZ.MyAccount.SubscMyOrdersCommunity) {
+                    CCRZ.MyAccount.SubscMyOrdersCommunity.register(viewRef);
+                }*/
+                //Tell the My Account view that it should proceed with rendering the view
+                CCRZ.pubSub.trigger("view:myaccountView:subViewInit", true);
+            });
+
+
+            CCRZ.pubSub.on("addressCreated", function (form) {
+                var formData = form2js('editAddressForm', '.', false, function (node) {
+                }, false, true);
+                //console.log(formData);
+                var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'MyAccountActions'});
+                remoteCall.invokeCtx('updateAddress', 'test', function (response) {
+                    //console.log('response : ',response);
+                }, {
+                    nmsp: false, escape: false
+                });
+            });
+
+            Backbone.on('view:myAddressBookView:created', function (view) {
+
+                CCRZ.collections.AddressList = CCRZ.CloudCrazePageable.extend({
+                    mode: "client",
+                    state: {
+                        firstPage: 1,
+                        pageSize: parseInt(CCRZ.getPageConfig('pgbl.ord', true) ? CCRZ.getPageConfig('pgbl.pageSize', '3') : '2000')
+                    },
+                    model: CCRZ.models.AddressModel,
+                    className: 'cc_ctrl_myaccountRD',
+                    initialize: function (dataList) {
+                        this.reset(dataList);
+                    },
+                    /*
+                    fetch: function(callback) {
+                    var coll = this;
+                    this.invokeContainerLoading($('.deskLayout'), 'fetchAddressBooks', CCRZ.pagevars.storefrontName, CCRZ.pagevars.portalUserId, function(response) {
+                    coll.reset(response);
+                    callback();
+                    });
+                    },
+                    */
+                    fetchAllNavData: function (state, formdata, callback) {
+                        var coll = this;
+                        this.invokeContainerLoadingCtx($('.deskLayout'), "fetchAddressBooks",
+                            formdata, function (response) {
+                                if (response && response.success) {
+                                    //console.log('fetch',response);
+
+                                    //custom
+                                    // console.log('json string');
+                                    // console.log(JSON.stringify(response.data));
+                                    var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'MyAccountActions'});
+                                    remoteCall.invokeCtx('getPhone', JSON.stringify(response.data), function (response2) {
+                                        if (response2 && response2.success) {
+                                            //console.log('custom fetch: ',response2);
+                                            response.data.forEach(function (addr) {
+                                                let id = addr.sfid;
+                                                addr.addressBean.phone = response2.data[id];
+                                            });
+                                            //console.log('after loop:',response);
+                                            callback(response.data);
+                                        } else {
+                                            CCRZ.pubSub.trigger("pageMessage", response2);
+                                        }
+                                    }, {
+                                        nmsp: false, escape: false
+                                    });
+
+
+                                } else {
+                                    CCRZ.pubSub.trigger("pageMessage", response);
+                                }
+                            }, {escape: false});
+                    },
+                    filter: function (value) {
+                        var col = this;
+                        $.each(col, function (index) {
+                            var address = col.at(index);
+                            if (value == 'All' || value == address.get("defaultAddressType") || address.get("addressTypes").length == 2) {
+                                address.set('hide', false);
+                            } else {
+                                address.set('hide', true);
+                            }
+                        });
+                    },
+
+                    //custom
+                    editEntity: function (addressId, updatedData, callback) {
+                        var coll = this;
+                        updatedData.isDefault = updatedData.addressTypes[0].isDefault;
+                        var jsonData = JSON.stringify(updatedData);
+                        var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'MyAccountActions'});
+                        remoteCall.invokeCtx('updateAddress', jsonData, function (response) {
+                            //console.log('response : ',response);
+                            if (response && response.success) {
+                                coll.fetch(callback);
+                            } else {
+                                CCRZ.pubSub.trigger("pageMessage", response);
+                            }
+                        }, {
+                            nmsp: false, escape: false
+                        });
+                    },
+                    deleteEntity: function (addressId, callback) {
+                        var coll = this;
+                        this.invokeContainerLoadingCtx($('.deskLayout'), 'deleteAddress', addressId, function (response) {
+                            coll.fetch(callback);
+                        });
+                    }
+                });
+
+
+            });
+
+        });
+
+    </script>
+
+    <script id="MyAccount-MyOrders-Desktop" type="text/template">
+        <div class="panel panel-default cc_panel cc_myaccount_myorders">
+            <div class="panel-heading cc_heading">
+                <h3 class="panel-title cc_title">{{pageLabelMap 'MyAccount_MyOrders'}}</h3>
+            </div>
+            <div class="panel-body cc_body cc_myaccount_content">
+                <div class="messagingSection-orderhistory-Error" role="alert" style="display: none"></div>
+                <div class="messagingSection-orderhistory-Info" role="alert" style="display: none">
+                    <button type="button" class="close cc_close" data-dismiss="alert" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                </div>
+                {{#ifDisplay 'srch.ord'}}
+                <form id="searchOrderForm" class="form-inline searchOrderForm cc_search_order_form cc_form-inline">
+                    <div class="form-group form-group-sm ">
+                        <label for="searchOrderInput" class="sr-only">Search order</label>
+                        <input id="searchOrderInput" type="text" class="form-control searchOrderInput input-text cc_search_order_input" name="searchOrderInput" value="{{searchOrder}}"
+                               placeholder="{{pageLabelMap 'MyOrdersInc_SearchOrders'}}"/>
+                    </div>
+                    <div class="form-group form-group-sm">
+                        <select name="searchOrderStatus" value="{{searchOrderStatus}}" class="form-control cc_search_order_status">
+                            <option value="">{{pageLabelMap 'MyOrdersInc_AllOrderStatus'}}</option>
+                            {{#each this.orderStatusOpts}}
+                            <option value="{{this.value}}" {{#ifEquals ..
+                            /searchOrderStatus this.value}} selected {{/ifEquals}}>{{this.label}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="form-group form-group-sm date">
+                        <label for="fromDateStr" class="cc_from_date_str">{{pageLabelMap 'MyOrdersInc_SearchFrom'}}</label>
+                        <div class="input-group date">
+                            <input type="text" id="fromDateStr" name="fromDateStr" value="{{this.fromDateStr}}" class="form-control requestedDate fromDate cc_from_date" readonly="true">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-sm date">
+                        <label for="toDateStr" class="cc_to_date_str">{{pageLabelMap 'MyOrdersInc_SearchTo'}}</label>
+                        <div class="input-group date">
+                            <input type="text" id="toDateStr" class="form-control requestedDate toDate cc_to_date" name="toDateStr" value="{{this.toDateStr}}" readonly="true">
+                            <div class="input-group-addon">
+                                <span class="glyphicon glyphicon-th"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="cc_order_search_action">
+                    <input type="button" class="btn btn-default btn-sm searchOrder cc_search_order" value="{{pageLabelMap 'MyOrdersButton_SearchOrders'}}"/>
+                    <input type="button" class="btn btn-default btn-sm resetOrder cc_reset_order" value="{{pageLabelMap 'MyOrdersButton_ResetOrders'}}"/>
+                </div>
+                {{/ifDisplay}}
+            </div>
+        </div>
+        <div class="orderPaginationSec"></div>
+        <div class="panel panel-default cc_panel cc_paginator">
+            <div class="table-responsive">
+                <table id="orderTable" class="table table-hover shopping_cart cc_table cc_order_search_table">
+                    <tr class="cc_table_header_row">
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_order_number">{{pageLabelMap 'MyOrdersInc_OrderNumber'}}</span>
+                        </th>
+                        {{#ifDisplay 'MO.DsplExtOrderNumber'}}
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_external_order_id">{{pageLabelMap 'ExternalOrderID'}}</span>
+                        </th>
+                        {{/ifDisplay}}
+                        {{#ifDisplay 'MO.DsplPONumber'}}
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_po_number">{{pageLabelMap 'PO Number'}}</span>
+                        </th>
+                        {{/ifDisplay}}
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_order_date">{{pageLabelMap 'MyOrdersInc_OrderDate'}}</span>
+                        </th>
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_order_amount">{{pageLabelMap 'MyOrdersInc_OrderAmount'}}</span>
+                        </th>
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_order_status">{{pageLabelMap 'MyOrdersInc_Status'}}</span>
+                        </th>
+                        {{#ifStoreSetting 'Filter_Orders_Based_on_Owner__c'}}
+                        &#160;
+                        {{else}}
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_order_owner ord_owner_hdr">{{pageLabelMap 'MyOrdersInc_Owner'}}</span>
+                        </th>
+                        {{/ifStoreSetting}}
+                        {{#ifDisplay 'MO.ShActOnOrd'}}
+                        <th class="cc_table_header">
+                            <span class="cc_table_header_order_actions">{{pageLabelMap 'MyCartsInc_Actions'}}</span>
+                        </th>
+                        <th class="cc_table_header"></th>
+                        <th class="cc_table_header"></th>
+                        {{/ifDisplay}}
+
+                    </tr>
+                    {{#each this.orderList}}
+                    <tr class="myAccOrderRows cc_table_row">
+                        <td class="cc_table_col">
+                            {{#if SAPOrderNumber}}
+                            <span class="cc_col_order_number"><a href="#" data-id="{{encryptedId}}" class="gotoOrderDetails cc_goto_order_detailss">{{SAPOrderNumber}}</a></span>
+                            {{else}}
+                            <span class="cc_col_order_number"><a href="#" data-id="{{encryptedId}}" class="gotoOrderDetails cc_goto_order_detailss">N/A</a></span>
+                            {{/if}}
+                        </td>
+                        {{#ifDisplay 'MO.DsplExtOrderNumber'}}
+                        <td class="cc_table_col">
+                            <span class="cc_col_external_order_id">{{externalOrderId}}</span>
+                        </td>
+                        {{/ifDisplay}}
+                        {{#ifDisplay 'MO.DsplPONumber'}}
+                        <td class="cc_table_col">
+                            <span class="cc_col_po_number">{{poNumber}}</span>
+                        </td>
+                        {{/ifDisplay}}
+                        <td class="cc_table_col">
+                            <span class="cc_col_order_date">{{orderDateStr}}</span>
+                        </td>
+                        <td class="cc_table_col">
+                            <span class="cc_col_order_amount">{{price totalAmount currencyIsoCode}}</span>
+                        </td>
+                        <td class="cc_table_col">
+                            <span class="cc_col_order_statust">{{pageLabelMap status}}</span>
+                        </td>
+                        {{#ifStoreSetting 'Filter_Orders_Based_on_Owner__c'}}
+                        &#160;
+                        {{else}}
+                        <td class="cc_table_col">
+                            <span class="cc_col_order_owner ord_owner">{{ownerName}}</span>
+                        </td>
+                        {{/ifStoreSetting}}
+                        {{#ifDisplay 'MO.ShActOnOrd'}}
+                        <td class="cc_table_col">
+                            {{#ifDisplay 'MO.ShReOrdBt'}}
+                            {{#if this.canReOrder}}
+                            <input type="button" class="btn btn-default btn-sm reorder cc_col_reorder" data-id="{{sfid}}" value="{{pageLabelMap 'MyOrdersInc_Reorder'}}"/>&#160;
+                            {{/if}}
+                            {{/ifDisplay}}
+                        </td>
+                        <td class="cc_table_col">
+                            {{#if this.canCancel}}
+                            {{#ifDisplay 'MO.ShAmdBt'}}
+                            {{#if this.canAmend}}
+                            <input type="button" class="btn btn-default btn-sm promptCancel promptAmend cc_col_prompt_amend" data-id="{{sfid}}" data-mode="Edit" value="{{pageLabelMap 'Amend'}}"/>&#160;
+                            {{/if}}
+                            {{/ifDisplay}}
+                            {{/if}}
+                        </td>
+                        <td class="cc_table_col">
+                            {{#if this.canCancel}}
+                            {{#ifDisplay 'MO.ShCanBt'}}
+                            <input type="button" class="btn btn-default btn-sm promptCancel cc_col_prompt_cancel" data-id="{{sfid}}" data-mode="Cancel" value="{{pageLabelMap 'Cancel'}}"/>
+                            {{/ifDisplay}}
+                            {{/if}}
+                        </td>
+                        {{/ifDisplay}}
+                    </tr>
+                    {{/each}}
+                </table>
+            </div>
+            <div id="modalSec"></div>
+        </div>
+    </script>
+    <style>
+    
+    .myAccBillingAddr{
+       	        display:none;
+       }
+       .myAccShippingAddr{
+       		display:none;
+       }
+       .cc_mailing_address{
+       	display:none;
+       }
+       
+       .myAccOtherAddr{
+       	display:none;
+       }
+       
+       .cc_myaccount_information{
+       	display:none;
+       }
+       
+       /*.cc_myaccount_contact{
+        display:none;
+       }*/
+       
+       .cc_myaccount_contact_information{
+       	display:none;
+       }
+       
+    
+    
+    
+    
+    
+    </style>
+</apex:page>

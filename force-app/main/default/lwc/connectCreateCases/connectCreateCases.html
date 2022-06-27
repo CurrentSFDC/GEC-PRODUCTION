@@ -1,0 +1,171 @@
+<template>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <c-case-creation-order-change-widget></c-case-creation-order-change-widget>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <c-case-creation-shipping-request-widget></c-case-creation-shipping-request-widget>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <c-case-creation-sales-support-widget></c-case-creation-sales-support-widget>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <c-case-creation-return-request-widget></c-case-creation-return-request-widget>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <c-case-creation-adjustment-widget></c-case-creation-adjustment-widget>
+        </div>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <c-case-creation-warranty-claim-widget></c-case-creation-warranty-claim-widget>
+        </div>
+    </div>
+    <!-- <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-small-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <lightning-card>
+                <div class="slds-p-around_medium slds-align_absolute-center">
+                    <div>
+                        <img style="height: 275px; width: 350px" src={changeImage}></div>
+                </div>
+                <div class="tiles slds-align_absolute-center">Submit Order Change Requests
+                </div>
+                <div class="button-container slds-grid slds-wrap slds-m-top_small slds-grid_align-center">
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-button slds-button_brand"
+                                onclick={openExpedite}>Expedite
+                        </button>
+                    </div>
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-button slds-button_brand"
+                                onclick={openChangeRequest}>Change
+                        </button>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+        <div class="slds-col slds-small-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <lightning-card>
+                <div class="slds-p-around_medium slds-align_absolute-center">
+                    <div>
+                        <img style="height: 275px; width: 350px" src={shippingIssue}></div>
+                </div>
+                <div class="tiles slds-align_absolute-center">Submit Shipping Issue Request
+                </div>
+                <div class="button-container slds-grid slds-wrap slds-m-top_small slds-grid_align-center">
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openOverage}>
+                            Overage
+                        </button>
+                    </div>
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openShortage}>
+                            Shortage
+                        </button>
+                    </div>
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openLostDamaged}>
+                            Lost / Damaged
+                        </button>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+        <div class="slds-col slds-small-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <lightning-card>
+                <div class="slds-p-around_medium slds-align_absolute-center">
+                    <div>
+                        <img style="height: 275px; width: 350px" src={salesSupport}></div>
+                </div>
+                <div class="tiles slds-align_absolute-center">Submit Sales Support Request
+                </div>
+                <div class="button-container slds-grid slds-wrap slds-m-top_small slds-grid_align-center">
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openNewSpec}
+                        >
+                            New Spec. Registration
+                        </button>
+                    </div>
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openLDR}>
+                            Lighting Design
+                        </button>
+                    </div>
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openMarketing}>
+                            Marketing
+                        </button>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+        <div class="slds-col slds-small-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <lightning-card>
+                <div class="slds-p-around_medium slds-align_absolute-center">
+                    <div>
+                        <img style="height: 275px; width: 350px" src={returnImage}></div>
+                </div>
+                <div class="tiles slds-align_absolute-center">Submit Return Requests
+                </div>
+                <div class="button-container slds-grid slds-wrap slds-m-top_small slds-grid_align-center">
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openReturn}
+                        >
+                            Return
+                        </button>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+        <div class="slds-col slds-small-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <lightning-card>
+                <div class="slds-p-around_medium slds-align_absolute-center">
+                    <div>
+                        <img style="height: 275px; width: 350px" src={adjustment}></div>
+                </div>
+                <div class="tiles slds-align_absolute-center">Submit Adjustment Requests
+                </div>
+                <div class="button-container slds-grid slds-wrap slds-m-top_small slds-grid_align-center">
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                         <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                    onclick={openCredit}
+                            >
+                                Credit
+                            </button>
+                    </div>
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                    onclick={openRebill}>
+                                Debit
+                            </button>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+        <div class="slds-col slds-small-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-p-vertical_small slds-p-horizontal_x-small">
+            <lightning-card>
+                <div class="slds-p-around_medium slds-align_absolute-center">
+                    <div>
+                        <img style="height: 275px; width: 350px" src={warranty}></div>
+                </div>
+                <div class="tiles slds-align_absolute-center">Submit Warranty Claim
+                </div>
+
+                <div class="button-container slds-grid slds-wrap slds-m-top_small slds-grid_align-center">
+                    <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_4-of-7 slds-medium-size_1-of-3 slds-p-vertical_small slds-p-horizontal_xx-small slds-text-align_center">
+                        <button class="slds-size_12-of-12 slds-button slds-button_brand"
+                                onclick={openWarranty}
+                        >
+                            Warranty Claim
+                        </button>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+    </div> -->
+</template>

@@ -1,0 +1,36 @@
+<template>
+ 
+
+    <template if:false={authorized}>
+    <h2>You are now Authorized to use this funtion. Please click on "LOGIN" below, and "May the force be with you..."</h2> <br> <br>
+    <lightning-button variant="success"
+                                  label="LOGIN"
+                                  title="LOGIN"
+                                  onclick={launch}></lightning-button>
+</template>
+            <template if:true={authorized}>
+
+                <div class="slds-grid slds-gutters slds-wrap">
+              
+                    <div class="slds-col slds-size_1-of-1 slds-large-size_12-of-12 slds-is-relative">
+                       
+                        <template if:true={isLoading}>
+                            <lightning-spinner class="loading" alternative-text="Logging In" variant="brand"></lightning-spinner>
+                        </template>
+
+                        <!--<iframe class="iframe-container" src={impersonateURL} name="theFrame" ></iframe>-->
+                        
+                        <!--<iframe  src='about:blank' width="700" height="900" onload={setWindow}></iframe>-->
+
+                        <!--div class="iframe-container" lwc:dom="manual"></div>
+                        <template if:true={loading}>
+                            <lightning-spinner variant="brand" size="large" ></lightning-spinner>
+                        </template>-->
+                    </div>
+                </div>
+            </template>
+           
+            
+           
+
+</template>

@@ -1,0 +1,29 @@
+<template>
+    <div class="wrapper">
+    <!--c-expedite-order-prod-lwc orderId={saveExpedite}></c-expedite-order-prod-lwc-->
+    
+    <div class="slds-p-around_medium ">
+        <!--p><lightning-formatted-url value={sfdcOrgURL} ></lightning-formatted-url></p-->
+    </div>                             
+
+    <div class="slds-m-top_medium slds-m-bottom_x-large">
+        
+        <!-- Simple -->
+        <div class="slds-p-around_medium lgc-bg">
+            <lightning-button-menu alternative-text="Show menu" variant="success" label="Submit Request" onclick={handleOnselect}>
+                <template if:true={chnExp}>
+                    <lightning-menu-item value="MenuItemOne" label=" Change Request"  onclick={saveChangeRequest}></lightning-menu-item>
+                    <!--<lightning-menu-item value="MenuItemTwo" label="Expedite" onclick={saveExpedite} ></lightning-menu-item>-->
+                </template>
+                <lightning-menu-item value="MenuItemThree" label="Return" onclick={saveReturnReplace}></lightning-menu-item>           
+                <lightning-menu-item value="MenuItemFour" label="Overage" onclick={saveOverage}></lightning-menu-item>
+                <lightning-menu-item value="MenuItemFive" label="Shortage" onclick={saveShortage}></lightning-menu-item>
+                <lightning-menu-item value="MenuItemSix" label="Lost/Damage" onclick={saveLostDamage}></lightning-menu-item>
+                <lightning-menu-item value="MenuItemSeven" label="Warranty claim" onclick={saveWarrantyClaim}></lightning-menu-item>
+            </lightning-button-menu>
+        </div>
+
+        
+    </div>
+    </div>
+</template>

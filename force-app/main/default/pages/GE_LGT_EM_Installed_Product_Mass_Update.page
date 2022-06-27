@@ -1,0 +1,63 @@
+<apex:page standardController="Installed_Product__c" recordSetVar="InstalledproductLineItem">
+    <apex:form >
+    <apex:pagemessages />
+        <apex:pageBlock >
+            <!--<apex:pageBlock >
+                Note: All modifications made on the page will be lost if Return button is clicked without clicking the Save button first. 
+            </apex:pageBlock>-->
+
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!save}"/>
+                <apex:commandButton value="Return" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockTable value="{!selected}" var="ipli">
+                <apex:column headerValue="Install Base Name">
+                    <apex:outputField value="{!ipli.Name}"/>
+                </apex:column>
+                
+                <apex:column headerValue="Material Id ">
+                    <apex:inputField value="{!ipli.SFDC_Material_ID__c}"/>
+                </apex:column>
+                
+                <apex:column headerValue="Sku ">
+                <apex:inputField value="{!ipli.SKU__c}"/>
+                </apex:column>
+                <apex:column headerValue="Product Manual Description">
+                    <apex:inputField value="{!ipli.Product_Manual_Description__c}"/>
+                </apex:column>                
+                <apex:column headerValue="Designed qty ">
+                    <apex:inputField value="{!ipli.Qty__c}"/>
+                </apex:column>
+                <apex:column headerValue="Ordered qty ">
+                    <apex:inputField value="{!ipli.Ordered_Qty__c}"/>
+                </apex:column>
+                <apex:column headerValue="Installed qty ">
+                    <apex:inputField value="{!ipli.Installed_Qty__c}"/>
+                </apex:column>
+                <apex:column headervalue="Area ">
+                    <apex:inputField value="{!ipli.Area__c}"/>
+                </apex:column> 
+                <apex:column headervalue="Floor ">
+                    <apex:inputField value="{!ipli.Floor__c}"/>
+                </apex:column>
+                <apex:column headervalue="Room ">
+                    <apex:inputField value="{!ipli.Room__c}"/>
+                </apex:column> 
+                <apex:column headervalue="sales price per unit ">
+                    <apex:inputField value="{!ipli.Sales_Price_per_Unit__c}"/>
+                </apex:column> 
+                <apex:column headervalue="Total price">
+                    <apex:outputField value="{!ipli.Total_Price__c}"/>
+                </apex:column> 
+                <apex:column headervalue="Product Warranty Years">
+                    <apex:inputField value="{!ipli.Product_Warranty_Years__c}"/>
+                </apex:column>
+                <apex:column headervalue="Product Wattage">
+                    <apex:inputField value="{!ipli.Product_Wattage__c}"/>
+                </apex:column>                
+            </apex:pageBlockTable>
+
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

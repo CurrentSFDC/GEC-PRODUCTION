@@ -1,0 +1,122 @@
+<!--
+ - Created by andra on 2021. 03. 25..
+ -->
+
+<!-- Stock Balancing Return Review -->
+<template>
+    <div class="slds-box">
+
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title__divider">Requestor Information</h3>
+                <div class="slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <b>Account: </b>{mainDetails.mainAccountName}<br>
+                            <b>Requestor Name: </b>{mainDetails.reqName}<br>
+                            <b>Requestor Email: </b>{mainDetails.reqEmail}<br>
+                            <b>Requestor Phone: </b>{mainDetails.reqPhone}<br>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title__divider">Type & Account Information</h3>
+                <div class="slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <b>Return Reference Number:</b> {mainDetails.refNumber}<br>
+                            <b>Sold To Account:</b> {mainDetails.soldToAccName}<br>
+                            <b>Ship To Account:</b> {mainDetails.shipToAccName}<br>
+                            <b>Comments: </b>{mainDetails.comments}
+                        </div>
+                    </div>
+                </div><br>
+                <div>
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_2-of-4">
+                            <lightning-map
+                                    map-markers={mapMarker}
+                                    zoom-level="10"
+                                    options={mapOptions}
+                            ></lightning-map>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="slds-box">
+
+            <div class="slds-col slds-size_8-of-8">
+                <h3 class="slds-section-title_divider">PRODUCTS ADDED FOR STOCK BALANCING CLAIM</h3>
+                <div class="slds-theme_shade border">
+                    <div class="slds-grid slds-show_medium">
+                        <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><b>Product Number</b></div>
+                        <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><b>Quantity</b></div>
+                        <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><b>Unit of Measure</b></div>
+                        <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><b>Product Status</b></div>
+                        <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><b>Unit Price</b></div>
+                        <div class="slds-col slds-size_2-of-12 slds-p-horizontal_small"><b>Extended Amount</b></div>
+                    </div>
+                    <template for:each={itemList} for:item="item" for:index='index'>
+                        <div class="slds-grid slds-wrap order-item-row " key={item.materialMaster}>
+                            <div class="slds-col slds-max-medium-size_1-of-1 slds-medium-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                                <div class="slds-hide_medium slds-m-bottom_x-small">
+                                    <b>Product Number</b>
+                                </div>
+                                <lightning-formatted-text label="" required variant="label-hidden" value={item.materialName}
+                                                 data-index={index} disabled=TRUE
+                                ></lightning-formatted-text>
+                            </div>
+                            <div class="slds-col slds-max-medium-size_1-of-1 slds-medium-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                                <div class="slds-hide_medium slds-m-bottom_x-small">
+                                    <b>Quantity</b>
+                                </div>
+                                <lightning-formatted-text label="" required variant="label-hidden" value={item.returnQuantity}
+                                                 data-index={index} disabled=TRUE
+                                ></lightning-formatted-text>
+                            </div>
+                            <div class="slds-col slds-max-medium-size_1-of-1 slds-medium-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                                <div class="slds-hide_medium slds-m-bottom_x-small">
+                                    <b>Unit of Measure</b>
+                                </div>
+                                <lightning-formatted-text label="" required variant="label-hidden" value={item.uomLabel}
+                                                    data-index={index} disabled=TRUE
+                                ></lightning-formatted-text>
+                            </div>
+                            <div class="slds-col slds-max-medium-size_1-of-1 slds-medium-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                                <div class="slds-hide_medium slds-m-bottom_x-small">
+                                    <b>Product Status</b>
+                                </div>
+                                <lightning-formatted-text label="" required variant="label-hidden" value={item.status}
+                                                          data-index={index} disabled=TRUE
+                                ></lightning-formatted-text>
+                            </div>
+                            <div class="slds-col slds-max-medium-size_1-of-1 slds-medium-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                                <div class="slds-hide_medium slds-m-bottom_x-small">
+                                    <b>Price</b>
+                                </div>
+                                <lightning-formatted-text label="" disabled=TRUE variant="label-hidden" value={item.priceAndCurrency}
+                                                 data-index={index}
+                                ></lightning-formatted-text>
+                            </div>
+                            <div class="slds-col slds-max-medium-size_1-of-1 slds-medium-size_2-of-12 slds-p-horizontal_small slds-m-bottom_x-small">
+                                <div class="slds-hide_medium slds-m-bottom_x-small">
+                                    <b>Extended Amount</b>
+                                </div>
+                                <lightning-formatted-text label="" disabled=TRUE variant="label-hidden" value={item.totalPrice}
+                                                          data-index={index}
+                                ></lightning-formatted-text>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+    </div>
+</template>

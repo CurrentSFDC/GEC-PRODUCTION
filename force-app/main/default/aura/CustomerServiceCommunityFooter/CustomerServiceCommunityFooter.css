@@ -1,0 +1,36 @@
+.THIS {
+}
+
+.THIS p {
+   font-weight:bold;
+    padding:10px;
+}
+
+.THIS a {
+   color:black;
+}
+
+.THIS .bold {
+    font-weight:bold;
+}
+
+.THIS .right {
+    float:right;
+}
+
+.THIS .paddingleft {
+    padding-left:15px;
+}
+
+.THIS .paddingtop {
+    padding-top:15px;
+}
+
+.THIS .margintop {
+    margin-top:15px;
+}
+
+.THIS .socialmediaicon {
+    height:20px;
+    width:20px;
+}

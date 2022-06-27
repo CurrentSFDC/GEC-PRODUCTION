@@ -1,0 +1,38 @@
+.pa-heading-label {
+    display: block;
+}
+.pa-heading-value {
+    display: block;
+}
+.pa-line-label {
+    width: 50%;
+    float: left;
+}
+.pa-line-value {
+    width: 50%;
+    float: left;
+    padding: 4px 0;
+    word-wrap: break-word;
+}
+.assigned-msg > abbr {
+    display: block;
+}
+
+@media only screen and (max-width: 767px) {
+    .pa-heading-label, .pa-heading-value {
+        padding: 6px 0;
+    }
+    .pa-line-label, .pa-line-value {
+        display: block;
+        width: 100%;
+    }
+    .pa-line-value {
+        padding: 7px 10px 7px 0;
+    }
+}
+
+.activeagreements {
+
+    --sds-c-accordion-heading-text-color:green;
+
+}

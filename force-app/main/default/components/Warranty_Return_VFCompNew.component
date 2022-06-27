@@ -1,0 +1,7 @@
+<apex:component controller="DisputeWithProductsController" access="global">
+<apex:attribute name="cId" type="Id" description="This is the Id of the Case Id" assignTo="{!caseId}" access="global"/>
+<apex:repeat value="{!caseDtl}" var="case">
+{!case.CaseNumber}
+ </apex:repeat>
+
+</apex:component>

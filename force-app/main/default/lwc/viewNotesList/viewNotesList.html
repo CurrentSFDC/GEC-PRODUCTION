@@ -1,0 +1,127 @@
+<template>
+
+
+    <lightning-card title="Case Notes List" icon-name="custom:custom63"> 
+        <lightning-datatable 
+                data={notes} 
+                columns={columns}
+                hide-checkbox-column
+                show-row-number-column
+                onrowaction={handleRowActionReadOnly}
+                enable-infinite-loading 
+                key-field="Id">
+        </lightning-datatable> 
+
+             <!-- Detail view modal start -->
+   <template if:true={bShowModal}>
+    <section role="dialog" tabindex="-1"
+             aria-labelledby="modal-heading-01"
+             aria-modal="true"
+             aria-describedby="modal-content-id-1"
+            class="slds-modal slds-fade-in-open slds-modal_medium">
+       <div class="slds-modal__container">
+          <!-- modal header start -->
+          <header class="slds-modal__header">
+             <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+             </button>
+             <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Note Detail</h2>
+          </header>
+          <!-- modal body start -->
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" if:false={isEditForm}>
+            <dl class="slds-list_horizontal slds-wrap">
+                <dt class="slds-item_label slds-truncate" title="Case">Case:</dt>
+                <dd class="slds-item_detail slds-truncate">{record.Case__r.CaseNumber}</dd><br/>
+                <dt class="slds-item_label slds-truncate" title="NoteType">Note Type:</dt>
+                <dd class="slds-item_detail slds-truncate">{record.Note_Type__c}</dd><br/>
+                <dt class="slds-item_label slds-truncate" title="Content">Note Content:</dt>
+                <dd class="slds-item_detail">{record.Note__c}</dd><br/>
+                <!--<dt class="slds-item_label slds-truncate" title="CreatedDate">Created Date :</dt>
+                <dd class="slds-item_detail slds-truncate">{record.CreatedDate}</dd> -->
+                <dt class="slds-item_label slds-truncate" title="Owner">Created By:</dt>
+                <dd class="slds-item_detail slds-truncate">{record.Created_By__c}</dd>
+                
+            </dl>
+          </div>
+
+          <!-- showing record edit form -->
+          <div if:true={isEditForm} class="slds-theme_default">
+            <lightning-record-edit-form layout-type="Full" record-id={currentRecordId} object-api-name="Case_Notes__c" onsubmit={handleSubmit} onsuccess={handleSuccess}>
+                <lightning-messages></lightning-messages>
+                <lightning-output-field field-name="Case__c"></lightning-output-field>
+                <lightning-output-field field-name="Created_By__c"></lightning-output-field>
+                <lightning-input-field field-name="Note_Type__c"></lightning-input-field>
+                <lightning-input-field field-name="Note__c"></lightning-input-field>
+                
+                
+                <div style="text-align:center;">
+                    <lightning-button class="slds-m-top_small"
+                                      variant="brand"
+                                      type="submit"
+                                      name="update"
+                                      label="Update Record"></lightning-button>
+                </div>
+            </lightning-record-edit-form><br/>
+            <div></div>
+        </div>
+
+
+          <!-- modal footer start-->
+          <footer class="slds-modal__footer">
+               <lightning-button variant="brand"
+               label="Close"
+               title="Close"
+               onclick={closeModal}
+               ></lightning-button>
+          </footer>
+       </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+ </template>
+ <!-- Detail view modal end -->
+
+
+
+    <!--<template if:true={notes}>
+        <table class="tablecls">
+            <thead>
+                <tr class="slds-line-height_reset">
+                    <th class="" scope="col">
+                        <div class="slds-truncate"  title="Title">TITLE</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-truncate"  title="Body">NOTE</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-truncate" title="Owner">OWNER</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div class="slds-truncate" title="CreatedDate">DATE</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+ 
+                <template for:each={notes} for:item="acc">
+                    <tr class="slds-hint-parent" key={acc.Id}>
+                        <th data-label="Title" scope="row">
+                            <div class="slds-truncate" >{acc.Title}</div>
+                        </th>
+                        <td data-label="Body">
+                            <div class="slds-truncate" >{acc.TextPreview}</div>
+                        </td>
+                        <td data-label="Owner">
+                            <div class="slds-truncate" >{acc.Owner.Name}</div>
+                        </td>
+                        <td data-label="CreatedDate">
+                             
+                            <div><lightning-formatted-date-time value={acc.CreatedDate} year="numeric" month="numeric" day="numeric" hour="2-digit"
+                            minute="2-digit" timezonename="short" hour12="true"></lightning-formatted-date-time></div>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </template> -->
+    </lightning-card>
+</template>

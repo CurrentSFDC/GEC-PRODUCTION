@@ -1,0 +1,17 @@
+<apex:component controller="DaintreeProductsController" access="global">
+	<apex:attribute name="productsText" type="string" description="Order Products text field" assignTo="{!orderProductsList}"/>  
+        <table style="width:100%" border="1">
+        <tr>
+            <th style ="text-align:left">SKU</th>
+            <th style ="text-align:left">Quantity</th>
+            <th style ="text-align:left">Material Description</th>               
+        </tr>
+		<apex:repeat value="{!OrderProductsTable}" var="OrderProduct">
+            <tr>
+    		<apex:repeat value="{!OrderProduct}" var="productValue">
+          		<td>{!productValue}</td>
+    		</apex:repeat>
+            </tr>    
+		</apex:repeat>     
+    </table>
+</apex:component>

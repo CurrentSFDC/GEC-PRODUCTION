@@ -1,0 +1,128 @@
+<apex:page standardController="GE_LGT_EM_ComplaintLineItem__c" extensions="EMEA_PSO_Claim">
+<apex:pageMessages />
+
+<apex:form >
+<apex:pageBlock >
+  <apex:pageBlockButtons >
+    <apex:commandButton value="Claim Save" action="{!saveAll}"/>
+
+  </apex:pageBlockButtons> 
+  <apex:pageBlockSection title=" " columns="2" collapsible="false">
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q1__c}" 
+         label="Does given layout and the reality match each other?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Ceiling / pole'}"/>
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q2__c}" 
+         label="Physical fit - are existing ceiling structures sound and uniform?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Ceiling / pole'}"/>
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q3__c}"
+          label="Has the ceiling void depth been checked"  
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Ceiling / pole'}"/>   
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q4__c}"
+          label="Is the existing wiring fit for purpose (eg will it last for the duration of any GE agreement)"  
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Ceiling / pole'}"/>
+            
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q5__c}"
+          label="Is the site lighting control system (current / planned) compatible with the product drivers?"  
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Control system'}"/>
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q6__c}"
+          label="Are there any  environmental considerations to take into account such as, corr. atm. high temp.?"  
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Environment'}"/>         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q7__c}"
+          label="Are the IP ratings suitable for the installation?"   
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Environment'}"/>
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q8__c}"
+          label="Is there any need for special accessories for the application (currently not available in GE)?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Accessories'}"/>
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q9__c}"
+          label="Are any applicable product accessories included whether part of the product or addit. accessory?"  
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Accessories'}"/>
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q10__c}"
+          label="Do the installation drawing SKU match the product SKU?"  
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Lighting design'}"/>
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q11__c}"
+          label="Has the Installer been trained / otherwise made fully aware of the installation methods?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product / installation training'}"/>         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q12__c}"
+          label="Are there any handling techniques that the Installer should be made aware of to prevent product damage?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product / installation training'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q13__c}"
+          label="Do the installation guides include special handling techniques to avoid damage?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product / installation training'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q14__c}"
+          label="Are the published / included installation guides up to date?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product / installation training'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q15__c}"
+          label="Are any special tools required in order to complete the installation process?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product / installation training'}"/>            
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q16__c}"
+          label="Is an installation guide provided for any accessories provided" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product / installation training'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q17__c}"
+          label="Has all commissioning responsibilities and parameters been agreed on?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Commissioning'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q18__c}"
+          label="Is the installer aware of any considerations regarding commissioning of emergency fittings and testing there?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Commissioning'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q19__c}"
+          label="Emergency fittings should not contain a mix of self test and manual key-test - is the Installer aware?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Commissioning'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q20__c}"
+          label="Are there any settings the contractors need to verify (driver 700mA and 1400mA settings is not clear and often pre-set differently)" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Commissioning'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q21__c}"
+          label="Was there any trial site installation before or similar installation completed before?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Trial site / previous experience'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q22__c}"
+          label="In case previous installations failed, have all corrective actions been implemented?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Trial site / previous experience'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q23__c}"
+          label="Is the Installer a GE Vendor? This may be required for any on-site remedial tasks." 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Remediation'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q23__c}"
+          label="Has PSO history been checked for products involved?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product quality'}"/>           
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q24__c}"
+          label="Have all products been involved in former installations? (non customer, non NPI)" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product quality'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q25__c}"
+          label="In case previous application failures of involved products, have all corrective actions been implemented?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product quality'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q26__c}"
+          label="If any of the products is customer specific or NPI, has it been field-tested internally?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product quality'}"/>  
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q27__c}"
+          label="Have sufficient production and warehouse audits been carried out to ensure the products meet specification?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product quality'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q28__c}"
+          label="Are all products and solutions checked for regulations and do they meet requirements?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Regulatory compliance'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q29__c}"
+          label="Is there a sufficient stock of contingency product available to service any site issues raised during installation?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Contingency stock'}"/>          
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q30__c}"
+          label="Has a quantity of warranty stock been reserved to allow GE service level agreements to be achieved" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Contingency stock'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q31__c}"
+          label="Has the product been upgraded leading to variations but still has the same product code?" 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product compatibility'}"/>  
+         
+     <apex:inputField value="{!GE_LGT_EM_ComplaintLineItem__c.PSO_Q32__c}"
+          label="Are there any specific times of the day that the products will be accepted on the site? (Availability of fork lift driver etc)." 
+         rendered="{!GE_LGT_EM_ComplaintLineItem__c.SUB_CATEGORIES__c == 'Product delivery'}"/>  
+                    
+  </apex:pageblocksection> 
+         
+</apex:pageblock>
+</apex:form>
+</apex:page>

@@ -1,0 +1,41 @@
+<template>
+    <template if:true={timetrackers}>
+        <table class="tablecls">
+            <thead>
+                <tr class="slds-line-height_reset">
+                    <th class="" scope="col">
+                        <div title="Status">STATUS</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div  title="Days">DAYS</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div title="Hrs">HRS</div>
+                    </th>
+                    <th class="" scope="col">
+                        <div title="Mins">MINS</div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+ 
+                <template for:each={timetrackers} for:item="acc">
+                    <tr class="slds-hint-parent" key={acc.Id}>
+                        <th data-label="Name" scope="row">
+                            <div >{acc.Current_Status__c}</div>
+                        </th>
+                        <td data-label="Days">
+                            <div >{acc.TotalDays}</div>
+                        </td>
+                        <td data-label="Hrs">
+                            <div >{acc.TotalHours}</div>
+                        </td>
+                        <td data-label="Mins">
+                            <div >{acc.TotalMinutes}</div>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </template>
+</template>

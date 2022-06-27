@@ -1,0 +1,12 @@
+<!--
+ - Created by PA on 2021. 06. 22..
+ -->
+
+<!-- Download Rga Document -->
+<template>
+    <div class="slds-align_absolute-center" title="Download the RGA PDF by clicking the pdf icon">
+        <lightning-button label="Download RMA" icon-name="action:download" class="slds-m-left_x-small" onclick={handleClick}></lightning-button>
+        <!--<lightning-icon class="action-icon" icon-name="doctype:pdf" size="medium" onclick={handleClick}></lightning-icon>-->
+        <lightning-spinner class="slds-hidden" alternative-text="Loading" size="small" ></lightning-spinner>
+    </div>
+</template>

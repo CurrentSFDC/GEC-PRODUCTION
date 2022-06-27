@@ -1,0 +1,489 @@
+<template>
+    <lightning-spinner class="page-loader" if:true={isLoading} variant="brand"></lightning-spinner>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_1-of-1 slds-p-around_large slds-text-align_right order-actions">
+            <span if:true={orderDataAvaliable}>
+                <c-test-p-d-f-viewer-l-w-c if:true={orderZRE} record-id={orderHeaderData.Id} number={orderHeaderData.GE_Order_NO__c} label="Print RMA" variant="brand-inverse" type="RMA"></c-test-p-d-f-viewer-l-w-c>
+                <c-test-p-d-f-viewer-l-w-c if:false={orderZRE} record-id={orderHeaderData.Id} number={orderHeaderData.GE_Order_NO__c} label="Order Confirmation" variant="brand-inverse" type="Order"></c-test-p-d-f-viewer-l-w-c>
+            </span>
+            <span class="slds-m-left_medium">
+                <lightning-button-menu alternative-text="Show menu" variant="success" label="Submit Request" onselect={handleRequest}>
+                    <lightning-menu-item if:false={isOrderComplete} value="change-request" label="Change Request"></lightning-menu-item>
+                    <lightning-menu-item value="return-replace" label="Return"></lightning-menu-item>           
+                    <lightning-menu-item value="overage" label="Overage"></lightning-menu-item>
+                    <lightning-menu-item value="shortage" label="Shortage"></lightning-menu-item>
+                    <lightning-menu-item value="lost-damage" label="Lost/Damage"></lightning-menu-item>
+                    <lightning-menu-item value="warranty-claim" label="Warranty claim"></lightning-menu-item>
+                </lightning-button-menu>
+            </span>
+            <span class="slds-m-left_medium">
+                <lightning-button-menu alternative-text="Show menu" variant="success" label="Download Report" onselect={handleReport}>
+                    <lightning-menu-item value="line-items" label="Line Items CSV"></lightning-menu-item>
+                    <lightning-menu-item value="shipment-info" label="Shipment Info CSV"></lightning-menu-item>
+                </lightning-button-menu>
+            </span>
+        </div>
+    </div>
+    
+    <div class="slds-grid slds-wrap slds-p-around_large">
+        <div class="slds-col slds-size_6-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Current Order No.</span>
+            <span class="pa-heading-value">{orderHeaderData.GE_Order_NO__c}</span>
+        </div>
+        <div class="slds-col slds-size_6-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Customer PO No.</span>
+            <span class="pa-heading-value">{orderHeaderData.Customer_PO_Number__c}</span>
+        </div>
+        <div class="slds-col slds-size_6-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Account No.</span>
+            <span class="pa-heading-value">{orderHeaderData.Sold_To__r.GE_LGT_EM_SAP_Customer_Number__c}</span>
+        </div>
+        <div class="slds-col slds-size_6-of-12 slds-medium-size_2-of-12 slds-large-size_3-of-12">
+            <span class="slds-form-element__label pa-heading-label">Account Name</span>
+            <span class="pa-heading-value">{orderHeaderData.Sold_To__r.Name}</span>
+        </div>
+        <div class="slds-col slds-size_6-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+            <span class="slds-form-element__label pa-heading-label">Block Status</span>
+            <span class="pa-heading-value">{orderHeaderData.BlockDescription__c}</span>
+        </div>
+        <div class="slds-col slds-size_6-of-12 slds-medium-size_2-of-12 slds-large-size_1-of-12">
+            <span class="slds-form-element__label pa-heading-label">
+                Order Status<lightning-helptext content="SAP Order Status"></lightning-helptext>
+            </span>
+            <span class="pa-heading-value">{orderHeaderData.GBSTK__c}</span>
+        </div>
+    </div>
+
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_12-of-12 slds-p-around_medium order-tabset">
+            <lightning-tabset active-tab-value="details">
+                <lightning-tab label="Details" value="details">
+                    <div class="slds-grid slds-wrap slds-p-horizontal_small">
+                        <div class="slds-col slds-size_6-of-12">
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Current Order Number</span>
+                                <span class="pa-heading-value">{orderHeaderData.GE_Order_NO__c}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Order Start Date</span>
+                                <span class="pa-heading-value">
+                                    <lightning-formatted-date-time
+                                        value={orderHeaderData.EffectiveDate_FORMAT}
+                                        year="numeric"
+                                        month="numeric"
+                                        day="2-digit">
+                                    </lightning-formatted-date-time>
+                                </span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Requested Delivery Date</span>
+                                <span class="pa-heading-value">
+                                    <lightning-formatted-date-time
+                                        value={salesHeaderData.REQ_DEL_DATE_FORMAT}
+                                        year="numeric"
+                                        month="numeric"
+                                        day="2-digit">
+                                    </lightning-formatted-date-time>
+                                    <!-- <lightning-formatted-date-time
+                                        value={orderHeaderData.Order_Req_Delivery_Date__c_FORMAT}
+                                        year="numeric"
+                                        month="numeric"
+                                        day="2-digit">
+                                    </lightning-formatted-date-time> -->
+                                </span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Order Amount</span>
+                                <span class="pa-heading-value">
+                                    <lightning-formatted-number
+                                        value={orderHeaderData.TotalAmount}
+                                        format-style="currency"
+                                        currency-code={orderHeaderData.CurrencyIsoCode}
+                                        maximum-fraction-digits="2">
+                                    </lightning-formatted-number>
+                                </span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Order Fees</span>
+                                <span class="pa-heading-value">
+                                    <lightning-formatted-number
+                                        value={orderHeaderData.SURCHARGES__c}
+                                        format-style="currency"
+                                        currency-code={orderHeaderData.CurrencyIsoCode}
+                                        maximum-fraction-digits="2">
+                                    </lightning-formatted-number>
+                                </span>
+                            </div>
+                            <template if:true={isAgent}>
+                                <template if:true={allowViewCommission}>
+                                    <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                        <span class="slds-form-element__label pa-heading-label">Total Commission</span>
+                                        <span class="pa-heading-value">
+                                            <lightning-formatted-number
+                                                value={orderHeaderData.TotalCommission__c}
+                                                format-style="currency"
+                                                currency-code={orderHeaderData.CurrencyIsoCode}
+                                                maximum-fraction-digits="2">
+                                            </lightning-formatted-number>
+                                        </span>
+                                    </div>
+                                    <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                        <span class="slds-form-element__label pa-heading-label">Total Commission %</span>
+                                        <span class="pa-heading-value">{orderHeaderData.TotalCommission_per}</span>
+                                    </div>
+                                </template>
+                            </template>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Order Source</span>
+                                <span class="pa-heading-value">{orderHeaderData.OrderSourceCode__c}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Project Name</span>
+                                <span class="pa-heading-value">{salesHeaderData.OPPORTUNITY_ID}</span>
+                                <!-- <span class="pa-heading-value">{orderHeaderData.GE_Opportunity_Id__c}</span> -->
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Sold To Account No.</span>
+                                <span class="pa-heading-value">{orderHeaderData.Sold_To__r.GE_LGT_EM_SAP_Customer_Number__c}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Sold To Account</span>
+                                <span class="pa-heading-value">{orderHeaderData.Sold_To__r.Name}</span>
+                            </div>
+                        </div>
+
+                        <div class="slds-col slds-size_6-of-12">
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Delivery Contact</span>
+                                <span class="pa-heading-value">{salesHeaderData.SHIP_CONTACT_NAME}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Delivery Contact Number</span>
+                                <span class="pa-heading-value">{salesHeaderData.SHIP_CONTACT_NUMBER}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Customer PO Number</span>
+                                <span class="pa-heading-value">{orderHeaderData.Customer_PO_Number__c}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Agent Name</span>
+                                <span class="pa-heading-value" if:true={orderHeaderData.Agent_Account__r}>{orderHeaderData.Agent_Account__r.Name}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Agent Rep Code</span>
+                                <span class="pa-heading-value" if:true={orderHeaderData.Agent_Account__r}>{orderHeaderData.Agent_Account__r.GE_LGT_EM_SAP_Customer_Number__c}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Strategic Account</span>
+                                <span class="pa-heading-value">{strategicAccountName}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Strategic Account No.</span>
+                                <span class="pa-heading-value">{strategicAccountNo}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Order Type</span>
+                                <span class="pa-heading-value">{orderHeaderData.Type}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Ship Complete</span>
+                                <span class="pa-heading-value">{shipcomplete}</span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Shipping Address</span>
+                                <span class="pa-heading-value">
+                                    <lightning-formatted-text value={orderHeaderData.ShippingAddress_C}></lightning-formatted-text>
+                                </span>
+                            </div>
+                            <div class="slds-col slds-size_12-of-12 slds-p-vertical_small">
+                                <span class="slds-form-element__label pa-heading-label">Shipping Notes</span>
+                                <span class="pa-heading-value">Refer To Order Confirmation</span>
+                            </div>
+                        </div>
+                    </div>
+                </lightning-tab>
+                
+                <lightning-tab label="Line Items" value="line-items">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col slds-size_12-of-12">
+                            <lightning-accordion allow-multiple-sections-open>
+                                <template for:each={orderLineItems} for:item="item">
+                                    <lightning-accordion-section name={item.ITEM_NUMBER} label={item.accordianTitle} key={item.ITEM_NUMBER}>
+                                        <div class="slds-grid slds-wrap slds-p-around_small line-container">
+                                            <div class="slds-col slds-size_6-of-12">
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Order Line No.:</span>
+                                                    <span class="pa-line-value">{item.ITEM_NUMBER}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Catalog No.:</span>
+                                                    <span class="pa-line-value">{item.PRODUCT_DESCRIPTION}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">SKU:</span>
+                                                    <span class="pa-line-value">
+                                                        <c-community-inventory-view sku={item.PRODUCT_NUMBER} product={item.PRODUCT_DESCRIPTION} onisloading={handleIsLoading}></c-community-inventory-view>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Price Agreement No.:</span>
+                                                    <span class="pa-line-value" if:true={allowDownloadPAPdf}><a href="javascript:void(0);" onclick={downloadAgreementPdf} title={item.PRICE_AGR_NUMBER}>{item.PRICE_AGR_NUMBER}</a></span>
+                                                    <span class="pa-line-value" if:false={allowDownloadPAPdf}>{item.PRICE_AGR_NUMBER}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Quantity Ordered:</span>
+                                                    <span class="pa-line-value">{item.QUANTITY}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Unit of Measure:</span>
+                                                    <span class="pa-line-value">{item.SALES_UNIT}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Price Per Unit:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-number
+                                                            value={item.UNIT_PRICE}
+                                                            format-style="currency"
+                                                            currency-code={item.CURRENCY_x}
+                                                            maximum-fraction-digits="2">
+                                                        </lightning-formatted-number>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Line Total:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-number
+                                                            value={item.ITEM_NET_VALUE}
+                                                            format-style="currency"
+                                                            currency-code={item.CURRENCY_x}
+                                                            maximum-fraction-digits="2">
+                                                        </lightning-formatted-number>
+                                                    </span>
+                                                </p>
+                                                <template if:true={isAgent}>
+                                                    <template if:true={allowViewCommission}>
+                                                        <p>
+                                                            <span class="slds-form-element__label pa-line-label">Standard Commission:</span>
+                                                            <span class="pa-line-value">
+                                                                <lightning-formatted-number
+                                                                    value={item.STANDARD_COMMISSION}
+                                                                    format-style="currency"
+                                                                    currency-code={item.CURRENCY_x}
+                                                                    maximum-fraction-digits="2">
+                                                                </lightning-formatted-number> | {item.STANDARD_COMMISSION_PER}
+                                                            </span>
+                                                        </p>
+                                                        <p>
+                                                            <span class="slds-form-element__label pa-line-label">Overage Commission:</span>
+                                                            <span class="pa-line-value">
+                                                                <lightning-formatted-number
+                                                                    value={item.OVERAGE_COMMISSION}
+                                                                    format-style="currency"
+                                                                    currency-code={item.CURRENCY_x}
+                                                                    maximum-fraction-digits="2">
+                                                                </lightning-formatted-number>
+                                                            </span>
+                                                        </p>
+                                                        <p>
+                                                            <span class="slds-form-element__label pa-line-label">Total Commission:</span>
+                                                            <span class="pa-line-value">
+                                                                <lightning-formatted-number
+                                                                    value={item.ITEM_COMM_VALUE}
+                                                                    format-style="currency"
+                                                                    currency-code={item.CURRENCY_x}
+                                                                    maximum-fraction-digits="2">
+                                                                </lightning-formatted-number> | {item.TOTAL_COMMISSION_PER}
+                                                            </span>
+                                                        </p>
+                                                    </template>
+                                                </template>
+                                            </div>
+                                            <div class="slds-col slds-size_6-of-12">
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Quantity Shipped:</span>
+                                                    <span class="pa-line-value">{item.QTY_SHIPPED}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Quantity Remaining:</span>
+                                                    <span class="pa-line-value">{item.QTY_REMAINING}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Requested Delivery Date:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-date-time
+                                                            value={item.REQ_DEL_DATE_FORMAT}
+                                                            year="numeric"
+                                                            month="numeric"
+                                                            day="2-digit">
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Shipment Status:</span>
+                                                    <span class="pa-line-value">{item.ITEM_STATUS}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </lightning-accordion-section>
+                                </template>
+                            </lightning-accordion>
+                        </div>    
+                    </div>
+                </lightning-tab>
+                
+                <lightning-tab label="Shipment Info" value="shipment-info">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col slds-size_12-of-12">
+                            <lightning-accordion allow-multiple-sections-open>
+                                <template for:each={shipmentLineItems} for:item="item">
+                                    <lightning-accordion-section name={item.ITEM_NUMBER} label={item.accordianTitle} key={item.ITEM_NUMBER}>
+                                        <div class="slds-grid slds-wrap slds-p-around_small line-container">
+                                            <div class="slds-col slds-size_6-of-12">
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">First Promise Date:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-date-time
+                                                            value={item.FPDD_FORMAT}
+                                                            year="numeric"
+                                                            month="numeric"
+                                                            day="2-digit">
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Estimated Shipping Date:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-date-time
+                                                            value={item.EST_SHIP_DATE_FORMAT}
+                                                            year="numeric"
+                                                            month="numeric"
+                                                            day="2-digit">
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Estimated Delivery Date:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-date-time
+                                                            value={item.EST_DEL_DATE_FORMAT}
+                                                            year="numeric"
+                                                            month="numeric"
+                                                            day="2-digit">
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Carrier:</span>
+                                                    <span class="pa-line-value">{item.CARRIER_NAME}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Tracking Number:</span>
+                                                    <span class="pa-line-value">
+                                                        <a href="javascript:void(0);" title={item.TRACKING_NUMBER} name={item.CARRIER_NAME} onclick={showTackingModal}>{item.TRACKING_NUMBER}</a>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="slds-col slds-size_6-of-12">
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Shipped From:</span>
+                                                    <span class="pa-line-value">{item.SHIPPED_FROM}</span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Invoice No.:</span>
+                                                    <span class="pa-line-value">
+                                                        <c-test-p-d-f-viewer-l-w-c record-id={orderHeaderData.Id} number={item.INVOICE_NUMBER} label="Invoice Details" variant="brand-inverse" type="Invoice"></c-test-p-d-f-viewer-l-w-c>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Invoice Date:</span>
+                                                    <span class="pa-line-value">
+                                                        <lightning-formatted-date-time
+                                                            value={item.INVOICE_DATE_FORMAT}
+                                                            year="numeric"
+                                                            month="numeric"
+                                                            day="2-digit">
+                                                        </lightning-formatted-date-time>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="slds-form-element__label pa-line-label">Packing List:</span>
+                                                    <span class="pa-line-value">
+                                                        <c-test-p-d-f-viewer-l-w-c record-id={orderHeaderData.Id} number={item.DEL_NUMBER} label="Packing List" variant="brand-inverse" type="Packing List"></c-test-p-d-f-viewer-l-w-c>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </lightning-accordion-section>
+                                </template>
+                            </lightning-accordion>
+                        </div>    
+                    </div>
+                </lightning-tab>
+            </lightning-tabset>
+            <!-- Show shipment message behind shipment tab-->
+            <lightning-helptext class="shipment-tracking-info" content="*Note: Tracking may take up to 24-hours after shipment to update, depending on the carrier"></lightning-helptext>
+        </div>
+    </div>
+    
+    <!-- Shipment Tracking Modal Box -->
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-02" aria-describedby="modal-content-id-2" aria-modal="true" class="slds-modal slds-modal_large community-modal shipment-tracking-modal">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close slds-button_icon-inverse" title="close" onclick={closeModal}></lightning-button-icon>
+                <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate">Shipment Details</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-2">
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-size_12-of-12 slds-text-align_center slds-m-bottom_x-small tracking-flags">
+                        <div>
+                            Carrier: <span>{trackingData.companyName}</span>
+                            <template if:true={showShipmentFlag}>
+                                <abbr if:false={trackingData.isDispatched} class="shipment-status">Dispatch</abbr>
+                                <abbr if:true={trackingData.isDispatched} class="shipment-status shipment-status-success">Dispatch</abbr>
+                            </template>
+                        </div>
+                        <div>
+                            Tracking ID: <span>{trackingData.trackingNumber}</span>
+                            <template if:true={showShipmentFlag}>
+                                <abbr if:false={trackingData.isInTransit} class="shipment-status">In Transit</abbr>
+                                <abbr if:true={trackingData.isInTransit} class="shipment-status shipment-status-success">In Transit</abbr>
+                            </template>
+                        </div>
+                        <div if:true={showShipmentFlag}>
+                            Est. Delivery Date: <span>{trackingData.expectedDelivery}</span>
+                            <abbr if:false={trackingData.isDelivered} class="shipment-status">Delivered</abbr>
+                            <abbr if:true={trackingData.isDelivered} class="shipment-status shipment-status-success">Delivered</abbr>
+                        </div>
+                    </div>
+                </div>
+                <template if:true={showShipmentFlag} for:each={trackingCheckpoints} for:item="item">
+                    <div class="slds-grid slds-wrap slds-box slds-m-bottom_x-small ship-tracking-record" key={item.checkpoint_time}>
+                        <div class="slds-col slds-size_12-of-12">
+                            <div class="slds-grid slds-p-horizontal_small ship-tracking-row">
+                                <div class="slds-p-right_small">{item.checkpoint_time}</div>
+                                <div>
+                                    <div>{item.tag}</div>
+                                    <div>{item.location}</div>
+                                    <div>{item.message}</div>
+                                </div>
+                            </div>
+                        </div>                                  
+                    </div>
+                </template>
+
+                <template if:false={showShipmentFlag}>
+                    <div class="slds-grid slds-wrap slds-box ship-tracking-rcord">
+                        <div class="slds-col slds-size_12-of-12">
+                            <p class="slds-text-align_center" if:true={isEmptyTrackingUrl}>Please Contact &nbsp; {trackingData.companyName} &nbsp; for the tracking number &nbsp; {trackingData.trackingNumber}</p>
+                            <p class="slds-text-align_center" if:false={isEmptyTrackingUrl}>Please find shipment details for the tracking number {trackingData.trackingNumber} <a href={trackingData.url} target="_blank">here.</a></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick={closeModal}>Close</button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop"></div>
+</template>

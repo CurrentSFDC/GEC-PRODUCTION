@@ -1,0 +1,194 @@
+<template>
+    <lightning-spinner if:true={isLoading} variant="brand"></lightning-spinner>
+    <div class="slds-box">
+        <div class="slds-grid slds-gutters slds-wrap">
+            <div class="slds-col slds-size_1-of-1">
+                <h2 class="slds-text-align_center slds-p-vertical_x-small">Customer List</h2>
+            </div>
+        </div>
+        <div class="slds-grid slds-gutters slds-wrap slds-p-around_xx-small">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                <lightning-input type="search" onchange={searchDataTable} value={searchString} class="slds-m-bottom_small" label="Search Accounts"></lightning-input>
+            </div>
+            <template if:true={isAgent}>
+                <div if:true={showFooter} class="slds-col slds-size_1-of-2 slds-medium-size_5-of-12 slds-large-size_5-of-12 slds-text-align_center slds-m-top_large slds-p-vertical_xx-small acc-name">
+                    <span><b>Agent Account: </b></span><span>{selectedAgent}</span>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-medium-size_3-of-12 slds-large-size_3-of-12 slds-text-align_right slds-m-top_large change-btn">
+                    <!-- <lightning-button if:true={allowDownload}
+                        class="slds-m-left_x-small"
+                        icon-name="utility:download"
+                        alternative-text="Download Customer List"
+                        onclick={downloadCustomerList}
+                        variant="brand">
+                    </lightning-button> -->
+                    <lightning-icon if:true={allowDownload}
+                        icon-name="doctype:csv"
+                        alternative-text="Download Customer List"
+                        title="Download Customer List"
+                        onclick={downloadCustomerList}>
+                    </lightning-icon>
+                    <!-- Change Agent Button For Desktop View -->
+                    <lightning-button if:true={showFooter}
+                        variant="brand"
+                        label="Change Agent"
+                        title="Back"
+                        onclick={goBackToStepOne}
+                        icon-name="utility:back"
+                        class="slds-m-left_x-small dsk-change-agent">
+                    </lightning-button>
+                    <!-- Change Agent Button For Ipad & Mobile View -->
+                    <lightning-button if:true={showFooter}
+                        variant="brand"
+                        title="Back"
+                        onclick={goBackToStepOne}
+                        icon-name="utility:back"
+                        class="slds-m-left_x-small im-change-agent">
+                    </lightning-button>
+                </div>
+            </template>
+            <template if:false={isAgent}>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-large-size_8-of-12 slds-text-align_right slds-m-top_large change-btn">
+                    <!-- <lightning-button if:true={allowDownload}
+                        class="slds-m-left_x-small"
+                        icon-name="utility:download"
+                        alternative-text="Download Customer List"
+                        onclick={downloadCustomerList}
+                        variant="brand">
+                    </lightning-button> -->
+                    <lightning-icon if:true={allowDownload}
+                        icon-name="doctype:csv"
+                        alternative-text="Download Customer List"
+                        title="Download Customer List"
+                        onclick={downloadCustomerList}>
+                    </lightning-icon>
+                </div>
+            </template>
+            <div class="slds-col slds-size_1-of-1 slds-m-vertical_xxx-small" if:true={isAgent}>
+                <lightning-progress-indicator
+                    current-step={currentStep}
+                    type="path"
+                    variant="base">
+                    <lightning-progress-step
+                        label="1. Agent Account"
+                        value="1"
+                    ></lightning-progress-step>
+                    <lightning-progress-step
+                        label="2. Customer Account"
+                        value="2"
+                    ></lightning-progress-step>
+                </lightning-progress-indicator>
+            </div>
+            <div class="stepOne slds-m-top_small">
+                <table if:true={searchable} class="slds-table slds-table_cell-buffer slds-table_fixed-layout slds-max-medium-table_stacked-horizontal slds-table_bordered">
+                    <thead>
+                        <tr class="slds-text-heading_label">
+                            <th class="slds-cell-wrap slds-is-sortable" scope="col" data-sort-by="Name">
+                                <span class="slds-p-right_small">Name</span>
+                                <lightning-icon icon-name={typeSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                            <th class="slds-is-sortable" scope="col" data-sort-by="Customer_Segmentation__c">
+                                <span class="slds-p-right_small">Segmentation</span>
+                                <lightning-icon icon-name={titleSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                            <th class="slds-is-sortable" scope="col" data-sort-by="GE_LGT_EM_SAP_Customer_Number__c">
+                                <span class="slds-p-right_small">Account #</span>
+                                <lightning-icon icon-name={descriptionSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                            <th class="slds-is-sortable" scope="col" data-sort-by="ShippingAddress">
+                                <span class="slds-p-right_small">Address</span>
+                                <lightning-icon icon-name={dateSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                            <th scope="col" if:true={isAgent}></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={searchable} for:item="record" for:index="index">
+                            <tr key={record.Id}>
+                                <td data-label="Name" class="slds-cell-wrap">
+                                    {record.Name}
+                                </td>
+                                <td data-label="Segmentation">
+                                    <!-- {record.Customer_Segmentation__c} -->
+                                    {record.Segment}
+                                </td>
+                                <td data-label="Account #">
+                                    {record.GE_LGT_EM_SAP_Customer_Number__c}
+                                </td>
+                                <td data-label="Address">
+                                    <lightning-formatted-address
+                                            street={record.ShippingStreet}
+                                            city={record.ShippingCity}
+                                            country={record.ShippingCountry}
+                                            province={record.ShippingState}
+                                            postal-code={record.ShippingPostalCode}
+                                        ></lightning-formatted-address>
+                                </td>
+                                <td if:true={isAgent}>
+                                    <lightning-button variant="brand" label="View Customer" value={index} onclick={getCustomers}></lightning-button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div class="stepTwo slds-hide slds-m-top_small">
+                <table if:true={distributorAccounts} class="slds-table slds-table_cell-buffer slds-table_fixed-layout slds-max-medium-table_stacked-horizontal slds-table_bordered">
+                    <thead>
+                        <tr class="slds-text-heading_label">
+                            <th class="slds-cell-wrap slds-is-sortable" scope="col" data-sort-by="Name">
+                                <span class="slds-p-right_small">Name</span>
+                                <lightning-icon icon-name={typeSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                            <th class="slds-is-sortable" scope="col" data-sort-by="Customer_Segmentation__c">
+                                <span class="slds-p-right_small">Segmentation</span>
+                                <lightning-icon icon-name={titleSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                            <th class="slds-is-sortable" scope="col" data-sort-by="GE_LGT_EM_SAP_Customer_Number__c">
+                                <span class="slds-p-right_small">Account #</span>
+                                <lightning-icon icon-name={descriptionSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                            <th class="slds-is-sortable" scope="col" data-sort-by="ShippingAddress">
+                                <span class="slds-p-right_small">Address</span>
+                                <lightning-icon icon-name={dateSortDirectionArrow} size="x-small"></lightning-icon>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={distributorAccounts} for:item="record" for:index="index">
+                            <tr key={record.Id}>
+                                <td data-label="Name" class="slds-cell-wrap">
+                                    {record.Name}
+                                </td>
+                                <td data-label="Segmentation">
+                                    <!-- {record.Customer_Segmentation__c} -->
+                                    {record.Segment}
+                                </td>
+                                <td data-label="Account #">
+                                    {record.GE_LGT_EM_SAP_Customer_Number__c}
+                                </td>
+                                <td data-label="Address">
+                                    <lightning-formatted-address
+                                            street={record.ShippingStreet}
+                                            city={record.ShippingCity}
+                                            country={record.ShippingCountry}
+                                            province={record.ShippingState}
+                                            postal-code={record.ShippingPostalCode}
+                                        ></lightning-formatted-address>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <lightning-button-icon
+        if:true={showScroll}
+        icon-name="utility:arrowup" 
+        class="topButton" 
+        onclick={scrollTop}               
+        variant="brand" 
+        alternative-text="Scroll Top">
+    </lightning-button-icon>
+</template>

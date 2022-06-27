@@ -1,0 +1,9 @@
+@import 'c/communityCSS';
+
+ol{
+    list-style: circle;
+    padding-left: 1rem;
+}
+.page-loader {
+    position: fixed;
+}

@@ -1,0 +1,100 @@
+<apex:page id="thePage" standardcontroller="GE_NAS_RMA_Lineitem__c" extensions="GE_NAS_RMAClaimItemEvaluation" showHeader="false" sidebar="false" docType="html-5.0">
+    <apex:form id="theForm">
+        <apex:pageblock id="theBlock">
+            <apex:pageblockbuttons >
+                <apex:commandButton action="{!saveEval}" value="Save" rerender="pnlLines"/>
+                <input class="btn" type="button" name="Close" value="Close" onclick="javascript:window.close();"/>
+                
+            </apex:pageblockbuttons> 
+            <apex:pageBlockSection id="thepageBlockSection" title="Evaluation" columns="2" collapsible="false">
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Claim ID"/>
+                    <apex:outputfield value="{!lineItem.GE_NAS_RMA_Claim__r.Name}" id="Name"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Item"/>
+                    <apex:outputLabel value="{!lineItem.GE_NAS_Item__c}" id="Item"/>
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Item #"/>
+                    <apex:outputfield value="{!lineItem.GE_NAS_MfgNo__c}" id="Mfg"/>
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="RMA"/>
+                    <apex:outputfield value="{!lineItem.GE_NAS_RMA_Claim__r.GE_NAS_RMA_No__c}" id="RMA"/>
+                </apex:pageblocksectionItem>    
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Item Description"/>
+                    <apex:outputfield value="{!lineItem.GE_NAS_CAT_NO__c}" id="Item"/>
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="QTY"/>
+                    <apex:outputfield value="{!lineItem.GE_NAS_QTY__c}" id="Qty"/>
+                </apex:pageblocksectionItem>
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Eval By"/>
+                    <apex:inputfield value="{!lineItem.GE_NAS_EvalBy__c}" id="EvalBy"/>
+                </apex:pageblocksectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="sectionLines1" title="" columns="1" collapsible="false" showHeader="false">
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Customer Letter"/>
+                    <apex:inputfield value="{!lineItem.GE_NAS_Customer_Letter__c}" id="Cutomerletter" style="width:500px;"/>
+                </apex:pageblocksectionItem>  
+                <apex:pageblocksectionItem >
+                    <apex:outputLabel value="Eval Summary"/>
+                    <apex:inputfield value="{!lineItem.GE_NAS_Eval_Summary__c}" id="Evalsummary" style="width:500px;"/>
+                </apex:pageblocksectionItem>  
+            </apex:pageBlockSection>
+            <apex:pageBlockSection id="sectionLines" title="Evaluation Details" columns="2" collapsible="false">
+            </apex:pageBlockSection>
+            <apex:outputpanel id="pnlLines">
+                <table class="list" cellpadding="0" cellspacing="0" width="100%" id="theTable">
+                    <tr class="headerRow">
+                        <td>Sample</td>
+                        <td>Delete</td>
+                        <td>EvalQty</td>
+                        <td>Date Received</td>
+                        <td>Date Evaluated</td>
+                        <td>Date Code</td>
+                        <td>Level1</td>
+                        <td>Level2</td>
+                    </tr>
+                    <apex:repeat value="{!itemeval}" var="itemlines" id="theRepeat">
+                        <tr>
+                            <td><apex:inputfield value="{!itemlines.GE_NAS_Sample__c}" id="sam" style="width:20px;"/></td>
+                            <td><apex:inputfield value="{!itemlines.GE_NAS_Delete__c}" id="del"/></td>
+                            <td><apex:inputfield value="{!itemlines.GE_NAS_Eval_Qty__c}" id="qty" style="width:20px"/></td>
+                            <td><c:noDateLink ><apex:inputfield value="{!itemlines.GE_NAS_Date_Received__c}" id="dateRecv"/></c:noDateLink></td>
+                            <td><c:noDateLink id="theLink"><apex:inputfield value="{!itemlines.GE_NAS_Date_Evaluated__c}" id="dateEval"/></c:noDateLink></td>
+                            <td><apex:inputfield value="{!itemlines.GE_NAS_Date_Code__c}" id="dateCode" type="date"/></td>
+                            <td><apex:inputfield value="{!itemlines.GE_NAS_Level1__c}" id="Level1"/></td>
+                            <td><apex:inputfield value="{!itemlines.GE_NAS_Level2__c}" id="Level2"/></td>
+                        </tr>
+                    </apex:repeat>
+                    <tr>
+                        <td colspan="8" align="center">
+                            <apex:commandButton action="{!addLine}" value="Add Line" rerender="pnlLines"/>&nbsp;&nbsp;&nbsp;
+                            <apex:commandButton action="{!deleteLine}" value="Delete Lines" rerender="pnlLines"/>
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputpanel>
+        </apex:pageblock>
+    </apex:form>  
+    
+    <script>
+    function confirmClose() {
+        var elements = (document.all) ? document.all : document.getElementsByTagName("*");
+        for (var i=0, ii=elements.length; i<ii;i+=1) {
+            if(elements[i].id.indexOf('dateEval')>0)
+                if(elements[i].value == '') {
+                    alert('Date Evaluated is mandatory');
+                    elements[i].focus();
+                    return false;
+                }
+        }
+        return confirm('Are you sure you want to Close RMA in QAD?');
+    }
+    </script>
+</apex:page>

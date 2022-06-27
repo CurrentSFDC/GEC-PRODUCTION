@@ -1,0 +1,97 @@
+<template>
+    <div class="slds-box">
+        <!-- <div class="slds-text-title_caps">Review</div> <br>-->
+    
+
+        <div class="slds-grid slds-gutters slds-wrap">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-8 slds-large-size_4-of-8">
+                <h3 class="slds-section-title--divider">Requestor Information</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col">
+                            <b>Account: </b>{accountName}<br>
+                            <!--<lightning-input type="text" label="Requestor Name" value={requestorName} read-only="true" class="slds-input_bare" variant="label-inline"></lightning-input> -->
+                            <b>Requestor Name: </b>{requestorName}<br>
+                            <b>Requestor Email: </b>{requestorEmail}<br>
+                            <b>Requestor Phone: </b>{requestorPhone}<br>
+                            
+                        </div>
+                    </div>
+                </div><br>
+                <h3 class="slds-section-title--divider">Site Contact Information</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col slds-size_2-of-4">
+                            <b>Location: </b>{SiteName}<br>
+                            <b>Name: </b>{endUserName}<br>
+                            <b>Email: </b>{endUserEmail}<br>
+                            <b>Phone: </b>{endUserPhone}<br>
+                        </div>
+                        <div class="slds-col slds-size_2-of-4">
+                                <b>Site Contact Address: </b><lightning-formatted-address
+                                street={endUserAddressStreet}
+                                city={endUserAddressCity}
+                                country={endUserAddressCountry}
+                                province={endUserAddressState}
+                                postal-code={endUserAddressPostalCode}
+                                
+                            ></lightning-formatted-address>
+                        </div>      
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-8 slds-large-size_4-of-8">
+                <h3 class="slds-section-title--divider">Action and Reason</h3>
+                <div class="slds-theme_shade border">
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col">
+                            <b>Requested Action:</b> {requestedAction}<br>
+                            <b>Warranty Code:</b> {returnReason}<br>
+                            <b>Warranty Sub Code:</b> {secondaryReason}<br>
+                            <b>Comments: </b>{comments}
+                        </div>
+                    </div>
+                </div><br>
+                <div>
+                    <div class="slds-grid slds-wrap">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-4 slds-large-size_2-of-4">
+                            
+                            <lightning-map
+                            map-markers={mapMarker}
+                            zoom-level="7"
+                            options={mapOptions}
+                        ></lightning-map>
+                        
+                        </div>      
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <div class="slds-box"> 
+
+        <div if:true={isOrderIdAvailable}>
+        
+            <div class="slds-col slds-size_8-of-8">
+                <h3 class="slds-section-title--divider">Products Added for Warranty Claim</h3> 
+                <div class="slds-box slds-theme_shade border">
+            <template if:true={orderItemList}>
+                <lightning-datatable data={orderItemList} columns={warrantyColumns} key-field="Id" onrowaction={handleRowAction} hide-checkbox-column>
+                </lightning-datatable>
+                                
+            </template>
+            <template if:true={error}>
+                {error}
+            </template>
+
+           
+        
+        </div>
+        </div>
+    </div>
+    </div>
+</template>

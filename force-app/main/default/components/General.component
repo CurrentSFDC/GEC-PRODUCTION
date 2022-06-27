@@ -1,0 +1,235 @@
+<apex:component >
+    <script id="projectAddressEntry" type="text/template">
+        <!-- <div class="form-group">
+         <label for="address1">{{pageLabelMap 'Profile_Address'}}</label>
+         <input id="address1" type="text" class="form-control projectAddress1 projectField cc_contact_input_address" name="projectAddress.address1" value="{{this.address1}}" maxlength="40" />
+         <input id="address2" type="text" class="form-control projectAddress2 projectField cc_contact_input_address" name="projectAddress.address2" value="{{this.address2}}" maxlength="40" />
+         <input id="address3" type="text" class="form-control projectAddress3 projectField cc_contact_input_address" name="projectAddress.address3" value="{{this.address3}}" maxlength="40" />
+        </div> -->
+        <div class="project-messagingSection-Error" style="display: none"></div>
+        <div class="form-group">
+            <label for="country">{{pageLabelMap 'CheckOut_Country'}}</label>
+            {{log 'template'}}
+            {{log this}}
+            {{{selectGeo 'country' this.countryList '' 'countryListing form-control' 'project'}}}
+        </div>
+        <div class="form-group">
+            <label for="state">{{pageLabelMap 'CheckOut_State'}} {{#ifNotEquals orderType 'Purchase Order'}} * {{/ifNotEquals}}</label>
+            <div class="stateSection cc_state_section"></div>
+        </div>
+        <div class="form-group">
+            <label for="city">{{pageLabelMap 'CheckOut_City'}} {{#ifNotEquals orderType 'Purchase Order'}} * {{/ifNotEquals}}</label>
+            <input tabindex="4" id="city" type="text" class="form-control projectCity projectField cc_contact_input_city" name="projectAddress.city" maxlength=255 value="{{this.projectCity}}"/>
+        </div>
+        <div class="form-group">
+            <label for="postalCode">{{pageLabelMap 'CheckOut_PostalCode'}}</label>
+            <input tabindex="5" id="postalCode" type="text" class="form-control projectPostalCode projectField cc_contact_input_postal_code" name="projectAddress.postalCode" value="{{this.projectPostalCode}}"
+                   maxlength=10/>
+        </div>
+    </script>
+
+    <script id="General-Information-Desktop" type="text/template">
+        <div class="margin_form">
+            <div>
+                <form id="generalInfoForm" class="">
+
+                    <!-- Show General Form Error If Order Type Is "Price Agreement" & "Revise Price Agreement" By Sameer Mahadik On(6-23-2021) -->
+                    <div class="general-messagingCustom-Error" style="display: none"></div>
+
+                    <div class="form-group container" style="padding-left: 0px; padding-right: 30px;">
+                        {{#ifNotEquals orderType 'Purchase Order'}}
+                            <p>* Required field.</p>
+                        {{/ifNotEquals}}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h3 class="cc_section_title">{{pageLabelMap 'CheckOut_ProjectInfo'}}</h3>
+                            </div>
+
+                            <div class="col-sm-6">
+                                {{#ifEquals orderType 'Purchase Order'}}
+                                <h3 class="cc_section_title">{{pageLabelMap 'CheckOut_OrderInfo'}}</h3>
+                                {{else}}
+                                <h3 class="cc_section_title">{{pageLabelMap 'CheckOut_PAInfo'}}</h3>
+                                {{/ifEquals}}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <form id="projAddressForm" class="addressForm">
+                                <div class="col-sm-6">
+                                    <label for="projectName">{{pageLabelMap 'CheckOut_ProjectName'}} {{#ifNotEquals orderType 'Purchase Order'}} * {{/ifNotEquals}}</label>
+                                    <input tabindex="1" id="projectName" type="text" class="form-control projectfirstNameField projectField cc_contact_input_firstname" name="projectName" maxlength="{{#ifEquals orderType 'Purchase Order'}}18{{else}}20{{/ifEquals}}"
+                                           value="{{this.projectName}}"/>
+                                    <span class="remaining-char projectNameCharLimit">Remaining Character : <abbr>{{#ifEquals orderType 'Purchase Order'}}18{{else}}20{{/ifEquals}}</abbr></span>                                    
+                                    <br>
+                                    <label for="projectDescription" class="cc_shipnotes_label">{{#ifNotEquals orderType 'Purchase Order'}} {{pageLabelMap 'CheckOut_ProjectComments'}} {{else}}{{pageLabelMap 'CheckOut_ProjectDescription'}}{{/ifNotEquals}}</label>
+                                    <textarea tabindex="2" id="projectDescription" name="projectDescription" rows="6" maxlength="{{#ifEquals orderType 'Purchase Order'}}255{{else}}80{{/ifEquals}}" class="form-control">{{this.projectDescription}}</textarea>
+                                    <span class="remaining-char projectCommentCharLimit">Remaining Character : <abbr>{{#ifEquals orderType 'Purchase Order'}}255{{else}}80{{/ifEquals}}</abbr></span>                                    
+                                    {{> projectAddressEntry this}}
+                                </div>
+
+                                {{#ifEquals orderType 'Purchase Order'}}
+                                <div class="col-sm-6">
+                                    {{log this}}
+                                    <!--{{#if this.sampleOrder}}-->
+                                    {{#if false}}
+                                    <label for="orderReason">{{pageLabelMap 'CheckOut_OrderReason'}}</label>
+                                    <textarea tabindex="7" id="orderReason" rows="3" class="form-control orderReasonField projectField cc_contact_input_firstname" name="orderReason" maxlength=100>{{this.orderReason}}</textarea><br>
+                                    {{/if}}
+                                    <div class="form-group" id="repCodeListField">
+                                        <label for="repCode">{{pageLabelMap 'CheckOut_RepCode'}}</label>
+                                        <select tabindex="8" class="form-control repCodeList" name="repCode" id="repCode">
+                                        </select>
+                                        <input tabindex="9" type="hidden" name="agentRepCode" id="agentRepCode" value={{this.agentRepCode}}>
+                                    </div>
+                                    <div class="form-group" id="agentNameField">
+                                        <label for="agentName">{{pageLabelMap 'CheckOut_AgencyName'}}</label>
+                                        <input tabindex="10" class="form-control" type="text" name="agentName" id="agentName" value="{{this.agentName}}" readonly/>
+                                    </div>
+                                    <!-- <label for="serialNumber">{{pageLabelMap 'CheckOut_SerialNumber'}}</label>
+                                    <input id="serialNumber" type="text" class="form-control serialNumberField projectField cc_contact_input_firstname" name="serialNumber" maxlength=100 value="{{this.serialNumber}}" /><br> -->
+                                   <!-- <input id="StrategicAccounts" type="number" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==8) return false;" class="form-control PAField strategicAccountField" name="strategicAccount" value="{{this.strategicAccount}}" /> -->
+                                   <div class="form-group strategic-account-field" id="stratigicAccountField">
+                                        <label for="stratigicAccountField">{{pageLabelMap 'CheckOut_StrategicAccountNo'}}</label>
+                                        <input tabindex="11" type="text" id="StrategicAccounts" class="form-control search_input cc_search_input strategicAccountSearchText" name="strategicAccount" placeholder="Enter Strategic Account" title="Search strategic Account" data-trigger="focus" autocomplete="off">
+                                        <ul class="strategicAccountSearchResults"></ul>
+                                    </div>
+                                {{else}}
+                                <div class="col-sm-3">
+                                    <!-- <label for="agentRepCode">{{pageLabelMap 'CheckOut_AgentRepCode'}}</label> -->
+                                    <!-- <input id="agentRepCode" type="text" class="form-control PAField agentRepCodeField" name="agentRepCode" maxlength=5 value="" /><br> -->
+                                    <!-- <label for="fixtureRepCode">{{pageLabelMap 'CheckOut_FixtureAgentRepCode'}}</label> -->
+                                    <!-- <input id="fixtureRepCode" type="text" class="form-control PAField fixtureRepCodeField" name="fixtureRepCode" maxlength=100 value="" /><br> -->
+                                    <label for="strategicAccount">{{pageLabelMap 'CheckOut_StrategicAccountNo'}}</label>
+                                    <input tabindex="12" type="text" id="StrategicAccounts" class="form-control search_input cc_search_input strategicAccountSearchText" name="strategicAccount" placeholder="Enter Strategic Account" title="Search strategic Account" data-trigger="focus" autocomplete="off">
+                                    <ul class="strategicAccountSearchResults"></ul>
+                                </div>
+                                <div class="col-sm-3">
+                                    <label for="validFrom">{{pageLabelMap 'CheckOut_ValidFrom'}}</label>
+                                    <input tabindex="13" id="validFrom" type="date" class="form-control PAField validFromField" name="validFrom" onclick="setPAMinDate(this)" {{#ifEquals orderType 'Revise Price Agreement'}} readonly="readonly" {{/ifEquals}}/><br>
+                                    <label for="validTo">{{pageLabelMap 'CheckOut_ValidTo'}}</label>
+                                    <input tabindex="14" id="validTo" type="date" class="form-control PAField validToField" name="validTo" onclick="setPAMinDate(this)" /> <br>
+                                </div>
+                                {{#ifNotEquals orderType 'Revise Price Agreement'}}
+                                <div class="col-sm-3">
+                                    <label for="lotPricing">{{pageLabelMap 'CheckOut_LotPricing'}}</label>
+                                    <input tabindex="15" id="lotPricing" type="checkbox" class="form-control PAField lotPricingField" name="lotPricing"
+                                           onmousedown="this.form.lotPricingAmount.disabled=this.checked"/><br>
+                                </div>
+                                <div class="col-sm-3">
+                                    <label for="lotPricingAmount">{{pageLabelMap 'CheckOut_LotPricingAmount'}}</label>
+                                    <input tabindex="16" id="lotPricingAmount" type="number" step="0.01" class="form-control PAField lotPricingAmountField" name="lotPricingAmount" value="{{this.lotPricingAmount}}" disabled/> <br>
+                                </div>
+                                {{/ifNotEquals}}
+                                {{/ifEquals}}
+                            </form>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <p class="link_button">
+                <button tabindex="17" class="btn btn-default btn-sm" onclick="goBack()">Back</button>
+                <input tabindex="6" class="btn btn-default btn-sm processReviewNew" type="button" value="{{pageLabelMap 'CheckOut_Continue'}}" alt="{{pageLabelMap 'CheckOut_Continue'}}"/>
+                <br/>
+            </p>
+        </div>
+    </script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+        function loadEmptyCountrySelect() {
+            //$('.countryListing')[0].disabled='disabled';
+            //if ($('.countryListing')[0].value == 'US' && $('.projectstate')[0].value == 'AL' && $('.projectCity')[0].value == '') {
+                //$('.projectstate').prepend($('<option value="" selected>Please Select Province/State</option>'));
+                //$('.projectstate')[0].disabled='disabled';
+                //$('.countryListing').prepend($('<option value="" selected>--Please select--</option>'));
+            //} else {
+                //$('.countryListing').prepend($('<option value="">--Please select--</option>'));
+            //}
+        }
+        var countryTimer = setInterval(function () {
+                    if (typeof($('.countryListing')[0]) != 'undefined') {
+                        clearInterval(countryTimer);
+                        loadEmptyCountrySelect();
+                    }
+                }, 250);
+        
+        function setPAMinDate(t) {
+            var today = new Date();
+            //console.log('today',today);
+
+            var year = today.getFullYear();
+            //console.log('year',year);
+
+            var month = '' + (today.getMonth() + 1);
+            //console.log('month',month);
+
+            var day = '' + (today.getDate());
+            //console.log('day',day);
+
+            if (month.length < 2) {
+                month = '0' + month;
+                //console.log('month',month);
+
+            }
+            if (day.length < 2) {
+                day = '0' + day;
+            }
+            t.min = [year, month, day].join('-');
+        }
+    </script>
+    
+    <style>
+        span.remaining-char {
+
+        display: inline-block;
+
+        text-align: right;
+
+        font-size: 10px;
+
+        width: 100%;
+
+        margin-bottom: 3px;
+
+        }
+
+        span.remaining-char > abbr {
+
+        font-weight: 700;
+
+        }
+        .strategic-account-field {
+            position: absolute;
+            width: 100%;
+        }
+        .strategicAccountSearchText:focus + .strategicAccountSearchResults {
+            display: block
+        }
+        .strategicAccountSearchResults {
+            display: none;
+            position: relative;
+            /* left: 16px;
+            right: 16px;
+            top: 49px; */
+            z-index: 10;
+            margin: 0;
+            padding-left: 10px;
+            text-align: left;
+            list-style-type: none;
+            background-color: white;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            max-height: 100px;
+            overflow: auto;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(0,0,0,.6);
+        }
+        a.strategicSearchOption {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            display: block ;
+            cursor: pointer;
+        }
+   </style>
+</apex:component>

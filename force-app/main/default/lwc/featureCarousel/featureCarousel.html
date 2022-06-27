@@ -1,0 +1,36 @@
+<template>
+    <div class="slds-grid" >
+       
+        <div  class="slds-size_3-of-3 slds-p-bottom_medium">
+           
+            <lightning-carousel>
+                <template for:each={communityContentRecords} for:item="rec">
+                <lightning-carousel-image
+                    key = {rec.key}
+                    
+                    src = {rec.Image_URL__c}
+                    header = {rec.Title__c}
+                    description = {rec.Description__c}
+                    alternative-text = {rec.Image_Alternate_Text__c}
+                    href = {rec.Hyperlink__c}>
+                </lightning-carousel-image>
+                <!-- <lightning-carousel-image
+                    src = "https://www.lightningdesignsystem.com/assets/images/carousel/carousel-02.jpg"
+                    header = "Second Card"
+                    description = "Second card description."
+                    alternative-text = "Second card accessible description."
+                    href = "javascript:void(0);">
+                </lightning-carousel-image>
+                <lightning-carousel-image
+                    src = "https://www.lightningdesignsystem.com/assets/images/carousel/carousel-03.jpg"
+                    header = "Third Card"
+                    description = "Third card description."
+                    alternative-text = "Third card accessible description."
+                    href = "javascript:void(0);">
+                </lightning-carousel-image> -->
+            </template>
+            </lightning-carousel>
+       
+        </div>
+    </div>
+</template>

@@ -1,0 +1,56 @@
+<apex:page standardController="Opportunity_Support_Request__c" extensions="OSRcontactExtension">
+<apex:pageMessages />
+<script>
+function colorPageBlock(pageblock) 
+{
+    if (pageblock != null) 
+    pageblock.firstChild.style.cssText = " background-image: url('/img/alohaSkin/opacity75.png');";
+}
+function colorPageBlock1(pageblock) 
+{
+    if (pageblock != null) 
+    pageblock.firstChild.style.cssText = "background-color:#299517;";
+}
+</script>
+
+<apex:form >
+<apex:pageBlock >
+  <apex:pageBlockButtons >
+    <apex:commandButton value="Contact Save" action="{!saveAll}"/>
+    <apex:commandButton value="Cancel" action="{!cancel}"/>
+  </apex:pageBlockButtons> 
+  <apex:pageBlockSection columns="5" collapsible="false">
+  <apex:outputtext >                     </apex:outputtext>  
+  <apex:outputtext > Coach/Mentor ++     </apex:outputtext>
+  <apex:outputtext > Supporter +         </apex:outputtext> 
+  <apex:outputtext > Neutral = Unknown ?           </apex:outputtext>
+  <apex:outputtext > Negative -          </apex:outputtext>
+
+  <apex:outputtext > Decision Maker/Economic Buyer: </apex:outputtext>  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.DecisionMakerCoach__c}" label=""/>
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.DecisionMakerSupporter__c}" label="" />  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.DecisionMakerNeutral__c}"  label="" />
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.DecisionMakerNegative__c}" label="" />
+
+  <apex:outputtext > Approver </apex:outputtext>  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.ApproverCoach__c}" label=""/>
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.ApproverSupporter__c}" label="" />  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.ApproverNeutral__c}"  label="" />
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.ApproverNegative__c}" label="" />
+
+  <apex:outputtext > Evaluator </apex:outputtext>  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.EvaluatorCoach__c}" label=""/>
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.EvaluatorSupporter__c}" label="" />  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.EvaluatorNeutral__c}"  label="" />
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.EvaluatorNegative__c}" label="" />
+
+  <apex:outputtext > User </apex:outputtext>  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.User_Coach__c}" label=""/>
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.User_Supporter__c}" label="" />  
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.User_Neutral__c}"  label="" />
+  <apex:inputTextarea value="{!Opportunity_Support_Request__c.User_Negative__c}" label="" />  
+         
+  </apex:pageblocksection>
+</apex:pageblock>
+</apex:form>
+</apex:page>

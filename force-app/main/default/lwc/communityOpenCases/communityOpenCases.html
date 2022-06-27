@@ -1,0 +1,43 @@
+<template>
+    <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12">
+        <lightning-card>
+            <header slot="title">
+                <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                    <div class="slds-col slds-size_3-of-12">
+                        <img src={serviceRequest}>
+                    </div>
+                    <div class="slds-col slds-size_9-of-12 slds-align_absolute-left">
+                        Open Service Requests
+                    </div>
+                </div>
+            </header>
+            <div style="height: 240px">
+                <template if:false={isLoading}>
+                    <template if:false={caseItemsMessage}>
+                        <lightning-datatable
+                                key-field="id"
+                                data={caseItems}
+                                columns={caseColumns}
+                                resizle-column-disabled="true"
+                                hide-checkbox-column="true">
+                        </lightning-datatable>
+                    </template>
+                </template>
+                    <template if:true={caseItemsMessage}>
+                        <div style="margin-left: 15px;">{caseItemsMessage}</div>
+                    </template>
+                
+                <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                </template>
+            </div>
+            <p slot="footer">
+               
+                    <lightning-button  label={buttonLabel} variant="brand" onclick={viewAllcaseItems}>View All</lightning-button>
+                
+                
+            </p>
+            
+        </lightning-card>
+    </div>
+</template>

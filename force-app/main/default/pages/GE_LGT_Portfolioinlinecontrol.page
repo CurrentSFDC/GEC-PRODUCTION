@@ -1,0 +1,14 @@
+<apex:page standardController="Portfolio__c" extensions="GE_LGT_Portfolioinlinecontrol" sidebar="false">
+<apex:form >
+<apex:pageBlock title="Opportunity Team Members">
+<apex:outputPanel style="overflow:scroll;width:100%;height:150px;" layout="block">
+<apex:pageBlockTable value="{!opptteamlist}" var="ot" style="overflow:scroll;" border="1" align="left">
+  <apex:column headerValue="Opportunity Name" value="{!ot.Opportunity.NAME}" />
+  <apex:column headerValue="Opportunity AccessLevel" value="{!ot.OpportunityAccessLevel}"/>
+  <apex:column headerValue="Role" value="{!ot.TeamMemberRole}" />
+  <apex:column headerValue="User" value="{!ot.User.NAME}" />
+</apex:pageBlockTable> 
+</apex:outputPanel>   
+</apex:pageBlock>
+</apex:form>
+</apex:page>

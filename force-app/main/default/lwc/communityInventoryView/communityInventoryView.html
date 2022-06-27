@@ -1,0 +1,83 @@
+<template>
+    <a href="javascript:void(0);" title={sku} onclick={getInventory}>{sku}</a>
+
+    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" aria-modal="true" class="slds-modal slds-modal_medium community-modal inventory-modal">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close slds-button_icon-inverse" title="close" onclick={closeModal}></lightning-button-icon>
+                <h2 id="modal-heading-01" class="slds-text-heading_small slds-text-align_left slds-hyphenate">Inventory - {product}</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-col slds-size_12-of-12 slds-text-align_center slds-m-bottom_x-small">
+                        <!-- <template if:false={inventoryIsEmpty}> -->
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-no-row-hoverslds-no-row-hover inventory-tbl">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th scope="col">
+                                            <span class="slds-p-right_small">Warehouse</span>
+                                        </th>
+                                        <th class="slds-text-align_right" scope="col">
+                                            <span>Total Inventory</span>
+                                        </th>
+                                        <th class="slds-text-align_right" scope="col">
+                                            <span>Order Cut-off</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={inventoryList} for:item="item" for:index="index">
+                                        <tr data-id={item.isDefaultWarehouse} key={item.quantity}>
+                                            <td data-label="Warehouse">
+                                                <span>{item.warehouseName}</span>
+                                            </td>
+                                            <td data-label="Total Inventory" class="slds-text-align_right">
+                                                <span class="slds-p-right-small">
+                                                    <lightning-formatted-number value={item.quantity}></lightning-formatted-number>
+                                                </span>
+                                            </td>
+                                            <td data-label="Order Cut-off" class="slds-text-align_right">
+                                                <span class="slds-p-right-small">{item.orderCutoff}</span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="inv-total">
+                                        <td><span>Total</span></td>
+                                        <td class="slds-text-align_right">
+                                            <span>
+                                                <lightning-formatted-number value={totalQuantity}></lightning-formatted-number>
+                                            </span>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="slds-m-top_small slds-p-around_x-small slds-text-align_left inv-update-msg">
+                                <lightning-icon class="inv-info" size="xx-small" icon-name="utility:info" alternative-text="info" title="info"></lightning-icon>
+                                &nbsp; Inventory is updated as of &nbsp;
+                                <lightning-formatted-date-time
+                                    value={currentDate}
+                                    day="2-digit"
+                                    month="short"
+                                    hour="2-digit"
+                                    minute="2-digit"
+                                >
+                                </lightning-formatted-date-time>.
+                            </p>
+                        <!-- </template> -->
+                    </div>
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick={closeModal}>Close</button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop"></div>
+</template>

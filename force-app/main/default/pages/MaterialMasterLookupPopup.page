@@ -1,0 +1,81 @@
+<apex:page controller="MaterialMasterLookupController" sidebar="false" showheader="false">
+    <!--Rashmitha Changed the API vesion from 35 to 45 on 6-Mar-2019-->
+<script language="javascript">
+   window.onload = new function() 
+   {  
+      // bring popup window to front
+      window.focus(); 
+      var ele=document.getElementById('{!$Component.form.block.section.query}');
+      alert(ele.value);
+      if (ele)
+      {
+         ele.focus();
+      }
+     
+      
+   }
+   
+   //Called when you pick a SKU name from the results list
+   //Takes the id and name of the material master object you chose from the list
+   function fillIn(id,name,Description)
+   {
+      var winMain=window.opener;
+       
+      if (null==winMain)
+      {
+         winMain=window.parent.opener;
+            }
+            //Sets the document context to the GE_LGT_ProductSearch Page and changes the values of SKU name and ID to show the user the value has been updated.
+            ele=winMain.document.getElementById('{!$CurrentPage.parameters.skuName}');
+            ele.value=name;
+            ele=winMain.document.getElementById('{!$CurrentPage.parameters.skuID}');
+            ele.value=id;
+            ele="{!$CurrentPage.parameters.skuID}";
+            vsales1 = ele.replace("targetId","Desc");
+            vsales12=winMain.document.getElementById(vsales1);
+            vsales12.value=Description;
+            CloseWindow();
+        }
+
+        function CloseWindow(){
+            var winMain=window.opener;
+            if (null==winMain) {
+                winMain=window.parent.opener;
+            }
+            winMain.closeLookupPopup();
+        }
+    </script>
+
+    <apex:messages />
+    <apex:form id="form" >  
+        <div style="width 100%">
+         <apex:pageBlock title="SKU Lookup" id="block">
+           
+          <apex:pageBlockSection id="section">
+              Enter search text and click Go<br/>
+              <apex:inputText value="{!query}" id="query"/>
+              <apex:commandButton value="Go" action="{!runQuery}"/>
+          </apex:pageBlockSection>
+         </apex:pageBlock>
+            <apex:pageBlock rendered="{!IF(SKUs.size != null && SKUs.size > 0, true , false)}" id="main"> 
+                Total Records Found: {!totalCount}
+                <apex:pageBlockTable value="{!SKUs}" var="sku" id="MMTable">
+                    <apex:column headerValue="SKU ID">
+                        <apex:outputLink value="#" onclick="fillIn('{!sku.Id}', '{!sku.GE_LGT_EM_SAP_MaterialNumber__c}' ,'{!sku.GE_LGT_EM_MaterialDescription__c}')">{!sku.GE_LGT_EM_SAP_MaterialNumber__c}</apex:outputLink>       
+                    </apex:column>
+                    <apex:column headerValue="Description" value="{!sku.GE_LGT_EM_MaterialDescription__c}"/>
+                    <apex:column headerValue="Product Hierarchy" value="{!sku.GE_LGT_EM_ProductHierarchy__c}"/>
+                </apex:pageBlockTable>
+                <apex:pageBlockButtons id="MMButtons">
+                    <apex:commandButton value="Previous" action="{!Previous}" rerender="main,MMTable"
+                                    status="status" disabled="{!hasPrevious}" />
+                    <apex:commandButton value="Next" action="{!Next}" reRender="main,MMTable"
+                                    status="status" disabled="{!hasNext}" />
+                    <apex:actionStatus id="status" startText="Please Wait..."/>
+                </apex:pageBlockButtons>
+            </apex:pageBlock>
+            <button type="button" onclick="CloseWindow();">Close Window</button>
+        </div>
+    </apex:form>
+    <c:TLS_NiceWarningJquery />
+</apex:page>

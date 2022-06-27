@@ -1,0 +1,19 @@
+.loading::after {
+    position: absolute;
+    content: 'Signing In...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    font-weight: bold;
+    
+}
+
+h2{
+    font-weight: bold;
+    font-family: "Segoe UI";
+    font-size: 20px;
+}
+
+iframe {
+    min-height: 800px;
+}

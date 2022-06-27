@@ -1,0 +1,37 @@
+<!--> CustomerServiceCommunityFooter component
+//  Footer component for GE Current community
+//
+//  Author                    Date         Description 
+//  Devag Shah	              31/10/2020   Created
+//-->
+<aura:component  implements="forceCommunity:availableForAllPageTypes,flexipage:availableForAllPageTypes" access="global">
+    
+
+    <aura:attribute name="contactUsLink" type="String" default=""/>
+    <aura:attribute name="facebookLink" type="String" default=""/>
+    <aura:attribute name="linkedInLink" type="String" default=""/>
+    <aura:attribute name="twitterLink" type="String" default=""/>
+    <aura:attribute name="privacyPolicyLink" type="String" default=""/>
+    <aura:attribute name="termsOfServiceLink" type="String" default=""/>  
+    <aura:attribute name="cbaseURLPrivacy" type="String"/>  
+    <aura:attribute name="cbaseURLTerms" type="String"/>
+    <aura:attribute name="thisYear" type="String"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>   
+
+    <div class="slds-grid slds-gutters slds-grid_align-center paddingtop">
+        <div class="slds-col margintop">
+            <div>
+                <!-- <p>&nbsp;</p> -->
+                <center>
+
+                <!-- <p style="font-size: .75em;"><span style="color: #E9EAE9;">COPYRIGHT &copy; {!v.thisYear} GE CURRENT, A DAINTREE COMPANY</span>&nbsp;&nbsp;<span style="color: #E9EAE9;">|</span>&nbsp;&nbsp;<a href="{!v.cbaseURLPrivacy}" style="color: #FF9F19;text-decoration: none;">PRIVACY</a>&nbsp;&nbsp;<span style="color: #E9EAE9;">|</span>&nbsp;&nbsp;<a href="{!v.cbaseURLTerms}" style="color: #FF9F19;text-decoration: none;">TERMS</a>&nbsp;&nbsp;<span style="color: #E9EAE9;">|</span>&nbsp;&nbsp;<a href="#" onclick="event.preventDefault(); window.evidon.notice.showOptions();" style="color: #FF9F19;text-decoration: none;">COOKIES &amp; DO NOT SELL MY INFO</a></p> -->
+                <p style="text-align: center; font-size: .75em; color: #E9EAE9;">COPYRIGHT &copy; {!v.thisYear} GE CURRENT, A DAINTREE COMPANY&nbsp; |&nbsp;&nbsp;<span class="noprint" style="color: #E9EAE9; font-size: 10px; font-weight: bold;text-align: center;"><a href="{!v.cbaseURLPrivacy}" style="color: #FF9F19; text-decoration: none;">PRIVACY</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{!v.cbaseURLTerms}" style="color: #FF9F19; text-decoration: none;">TERMS</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class="evidon-notice-link" style="text-decoration: none;"> </a></span></p>
+                
+                    <p style="font-size: .75em; color: #BBBDBF; margin-top: 5px;">&copy; {!v.thisYear} Current Lighting Solutions, LLC. All rights reserved. GE and the GE monogram are trademarks of the General Electric Company and are used under license.<br />
+                    Information provided is subject to change without notice. All values are design or typical values when measured under laboratory conditions.</p>
+                    
+                </center>
+            </div> 
+        </div>
+    </div>
+</aura:component>

@@ -1,0 +1,35 @@
+<template>
+
+
+<div class="slds-grid slds-wrap slds-grid_vertical-align-end slds-gutters">
+    <div class="slds-col slds-p-right_small slds-max-medium-size_1-of-1 slds-medium-size_2-of-3 slds-large-size_4-of-6">
+        <!--<template if:true={noSoldTo}>-->
+            <!--<lightning-input type="search" id="lookup-account" label={label} class="sk" variant={variant}
+                                placeholder="Search Sold To.." required={required} disabled={disabled} is-loading={isLoading}
+                                autocomplete='off'></lightning-input> -->
+                                
+                                <c-sold-to-lookup label={label}
+                                required={required}
+                                disabled={disabled}
+                                placeholder={placeHolder}
+                                is-loading={isSearching}
+                                selected-value={selectedValue}
+                                error-message={errorMessage}
+                                message-when-invalid-value={messageWhenInvalidAccount}
+                                options={options}
+                                onchange={handleAccountChange}
+                                onselect={handleAccountSelect}
+                                onreset={handleAccountReset}
+                            ></c-sold-to-lookup>
+                               
+        <!--</template>-->
+    </div>
+    <div class="slds-col slds-p-right_small slds-max-medium-size_1-of-1 slds-medium-size_1-of-3 slds-large-size_2-of-6">
+                        <lightning-button icon-name="utility:change_owner"  label="Change"  variant="brand-inverse" disabled={changeButton} onclick={handleAccountReset}></lightning-button> 
+    </div>
+</div>
+
+
+
+
+</template>

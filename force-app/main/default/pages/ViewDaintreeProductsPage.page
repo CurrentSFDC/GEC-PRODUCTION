@@ -1,0 +1,28 @@
+<apex:page standardController="Asset"  extensions="ViewDaintreeProductsController">
+   
+<apex:outputPanel layout="block" style="overflow:auto;height:250px;white-space: nowrap">
+    <apex:pageBlock >
+     <apex:pageBlockTable value="{!SortedOrders}" var="o">
+        <apex:column breakBefore="true" colspan="1">
+            <apex:pageblock title="SO: {!o.GE_Order_NO__c} / PO: {!o.Customer_PO_Number__c}, Date: {!o.createddate}">
+                <apex:pageBlockTable value="{!o.orderitems}" var="i" style="border:1px solid black">
+                    <apex:column headervalue="SKU" style="border:1px solid black;background-color:
+                                                          {!IF(i.SKU__c=$setup.Daintree_Licensing__c.On_Cloud_Renewal_SKU__c
+                                                            || i.SKU__c=$setup.Daintree_Licensing__c.On_Premise_Renewal_SKU__c,
+                                                               '#D2FDBE','')}">
+                        <apex:outputtext value="{!i.SKU__c}"/>
+                    </apex:column>
+                    <apex:column headervalue="Quantity" style="border:1px solid black">
+                        <apex:outputtext value="{!i.quantity}"/>
+                    </apex:column>                        
+                    <apex:column headervalue="Description" style="border:1px solid black">
+                        <apex:outputtext value="{!i.SKU_Description_Cat_Logic__c}"/>
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageblock>
+        </apex:column>
+    </apex:pageBlockTable>
+    <br></br> <br></br> <br></br>
+   </apex:pageblock>
+</apex:OutputPanel>
+</apex:page>

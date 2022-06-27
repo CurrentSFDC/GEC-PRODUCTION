@@ -1,0 +1,959 @@
+<apex:component id="B2B_CommissionWidgetModal2" controller="PriceAgreementController">
+    <apex:slds />
+    <style>
+        @media (min-width: 600px) {
+            #commissionWidgetModal2 .modal-dialog {
+                width: 470px;
+                padding-top: 50px;
+                font-size: 15px;
+                /*vertical-align: middle;*/
+            }
+
+            .commissiontotal {                
+                font-weight: bold;
+                font-size: larger;
+                /*vertical-align: middle;*/
+            }
+            #commissionWidgetModal2 span {
+                display:block;                
+            }
+
+            .fa-spin {
+                -webkit-transform-origin: 66% 50%;
+                -ms-transform-origin: 66% 50%;
+                transform-origin: 66% 50%;
+            }
+
+            
+            #commissionWidgetModal2confirm .modal-dialog {
+                width: 470px;
+                /*padding-top: 130px;*/
+                font-size: 19px;
+                
+            }
+            #commissionWidgetModal2confirm span {
+                display:block;                
+            }
+            
+        }
+
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .slds-scope button {
+            color: white;            
+        }
+
+        .btndimm {
+            opacity: 0.3;
+            color: white;
+            pointer-events: none;
+        }
+
+        .qtyinput {
+            height: 30px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #676767;
+            border: 2px solid #ccc;
+            border-radius: 0px;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            width: 100px;
+        }
+
+        
+        .measureselect {
+            height: 30px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #676767;
+            border: 2px solid #ccc;
+            border-radius: 0px;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+            width: auto;
+        }
+
+        *:focus:not(.focus-visible) {
+            outline: 0 !important;
+            box-shadow: none !important;
+        }
+        .btnenable {
+            opacity: 0.1;
+            color: white;
+        }
+        .soldToSearchResults {
+            display: none;
+            position: absolute;
+            //left: 15px;
+            //right: 15px;
+            z-index: 10;
+            margin: 0;
+            text-align: left;
+            list-style-type:none;
+            background-color: white;
+            min-width: 210px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+            max-height: 180px;
+            left: 28%;
+            overflow: auto;
+
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(0,0,0,.6);
+        }
+
+       .search .results a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        a.searchOption {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            display: block ;
+        }
+
+        a.soldToSearchOption {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            display: block ;
+        }
+
+        .soldToSearchTextCommissionWidget:focus + .soldToSearchResults { 
+            display: block;            
+            left: 28%;
+        }
+
+        .tooltip {
+            position:relative; /* making the .tooltip span a container for the tooltip text */
+            //border-bottom:1px dashed #000; /* little indicater to indicate it's hoverable */
+            position: absolute;
+            z-index: 1070;
+            display: block;
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-style: normal;
+            font-weight: 350;
+            line-height: 1.42857143;
+            line-break: auto;
+            text-align: left;
+            text-align: start;
+            text-decoration: none;
+            text-shadow: none;
+            text-transform: none;
+            letter-spacing: normal;
+            word-break: normal;
+            word-spacing: normal;
+            word-wrap: normal;
+            white-space: normal;
+            font-size: 10px;
+            
+            opacity: 1; 
+        }
+
+        .tooltip:before {
+            content: attr(data-text); /* here's the magic */
+            position:absolute;
+            
+            /* vertically center */
+            top:50%;
+            transform:translateY(-50%);
+  
+            /* move to right */
+            left:100%;
+            margin-left:10px; /* and add a small left margin */
+            
+            /* basic styles */
+            width:280px;
+            padding:5px;
+            border-radius:10px;
+            background:#000;
+            color: #fff;
+            text-align:left;           
+            display:none; /* hide by default */
+        }
+
+        .tooltip:hover:before {
+            display:block;
+        }
+
+        .slds-scope:not(html), .slds-scope body {
+            font-size: .9600rem;
+            background: transparent;
+        }
+
+         .modal-content {
+            border: none;
+            border-radius: 0;
+            padding: 0px;
+            text-align: left;
+        }
+
+        .modal:nth-of-type(even) {
+            z-index: 1052 !important;
+        }
+        .modal-backdrop.show:nth-of-type(even) {
+            z-index: 1051 !important;
+        }
+
+        .applyPricing {
+            color: white !important;
+            text-decoration-color: white !important;
+            background-color: transparent;
+        }
+        #closeButton {
+            position: absolute;
+            left: initial;
+            top: 0;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+        }
+        #closeButton:hover {
+            text-decoration: none;
+        }
+    </style>
+
+    <script id="CommissionWidget-Desktop" type="text/template">
+        <!-- MOVED MODAL TO HERE, INSIDE SCRIPT TAG FOR TEMPLATE -->
+
+        <div id="commissionWidgetModal2confirm" class="modal" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body cc_modal-body">
+                        <div class="slds-scope">
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-size_4-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="messageconfirmation" class="slds-text-align--left"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slds-scope">
+                            <div class="row" style="padding:15px;padding-left: 15px;">
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-4">
+                                        <button type="button" id="modal2close" onclick="cancelCommissionCalcRequestedPrice();" class="btn btn-default btn-sm " data-dismiss="modal">{{pageLabelMap 'CommissionCalc_Cancel'}}</button>
+                                    </div>
+
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <button type="button" onclick="applyCommissionCalcRequestedPrice();" class="calcbtn btnprice btn btn-default btn-sm ">{{pageLabelMap 'CommissionCalc_Apply'}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="commissionWidgetModal2" class="modal fade cc_modal commissionWidgetModal2" tabindex="-1" role="dialog" aria-hidden="true" onclick="clickOutside();">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content cc_modal_content">
+
+                    <div class="modal-header cc_modal-header">
+                        <!-- MODAL HEADER STUFF GOES HERE -->
+                        <button type="button" class="close cc_close" id="closeButton" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <h3><span data-text="Grab the interactive slide and adjust the Product's price viewing your commission.  Create what-if scenarios to maximize your commission.  Any price above floor will be automatically approved."   class="tooltip" >{{pageLabelMap 'CommissionCalc_Calculator'}} &nbsp;<i class="fa fa-info" style="font-size:15px"></i></span> </h3>
+                    </div>
+
+                    <div id="selectedCartItemId" style="display : none">{{sfid}}</div>
+                    <div id="typeMark" style="display : none">{{typeMark}}</div>
+                    <div id="status_" style="display : none">{{status_}}</div>
+
+                    <div class="modal-body cc_modal-body">
+                        <div class="slds-scope">
+
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="slds-text-align--left">{{pageLabelMap 'CommissionCalc_CatalogNo'}}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_3-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="catalognumberval" class="slds-text-align--left">{{catalogNo}}</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="slds-grid slds-wrap">
+
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="slds-text-align--left">{{pageLabelMap 'CommissionCalc_SKU'}}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="skunumberval" class="slds-text-align--left">{{productSKU}}</span>
+                                    </div>
+                                </div>
+
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="slds-text-align--left">Pieces per Unit:</span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="piecesperunitval" class="slds-text-align--left">{{piecesPerUnit}}</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="slds-text-align--left">{{pageLabelMap 'CommissionCalc_UOM'}}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <select id="pricinguoms" class="form-control measureselect" name="pricinguoms" disabled>
+                                            <option value="{{unitOfMeasureCode}}">{{unitOfMeasureLabel}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="cc_label nowrap slds-text-align--left" id="qtyLabelNormal">{{pageLabelMap 'CommissionCalc_Quantity'}}</span>
+                                        <span class="cc_label nowrap slds-text-align--left" id="qtyLabelWarning" style="display:none"><span data-text="This item has a minimum order quantity. The value has been automatically updated for you to match this criteria." class="tooltip" >{{pageLabelMap 'CommissionCalc_Quantity'}}&nbsp;<i class="fa fa-warning" style="font-size:16px; color:#ffc000;"></i></span></span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <input onchange="onQtyChange()" type="number" min="1" id="selectedCartItemQty" name="selectedCartItemQty" value={{qty}} class="form-control qtyinput ">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="cc_label  slds-text-align--left">{{pageLabelMap 'CommissionCalc_SoldTo'}}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_3-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <div class="soldToSelector">
+                                            <input id="soldtoval"  type="text" class="form-control search_input cc_search_input soldToSearchTextCommissionWidget" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="cc_label  slds-text-align--left">{{pageLabelMap 'CommissionCalc_ListPrice'}}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                      <span id="listpriceval" class="slds-text-align--right"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span class="cc_label  slds-text-align--left">Your price:</span>
+                                    </div>
+                                </div>
+                                <div class="slds-size_1-of-4">
+                                    <div class="slds-text-align_center slds-m-around_x-small">
+                                        {{#if isAgent}}
+                                        <span id="adp-price" class="slds-text-align--right"></span>
+                                        {{else}}
+                                        <span id="your-price" class="slds-text-align--right"></span>
+                                        {{/if}}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="slds-box slds-box_x-small">
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="slds-text-align--left">{{pageLabelMap 'CommissionCalc_ADP'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="adppriceval" class="slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label nowrap slds-text-align--left">{{pageLabelMap 'CommissionCalc_ADPCommission'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span  id="adpcommissionval" class="slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label  slds-text-align--left">{{pageLabelMap 'CommissionCalc_Floor'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="floorpriceval" class=" slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label nowrap slds-text-align--left">{{pageLabelMap 'CommissionCalc_FloorCommission'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span id="floorcommissionval" class=" slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label  slds-text-align--left">{{pageLabelMap 'CommissionCalc_Standard'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="standardpriceval" class=" slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label nowrap slds-text-align--left">{{pageLabelMap 'CommissionCalc_StandardCommission'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span id="standardcommissionval" class=" slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label  slds-text-align--left">{{pageLabelMap 'CommissionCalc_Overage'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                        <span id="overagepriceval" class=" slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label nowrap slds-text-align--left">{{pageLabelMap 'CommissionCalc_OverageCommission'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span id="overagecommissionval" class=" slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_3-of-4">
+                                        <span  class="slds-text-align--left">Floor Price</span>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <span  class="slds-text-align--right">List Price</span>
+                                    </div>
+                                </div>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_3-of-4">
+                                        <span id="floorpriceslideval" class="slds-text-align--left"></span>
+                                    </div>
+                                    <div class="slds-size_1-of-4">
+                                        <span id="listpriceslideval" class="slds-text-align--right"></span>
+                                    </div>
+                                </div>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-size_4-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <input type="range" name="price" list="tickmarks" id="range_price" step="0.01"
+                                                   value="" min="" max="" oninput="onADPSliderChange(value)"
+                                                   onmouseup="getPriceAndCommission(
+                                                            'calccommission',
+                                                            $('#adbTextInput').val(),
+                                                            $('#skunumberval').text(),
+                                                            $('#pricinguoms option').text(),
+                                                            $('#selectedCartItemQty').val(),
+                                                            CCRZ.currentUser.Contact.Account.CurrencyIsoCode);"
+                                                   ontouchend="getPriceAndCommission(
+                                                            'calccommission',
+                                                            $('#adbTextInput').val(),
+                                                            $('#skunumberval').text(),
+                                                            $('#pricinguoms option').text(),
+                                                            $('#selectedCartItemQty').val(),
+                                                            CCRZ.currentUser.Contact.Account.CurrencyIsoCode);">
+                                            <datalist id="tickmarks">
+                                            <option value="" id="adp-tick" label="ADP"></option>
+                                            </datalist>
+                                            <div style="width: 100%; padding-left: 4px; text-align: left; padding-right: 4px;">
+                                                <span id="adpLabel" style="width: 25px; position: relative;">ADP</span>
+                                            </div>
+                                        {{pageLabelMap 'CommissionCalc_RequestedPrice'}}
+                                            <input type="text" id="adbTextInput" name="fname"
+                                                   min="" max="" step="0.01" oninput="onADPInputChange(value)"
+                                                   onkeypress="onADPKeyPress(event)">
+                                        </div>
+                                    </div>
+                                    <div class="slds-small-size_4-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <div class="slds-text-align_center slds-m-around_x-small">
+                                                <button type="button"
+                                                        onclick="getPriceAndCommission(
+                                                            'calccommission',
+                                                            $('#adbTextInput').val(),
+                                                            $('#skunumberval').text(),
+                                                            $('#pricinguoms option').text(),
+                                                            $('#selectedCartItemQty').val(),
+                                                            CCRZ.currentUser.Contact.Account.CurrencyIsoCode);"
+                                                        class="calcbtn btnprice btn btn-default btn-sm ">
+                                                    {{pageLabelMap 'CommissionCalc_Calculate'}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-small-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label slds-text-align--left">Total Amount:</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-small-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span id="total-extended-amount" class="slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="slds-grid slds-wrap">
+                                    <div class="slds-small-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label nowrap slds-text-align--left">{{pageLabelMap 'CommissionCalc_TotalCommissionAmount'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-small-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span id="totalcommissionamtval" class="slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-small-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span class="cc_label nowrap slds-text-align--left">{{pageLabelMap 'CommissionCalc_TotalCommission'}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="slds-small-size_1-of-4">
+                                        <div class="slds-text-align_center slds-m-around_x-small">
+                                            <span id="totalcommissionval" class="slds-text-align--right"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-default btn-sm calcbtn applyPricing" data-dismiss="modal">{{pageLabelMap 'CommissionCalc_ModalClose'}}</button>
+                        <!--<a href="#" type="button" class="calcbtn applyPricing " data-dismiss="modal">{{pageLabelMap 'CommissionCalc_ModalClose'}}</a>-->
+                        {{#if isCartPage}}
+                            <button type="button" onclick="confirmCommissionCalcRequestedPrice();" class="btn btn-default btn-sm ">{{pageLabelMap 'CommissionCalc_ApplyPrice'}}</button>
+                        {{else}}
+                            <button type="button" onclick="addToCart();" class="btn btn-default btn-sm ">{{pageLabelMap 'Component_MiniwishList_AddToCart'}}</button>
+                        {{/if}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </script>
+
+    <script>
+
+        function onADPSliderChange(val) {
+            let currency = CCRZ.currentUser.Contact.Account.CurrencyIsoCode;
+            let formattedValue =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(val);
+            let formattedTotalValue =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val * $('#selectedCartItemQty').val());
+            $("#adbTextInput").val(formattedValue);
+            $('#total-extended-amount').text(formattedTotalValue);
+        }
+
+        function onADPInputChange(val) {
+            let currency = CCRZ.currentUser.Contact.Account.CurrencyIsoCode;
+            let convertedVal = val.replace(/[A-Za-z$,]/g,'');;
+            let formattedTotalValue =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(convertedVal * $('#selectedCartItemQty').val());
+            $("#range_price").val(convertedVal);
+            $('#total-extended-amount').text(formattedTotalValue);
+            if (parseFloat($('#adbTextInput').val()) <  parseFloat($('#adbTextInput').attr('min'))) {
+                $("#adbTextInput").css('color', 'salmon');
+            }
+            else {
+                $("#adbTextInput").css('color', 'black');
+            }
+        }
+
+        function onADPKeyPress(event) {
+        if (event.keyCode == 13) {
+                getPriceAndCommission(
+                    'calccommission',
+                    $('#adbTextInput').val(),
+                    $('#skunumberval').text(),
+                    $('#pricinguoms option').text(),
+                    $('#selectedCartItemQty').val(),
+                    CCRZ.currentUser.Contact.Account.CurrencyIsoCode
+                );
+            }
+        }
+
+        function onQtyChange() {
+            $('#qtyLabelNormal').show();
+            $('#qtyLabelWarning').hide();
+            let currency = CCRZ.currentUser.Contact.Account.CurrencyIsoCode;
+            let price = $("#range_price").val();
+            let qty = $("#selectedCartItemQty").val();
+            let formattedTotalValue =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currency}).format(price * qty);
+            $('#total-extended-amount').text(formattedTotalValue);
+            getPriceAndCommission(
+                    'calccommission',
+                    $('#adbTextInput').val(),
+                    $('#skunumberval').text(),
+                    $('#pricinguoms option').text(),
+                    $('#selectedCartItemQty').val(),
+                    CCRZ.currentUser.Contact.Account.CurrencyIsoCode
+                );
+        }
+
+        function getPriceAndCommission(operation, requestedPrice, sku, uom, qty, currencyISOCode) {
+            var loadingspin = 'Loading...<i class="fa fa-1.5x fa-refresh fa-spin"></i>';
+            $("#listpriceval").html(loadingspin);
+            $("#listpriceslideval").html(loadingspin);
+            $("#adppriceval").html(loadingspin);
+            $("#adp-price").html(loadingspin);
+            $("#your-price").html(loadingspin);
+            $("#adpcommissionval").html(loadingspin);
+            $("#floorpriceval").html(loadingspin);
+            $("#floorcommissionval").html(loadingspin);
+            $("#floorpriceslideval").html(loadingspin);
+            $("#standardpriceval").html(loadingspin);
+            $("#standardcommissionval").html(loadingspin);
+            $("#overagepriceval").html(loadingspin);
+            $("#overagecommissionval").html(loadingspin);
+            $("#totalcommissionamtval").html(loadingspin);
+            $("#totalcommissionval").html(loadingspin);
+            $(".calcbtn").addClass('btndimm');
+
+            var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+				className: 'PriceAgreementController'
+            });
+
+            let soldTo = $('#soldtoval').val();
+//            if (CCRZ.effSelectorView.dataSet.workingEffAccount.sfid !== undefined){
+//			 	soldTo=CCRZ.effSelectorView.dataSet.workingEffAccount.sfid;
+//			}
+//			if (CCRZ.effSelectorView.dataSet.workingEffAccount.GE_LGT_EM_SAP_Customer_Number__c !== undefined){
+//			 	console.log('soldTo', CCRZ.effSelectorView.dataSet.workingEffAccount.GE_LGT_EM_SAP_Customer_Number__c);
+//			}
+
+			let requestedPriceNum = requestedPrice.replace(/[A-Za-z$,]/g,'');
+			console.log('req price', requestedPriceNum);
+
+
+            remoteCall.invokeCtx('getRealTimePricingForCommissionCalc', sku, soldTo, requestedPriceNum, currencyISOCode, operation, uom, qty, function (res, err) {
+                console.log('commision request',sku, soldTo, requestedPrice, currencyISOCode, operation, uom, qty);
+				if (res != null && res.data != null) {
+				    console.log('commission response', res);
+				    let callRespDate = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+                    $(".calcbtn").removeClass('btndimm');
+					let pr = res.data;
+                    let prArr = pr.priceAgreementItemList;
+                    if (prArr[0].currencyISOCode != ''){
+                        currencyISOCode = prArr[0].currencyISOCode;
+                    }
+			        let intQty = parseInt(qty);
+			        if (prArr[0].roundedQty != null && intQty != prArr[0].roundedQty) {
+			            $('#qtyLabelNormal').hide();
+                        $('#qtyLabelWarning').show();
+			            $('#selectedCartItemQty').val(prArr[0].roundedQty);
+			            getPriceAndCommission(
+                            'calccommission',
+                            $('#adbTextInput').val(),
+                            $('#skunumberval').text(),
+                            $('#pricinguoms option').text(),
+                            $('#selectedCartItemQty').val(),
+                            CCRZ.currentUser.Contact.Account.CurrencyIsoCode
+                        );
+			            return;
+                    }
+
+                    if (prArr[0].bookPrice != null) {
+                        let lp =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(prArr[0].bookPrice.toFixed(2));
+                        $("#listpriceval").text(lp);
+                        $("#listpriceslideval").text(lp);
+                        $("#range_price").attr({
+                            "max": prArr[0].bookPrice
+                        });
+                        $("#adbTextInput").attr({
+                            "max": prArr[0].bookPrice
+                        });
+                    }
+
+                    // Your price
+                    if ($('#soldtoval').val() == '') {
+                        if (prArr[0].extendedPrice != null) {
+                            let yourPrice =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(prArr[0].extendedPrice.toFixed(2)/intQty);
+                            $("#your-price").text(yourPrice);
+                        }
+                    }
+                    else {
+                        if (prArr[0].adpPrice != null) {
+                            let yourPrice =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(prArr[0].adpPrice.toFixed(2)/intQty);
+                            $("#your-price").text(yourPrice);
+                        }
+                    }
+
+                    if (prArr[0].adpPrice != null) {
+                        let adp =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(prArr[0].adpPrice.toFixed(2)/intQty);
+                        let adpTwoDeciamal = new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(prArr[0].adpPrice.toFixed(2)/intQty);
+                        console.log('adp decimal', adpTwoDeciamal);
+                        let adpTotalTwoDeciamal = new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode,  minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(prArr[0].adpPrice.toFixed(2));
+                        $("#adppriceval").text(adp);
+                        $("#adp-price").text(adp);
+                        $("#range_price").attr({
+                            "value": prArr[0].adpPrice/intQty
+                        });
+                        $("#adp-tick").attr({
+                            "value": prArr[0].adpPrice/intQty
+                        });
+                        $("#adbTextInput").attr({
+                            "value": adpTwoDeciamal
+                        });
+                        if ($('#total-extended-amount').text() == '') {
+                            $('#total-extended-amount').text(adpTotalTwoDeciamal);
+                        }
+                    }
+
+                    // ADP Commission (globalCommission)
+                    if (prArr[0].globalCommission != null) {
+                        $("#adpcommissionval").text(prArr[0].globalCommission.toFixed(2) + '%');
+                    }
+
+                    // Floor Price and minimum values for inputs (floorPrice)
+                    if (prArr[0].floorPrice != null) {
+                        let floorPrice =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(prArr[0].floorPrice.toFixed(2)/intQty);
+                        $("#floorpriceval").text(floorPrice);
+                        $("#floorpriceslideval").text(floorPrice);
+                        $("#range_price").attr({
+                            "min": prArr[0].floorPrice/intQty
+                        });
+                        $("#adbTextInput").attr({
+                            "min": prArr[0].floorPrice/intQty
+                        });
+                    }
+                    if (prArr[0].floorPrice != null && prArr[0].adpPrice != null && prArr[0].bookPrice != null) {
+                        let rangeMin = prArr[0].floorPrice/intQty;
+                        let rangeMax = prArr[0].bookPrice;
+                        let rangeVal = prArr[0].adpPrice/intQty;
+                        let offset = Math.round((rangeVal - rangeMin) / (rangeMax - rangeMin) * 100);
+                        document.getElementById("adpLabel").style.left = "calc( " + offset + "% - 10px)";
+                    }
+
+                    // Floor Commission (floorCommission)
+                    if (prArr[0].floorCommission != null) {
+                        $("#floorcommissionval").text(prArr[0].floorCommission.toFixed(2) + '%');
+                    }
+
+                    // Standard (slidingCommission)
+                    $("#standardpriceval").text(Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(0.00));
+                    if (prArr[0].slidingCommission != null) {
+                        let standard =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(prArr[0].slidingCommission.toFixed(2)/intQty);
+                        $("#standardpriceval").text(standard);
+                    }
+
+                    // Standard Commission (slidingCommissionPercentage)
+                    $("#standardcommissionval").text('0.00%');
+                    if (prArr[0].slidingCommissionPercentage != null) {
+                        $("#standardcommissionval").text(prArr[0].slidingCommissionPercentage.toFixed(2) + '%');
+                    }
+
+                    // Overage (overagePercentageAmount)
+                    $("#overagepriceval").text(Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(0.00));
+                    if (prArr[0].overagePercentageAmount != null) {
+                        let qty =  $("#selectedCartItemQty").val();
+                        let overage =  new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format((prArr[0].overagePercentageAmount / qty).toFixed(2));
+                        $("#overagepriceval").text(overage);
+                    }
+
+                    // Overage Commission (overagePercentagePerc)
+                    $("#overagecommissionval").text('0.00%');
+                    if (prArr[0].overagePercentagePerc != null) {
+                        $("#overagecommissionval").text(prArr[0].overagePercentagePerc.toFixed(2) + '%');
+                    }
+
+                    // Total Commission Amount (commission)
+                    $("#totalcommissionamtval").text(Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(0.00));
+                    if (prArr[0].commission != null ) {
+                        totalCommissionAmount = new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyISOCode }).format(prArr[0].commission);
+                        $("#totalcommissionamtval").text(totalCommissionAmount);
+                    }
+
+                    // Total Commission (slidingCommission + overagePercentageAmount / extendedPrice)
+                    $("#totalcommissionval").text('0.00%');
+                    if (prArr[0].commission != null) {
+                        let totalExtdAmnt = $('#total-extended-amount').text().replace(/[A-Za-z$,]/g,'');
+                        let totalCommission =  new Intl.NumberFormat('en-US', { minimumFractionDigits: 2,  maximumFractionDigits: 2}).format((100 * prArr[0].commission / totalExtdAmnt).toFixed(2));
+                        $("#totalcommissionval").text(totalCommission + '%');
+                    }
+				}
+			},
+			{
+			    nmsp: false,
+				escape: false,
+				timeout: 120000
+			});
+        }
+
+        function clickOutside() {
+            if (event.target == event.currentTarget) {
+                document.getElementById('closeButton').click();
+            }
+        }
+
+        function addToCart() {
+            console.log('ATC');
+
+            let typeMark = $('#typeMark').text();
+            
+            let status_ = $('#status_').text();
+            console.log(status_);
+            if(status_ == null || status_ == undefined || status_ == ''){
+                status_ = $("#invalidSkuSearchStatus").val();
+            }
+            
+            let cartId = CCRZ.pagevars.currentCartID;
+            let sku = $('#skunumberval').text();
+            let qty = $('#selectedCartItemQty').val();
+            let price = $("#range_price").val();
+            let sfid = $('#selectedCartItemId').text();
+            let priceUpdate = '';
+            let uom = $('#pricinguoms option').val();
+            let priceAgreement = '';
+            let catalogNum = $('#catalognumberval').text();
+
+            $('#typeMarkTextarea_' + sfid).val(null);
+            $('#typeMarkTextarea_' + sfid).keyup();
+            $('#typeMark-textarea').val(null);
+            $('#typeMark-textarea').keyup();
+            $('#invalidSkuSearchTypeMark').val(null);
+            $('#invalidSkuSearchTypeMark').keyup();
+
+            console.log('SKU ',$('#skunumberval').text());
+            console.log('QTY ',$('#selectedCartItemQty').val());
+            console.log('PRICE ',$("#range_price").val());
+            console.log('UOM ',$('#pricinguoms option').text());
+            console.log('CARTID ',cartId);
+            console.log('sfid ',sfid);
+            console.log('typeMark ',typeMark);
+
+            console.log('catalogNum ',catalogNum);
+            console.log('price ',price);
+            console.log('qty ',qty);
+            console.log('status_ ', status_);
+
+            var remoteCall = _.extend(CCRZ.RemoteInvocation, {
+                className: 'ProductListActions'
+            });
+
+            if (sfid !== 'sfid'){
+                console.log('valid item');
+                remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'addExtPricedItemForCommisionWidget',
+                    CCRZ.pagevars.currentCartID, sku, sfid, qty, price, typeMark, uom,
+                    function (res, err) {
+                        console.log('invoked with values', CCRZ.pagevars.currentCartID, sku, sfid, qty, price, typeMark, uom);
+                        console.log(res, err);
+                        if (res.success) {
+                            // console.log('success');
+                            var cartId = CCRZ.pagevars.currentCartID;
+                            CCRZ.pubSub.trigger('cartChange', cartId);
+                             setTimeout(function () {
+                                 console.log('Close');
+                                 document.getElementById('closeButton').click();
+                            }, 400);
+                        } else {
+                            console.error('failed');
+                            $(".customLoader").remove();
+                        }
+                    }, {
+                        nmsp: false,
+                        escape: false,
+                        timeout: 120000
+                    });
+            }
+            else {
+                console.log('invalid item');
+                remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'addInvalidSku', catalogNum, price, qty,typeMark,cartId, status_,
+                    function (res, err) {
+                        console.log(res, err);
+                        if (res.success) {
+                            // console.log('success');
+                            var cartId = CCRZ.pagevars.currentCartID;
+                            CCRZ.pubSub.trigger('cartChange', cartId);
+                             setTimeout(function () {
+                                 console.log('Close');
+                                 document.getElementById('closeButton').click();
+                            }, 400);
+                        } else {
+                            console.error('failed');
+                            $(".customLoader").remove();
+                        }
+                    }, {
+                        nmsp: false,
+                        escape: false,
+                        timeout: 120000
+                    });
+            }
+        }
+    </script>
+
+</apex:component>

@@ -1,0 +1,63 @@
+<template>
+    
+    
+    
+    <div class="slds-grid slds-gutters slds-wrap">
+        <div class="slds-col slds-size_6-of-12">
+            <img src={connectLogo}>
+        </div>
+        <div class="slds-align_absolute-center slds-col slds-size_6-of-12">
+            <h2 class="slds-align_absolute-center">
+                                        
+                Current Version: {currentVersion}
+                
+            </h2> 
+        </div>
+    </div> <br><br>
+
+    <div class="slds-grid slds-gutter slds-wrap">
+        <div class="slds-col slds-size_6-of-12">
+            <text class="header">RELEASE NOTES</text>
+        </div>
+    </div><br><br>
+
+<lightning-tabset active-tab-value="" class="slds-tabs_medium" variant="scoped">
+    <lightning-tab label="CURRENT" value="one" class="tabSection" icon-name="standard:work_order_item">
+        <h3 class="slds-section-title--divider">Current Release</h3>
+        <c-release-notes-l-w-c onsetversion={setVersion} is-current='true' active='true' release-type='Standard Release,Major Release,Emergency Release'></c-release-notes-l-w-c>
+        
+
+        
+        <h3 class="slds-section-title--divider">Past Releases</h3>
+        <c-release-notes-l-w-c is-current='false' active='true' release-type='Standard Release,Major Release,Emergency Release'></c-release-notes-l-w-c>
+    </lightning-tab>
+
+    <lightning-tab label="UPCOMING" value="two" class="tabSection" icon-name="standard:output">
+        <h3 class="slds-section-title--divider">Coming Soon....</h3>
+        <c-release-notes-l-w-c is-current='false' active='true' release-type='Upcoming'></c-release-notes-l-w-c>
+    </lightning-tab>
+
+</lightning-tabset>                        
+
+    <!--<div>
+        <div class="slds-card">
+            <c-release-notes-l-w-c release-type="Coming Soon"></c-release-notes-l-w-c>
+         
+        </div>
+        <div class="slds-card">
+            <c-release-notes-l-w-c release-type="Bug Fix"></c-release-notes-l-w-c>
+        </div>
+        <div class="slds-card">
+            <c-release-notes-l-w-c release-type="Enhancements"></c-release-notes-l-w-c>
+        </div>
+        <div class="slds-card">
+            <c-release-notes-l-w-c release-type="Software Patches"></c-release-notes-l-w-c>
+        </div>
+    </div>-->
+      
+    
+ 
+
+
+
+</template>

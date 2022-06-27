@@ -1,0 +1,56 @@
+<!-- Community Cases -->
+<template>
+    <div class="slds-grid slds-wrap slds-grid_vertical-align-end search-inputs">
+        <div class="slds-col slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_2-of-12 hide-clear-icon">
+            <lightning-input type="search" class="slds-m-bottom_small" label="Search Cases" name="Search" ></lightning-input>
+        </div>
+        <div class="slds-col slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_2-of-12">
+            <lightning-input type="date" class="slds-m-bottom_small" label="From" name="FromDate" ></lightning-input>
+        </div>
+        <div class="slds-col slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_2-of-12">
+            <lightning-input type="date" class="slds-m-bottom_small" label="To" name="ToDate" ></lightning-input>
+        </div>
+        <div class="slds-col slds-grow-none slds-p-vertical_small slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_3-of-12">
+            <button class="slds-button slds-button_brand" onclick={handleCaseSearch}>Search</button>
+            <button class="slds-button slds-button_destructive" onclick={clearSearch}>Clear</button>
+        </div>
+        <div class="slds-col slds-grow-none slds-p-vertical_small slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_3-of-12">
+            <text><lightning-icon size="x-small" icon-name="standard:merge"></lightning-icon> - Indicates case is associated to multiple PO's</text><br><br>
+            <!--<button class="slds-button slds-button_destructive" onclick={clearSearch}>Clear</button>-->
+        </div> 
+    </div>
+    <div class="status slds-m-bottom_medium">
+        <lightning-spinner if:true={isLoading} variant="brand"></lightning-spinner>
+    </div>
+    <div class="table-container">
+        <template if:false={noCases}>
+        
+        <template if:true={customerColumns}>
+            <lightning-datatable
+                key-field="Id"
+                data={cases}
+                columns={custColumns}
+                hide-checkbox-column="true"
+                enable-infinite-loading
+                onloadmore={loadMoreCases}
+                class="slds-max-medium-table_stacked">
+            </lightning-datatable>
+        </template>
+        <template if:false={customerColumns}> 
+            <lightning-datatable
+                    key-field="Id"
+                    data={cases}
+                    columns={caseColumns}
+                    hide-checkbox-column="true"
+                    enable-infinite-loading
+                    onloadmore={loadMoreCases}
+                    class="slds-max-medium-table_stacked">
+            </lightning-datatable>
+        </template>
+        </template>
+        <template if:true={noCases}>
+            <div style="margin-left: 15px;">{noCasesMessage}</div>
+        </template>
+        
+    </div>
+</template>

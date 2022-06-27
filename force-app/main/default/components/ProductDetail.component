@@ -1,0 +1,746 @@
+<apex:component controller="ProductListActions">
+    <apex:includeLightning ></apex:includeLightning>
+    <script id="EffAcctSel-Head-View-Desktop" type="text/template">
+        <ul class="list-inline navbar-nav cc_navbar-nav">
+            {{#if this.ro}}
+            <li class="effAccount cc_eff_account">
+                <a href="#" data-account-id="{{this.workingEffAccount.sfid}}" onclick="openModal(event);">
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city
+                    workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                </a>
+            </li>
+            {{else}}
+            <li class="effAccount cc_eff_account" data-toggle="modal" data-target="#effAccounts">
+                <a href="#" data-account-id="{{this.workingEffAccount.sfid}}" onclick="openModal(event);">
+                    {{#if this.workingEffAccount }}
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city
+                    workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                    {{else}}
+                    {{pageLabelMap 'SELECT_ACCOUNT' }}
+                    {{/if}}
+                    <span class="launchSel cc_launch_sel" aria-hidden="true"></span>
+                </a>
+            </li>
+            {{/if}}
+        </ul>
+        <div id="account-selector-lwc-container"></div>
+        <div style="display: none;">
+            <div class="modal fade cc_modal cc_effective_accounts_modal" id="effAccounts" tabindex="-1" role="dialog" aria-labelledby="effAccountsLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content cc_modal_content">
+                        <div class="modal-header cc_modal_header">
+                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                            <h4 class="modal-title cc_modal_title" id="effAccountsLabel">{{pageLabelMap 'EFFECTIVE_ACCOUNT_TITLE'}}</h4>
+                        </div>
+                        <div class="modal-body cc_modal_body">
+                            <input type="text" id="accountSearch" onkeyup="searchAccounts()" placeholder="Search Account" title="Type in an account">
+                            <div class="table-responsive">
+                                <table id="accountsTable" class="table table-hover cc_table">
+                                    <thead class="cc_thead">
+                                    <tr class="cc_tr">
+                                        <th class="cc_th_name">{{{pageLabelMap 'Name'}}}</th>
+                                        <th class="cc_th_name">{{{pageLabelMap 'Customer_Segmentation'}}}</th>
+                                        <th class="cc_th_account_number">{{{pageLabelMap 'ACCOUNT_NUMBER'}}}</th>
+                                        <th class="cc_th_address">{{{pageLabelMap 'Address'}}}</th>
+                                        <th class="cc_th_picked"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="cc_tbody">
+                                    {{#each this.effectiveList}}
+                                    <tr class="cc_tr_values">
+                                        <td class="cc_td_name">{{{name}}}</td>
+                                        <td class="cc_td_name">{{{customerSegmentation}}}</td>
+                                        <td class="cc_td_account_number">{{{accountNumber}}}</td>
+                                        <td class="cc_td_address">{{{pageLabelMap 'ADDRESS_FORMAT' shippingAddress.address1 shippingAddress.city shippingAddress.state shippingAddress.postalCode
+                                            shippingAddress.countryCode}}}
+                                        </td>
+                                        <td><a href="#"><i class="pickSel pickAccount cc_pick_account fa fa-chevron-right" data-id="{{sfid}}" aria-hidden="true"></i><span class="sr-only">{{pageLabelMap 'EffectiveAccount_SelectAccount'}}</span></a>
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="ProductDetail-Desktop-Override" type="text/template">
+        <div class="panel panel-default product_detail_container product_type_standard phoneProductItem cc_panel cc_product_detail_container cc_product_type_standard">
+            <div class="panel-heading cc_heading">
+                <h3 class="panel-title cc_title">{{this.product.prodBean.name}}</h3>
+            </div>
+            <div class="panel-body product_detail cc_body cc_product_detail">
+                <div class="messagingSection-Error" role="alert" style="display: none"></div>
+                <div class="messagingAction-Info" role="alert" style="display: none">
+                    <button type="button" class="close cc_close" data-dismiss="alert" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="prod_media cc_prod_media">
+                            {{#if this.mediaWrappers.[SVG Interactive Diagram]}}
+                            {{#each this.mediaWrappers.[SVG Interactive Diagram]}}
+                            <div class="interactive cc_interactive">{{displaySVG this 'mainProdImage prodDetail img-responsive'}}</div>
+                            {{/each}}
+                            {{/if}}
+                            <div id="altImageModal" class="modal fade cc_alt_image_modal" tabindex="-1" role="dialog">
+                                <div class="modal-dialog cc_modal-dialg" role="document">
+                                    <div class="modal-content cc_modal-content">
+                                        <div class="modal-header cc_modal-header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span>
+                                            </button>
+                                            <h4 class="modal-title cc_modal-title" id="myModalLabel"></h4>
+                                        </div>
+                                        <div class="modal-body cc_modal-body">
+                                            <img class="modalImg cc_modal_img" src=""/>
+                                            <p class="modalText cc_modal_text"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{#if this.product.mediaWrapper }}
+                            <div class="cc_product_detail_photo_container" id="photoContainer">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="cc_main_prod_image">{{displayImage this.product.mediaWrapper 'mainProdImage prodDetail img-responsive'}}</div>
+                                    </div>
+                                </div>
+                                {{#if this.mediaWrappers.[Alternate Images]}}
+                                <div class="row">
+                                    {{#each this.mediaWrappers.[Product Image]}}
+                                    <div class="col-xs-3">
+                                        <img class="alternate cc_alternate img-responsive thumbnail" src="{{productImage this}}" data-id="{{this.uri}}"/>
+                                    </div>
+                                    {{/each}}
+                                    {{#each this.mediaWrappers.[Alternate Images]}}
+                                    <div class="col-xs-3">
+                                        <img class="alternate cc_alternate img-responsive thumbnail" src="{{productImage this}}" data-id="{{this.uri}}"/>
+                                    </div>
+                                    {{/each}}
+                                </div>
+                                {{/if}}
+                            </div>
+                            {{else}}
+                            {{#if this.mediaWrappers.[SVG Interactive Diagram]}}
+                            {{else}}
+                            <div class="cc_product_detail_photo_container" id="photoContainer">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="cc_main_prod_image img-responsive">{{displayImage this.product.mediaWrapper 'mainProdImage prodDetail'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/if}}
+                            {{/if}}
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="product_detail_item wishFinder cc_wish_finder" data-sku="{{this.product.prodBean.sku}}">
+                            <h4 class="product_title cc_product_title">{{this.product.prodBean.name}}</h4>
+                            {{#ifDisplay 'PD.DsplSku'}}
+                            <div class="sku cc_sku">
+                                <span class="cc_label">{{pageLabelMap 'ProductDetailsInc_SKU'}}</span>
+                                <span class="value cc_value">{{this.product.prodBean.sku}}</span>
+                            </div>
+                            {{/ifDisplay}}
+<!--                            {{#ifDisplay 'PD.DsplUOM'}}-->
+<!--                            <div class="uom cc_uom">-->
+<!--                                <span class="cc_label">{{pageLabelMap 'ProductDetails_unitOfMeasure'}}</span>-->
+<!--                                <span class="value cc_value">{{pageLabelPrefixMap 'UOM_' this.product.prodBean.unitOfMeasure}}</span>-->
+<!--                            </div>-->
+<!--                            {{/ifDisplay}}-->
+                            {{#ifDisplay 'PD.DsplAvlb'}}
+                            <div class="inventory cc_inventory">
+                                <span class="cc_label">{{pageLabelMap 'ProductDetails_Availability'}}</span>
+                                {{#ifStoreSetting 'InventoryCheckFlag__c'}}
+                                <span class="value cc_value">{{{this.product.inventory}}}</span>
+                                {{else}}
+                                <span class="value cc_value">{{{pageLabelMap this.product.availMsg}}}</span>
+                                {{/ifStoreSetting}}
+                            </div>
+                            {{/ifDisplay}}
+                            {{#ifDisplay 'PR.Enabled'}}
+                            <div id="avgRating" class="rateit cc_rateit" data-rateit-value="{{this.product.avgRating}}" data-rateit-ispreset="true" data-rateit-readonly="true">
+                                <span class="cc_label">{{pageLabelMap 'NumberofReviews' this.numberOfReviews }}</span>
+                            </div>
+                            {{/ifDisplay}}
+                            {{#ifDisplay 'PD.DsplSDesc'}}
+                            <div class="shortDesc cc_short_desc">
+                                <p class="pblock cc_pblock">{{{this.product.prodBean.shortDesc}}}</p>
+                            </div>
+                            {{/ifDisplay}}
+                            <div class="row">
+                                <div class="sku-detials clearfix">
+                                    <div class="col-md-12">
+                                        <p>
+                                            <span class="cc_label">SKU:</span>
+                                            <span>{{product.prodBean.SKU}}</span>
+                                        <p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p>
+                                            <span class="cc_label">{{pageLabelMap 'ProductDetails_QuickStock'}}</span>
+                                            <span id="inventoryCount-{{product.prodBean.sfid}}">
+    <!--                                            {{pageLabelMap 'ProductDetails_Loading'}}<i class="fa fa-1.5x fa-refresh fa-spin"></i>   -->
+    												{{#if product.prodBean.inventoryAvailable}}
+                                                        {{numberFormat product.prodBean.inventoryAvailable}}
+                                                    {{else}}
+                                                        0
+                                                    {{/if}}
+                                            </span>
+                                                Pieces
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p>
+                                            <span class="cc_label">{{pageLabelMap 'ProductDetails_TotalInventory'}}</span>
+                                            <span id="totalinventoryCount-{{product.prodBean.sfid}}">
+     <!--                                     {{pageLabelMap 'ProductDetails_Loading'}}<i class="fa fa-1.5x fa-refresh fa-spin"></i>   -->
+                                                <a class="showinventoryModalButton" data-id="{{product.prodBean.SKU}}~{{product.prodBean.sfid}}" href="#{{product.prodBean.SKU}}~{{product.prodBean.sfid}}" id="inventoryModal">
+                                                    {{#if product.prodBean.totalStandardInventory}}
+                                                        {{numberFormat  product.prodBean.totalStandardInventory}}
+                                                    {{else}}
+                                                        0
+                                                    {{/if}}
+                                                </a>
+                                            </span>
+                                                Pieces
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p>Unit of Measure</p>
+                                            <div id="uom"></div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <p>Quantity</p>
+                                            <input type="text" class="form-control input-sm gp_attr_qty" value="1" />
+                                        </div>
+                                        <div class="col-md-3 product-price">
+                                            <p>Extended Price</p>
+                                            <span id="skuADP"><i class="fa fa-1.5x fa-refresh fa-spin"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                <div class="product-price-box clearfix">
+                                    <!--div class="col-md-6"><p><span class="mr-5">Price UOM:</span><span>  {{product.prodBean.unitOfMeasure}}</span></p></div-->
+                                    <div class="col-md-6 product-price"><span class="mr-5">List Price:</span><span id="calListPrice">{{pageLabelMap 'ProductDetails_Loading'}}<i class="fa fa-1.5x fa-refresh fa-spin"></i></span></div>
+									<div class="col-md-6"><p><span class="mr-5">Pieces Per Unit:</span><span id="pieces-per-unit">{{product.prodBean.piecesPerUnit}}</span></p></div>
+                                    <div class="col-md-6 product-price"><p><span class="mr-5">Your Price:</span><span id="skuYourPrice">{{pageLabelMap 'ProductDetails_Loading'}}<i class="fa fa-1.5x fa-refresh fa-spin"></i></span></p></div>
+									<div class="col-md-6"><p class="min-order-mr"><span class="mr-5">Minimum Order Quantity:</span><span>{{product.prodBean.salesOrgProduct.Minimum_Order_Quantity_in_PC__c}}</span> Pieces</p></div>
+                                    <div class="col-md-6"><p class="sub-text"><span class="mr-5">Must purchase in increments of:</span><span>{{product.prodBean.salesOrgProduct.Minimum_Order_Quantity_in_PC__c}}</span> Pieces</p></div>
+                                    <div class="clear-fix"></div>
+                                    <div class="col-md-6 skuADPDiv">
+                                        <div>
+                                            <span><b>ADP </b>Price<span class="adpCommissionlabel">/Commission</span>:</span>
+                                        </div>
+                                        <div>
+                                            <span class="adp-price" id="skuADP-{{product.prodBean.sfid}}">{{pageLabelMap 'ProductDetails_Loading'}} <i class="fa fa-1.5x fa-refresh fa-spin"></i></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 skuFloorDiv">
+                                        <div>
+                                            <span><b>Floor </b>Price/Commission:</span>
+                                        </div>
+                                        <div>
+                                            <span class="floor-price" id="skuFloorPricing-{{product.prodBean.sfid}}">{{pageLabelMap 'ProductDetails_Loading'}} <i class="fa fa-1.5x fa-refresh fa-spin"></i></span>
+                                        </div>
+                                    </div>
+
+                                    <!--div class="col-md-6">
+                                        <span><b>Extended Price </b></span>
+                                        <span id="extended-price-{{product.prodBean.sfid}}">{{pageLabelMap 'ProductDetails_Loading'}} <i class="fa fa-1.5x fa-refresh fa-spin"></i></span>
+                                    </div-->
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{#if this.product.showPricing}}
+                                {{#ifDisplay 'PD.DsplPrc'}}
+                                {{#if this.product.price}}
+                                <div class="price_block cc_price_block">
+                                    {{#ifDisplay 'PD.DsplListPrc'}}
+                                    {{#if this.product.basePrice}}
+                                    <p class="baseprice cc_baseprice">
+                                        <span class="cc_label">{{pageLabelMap 'ProductDetails_ListPrice'}}</span>
+                                        <span class="value cc_value">{{price this.product.basePrice}}</span>
+                                    </p>
+                                    {{/if}}
+                                    {{/ifDisplay}}
+                                    <p class="price cc_price">
+                                        <span class="cc_label">{{pageLabelMap 'Price'}}</span>
+                                        <span class="value cc_value cc_price{{product.prodBean.id}}">
+                                            {{#if this.highAttrPrice}}
+                                            {{#ifEquals this.lowAttrPrice this.highAttrPrice}}
+                                            {{price this.lowAttrPrice}}
+                                            {{else}}
+                                            {{price this.lowAttrPrice}} - {{price this.highAttrPrice}}
+                                            {{/ifEquals}}
+                                            {{else}}
+                                            {{price this.product.price}}
+                                            {{/if}}
+                                        </span>
+                                    </p>
+                                    <p class="cc_sold_by">
+                                        {{#if this.product.sellerID}}
+                                        <span class="soldbylabel cc_sold_by_label">{{pageLabelMap 'Prod_SoldBy'}}</span>
+                                        <span class="soldbyname cc_sold_by_name">{{pdp-seller-field 'sfdcName' this.product.sellerID this.sellers}}</span>
+                                        {{/if}}
+                                    </p>
+                                    {{#ifDisplay 'PD.DsplSvPrc'}}
+                                    {{#if this.product.savings}}
+                                    <p class="savings">
+                                        <span class="cc_label">{{pageLabelMap 'YouSave'}}</span>
+                                        <span class="value cc_value">{{price this.product.savings}}</span>
+                                    </p>
+                                    {{/if}}
+                                    {{/ifDisplay}}
+                                    {{#if this.isTierPriced}}
+                                    <div class="cc_prt_tool_tip_div cc_prt_tool_tip_div_pdp">
+                                <span class="cc_prt_tool_tip_text cc_prt_tool_tip_text_pdp" data-toggle="tooltip" title="{{pageLabelMap 'ProductPricingTiers_VolumeHover'}}">
+                            {{pageLabelMap 'ProductPricingTiers_VolumePricing'}}
+                                </span>
+                                    </div>
+                                    {{/if}}
+                                </div>
+                                <hr>
+                                {{/if}}
+                                {{/ifDisplay}}
+                                {{/if}}
+                            </div>
+                        </div>
+
+                        {{#if this.product.canAddtoCart}}
+                        {{#ifDisplay 'pd.tiersassec'}}
+                        {{else}}
+                        <div class="cc_product_pricing_tiers{{this.product.prodBean.sfid}}"></div>
+                        {{/ifDisplay}}
+
+                        {{#ifDisplay 'PD.dspladdcart'}}
+                        <div class="quantity_block gp_quantity_block cc_quantity_block">
+                            <!--ez a rész kell?-->
+                            <!--{{#if this.product.qtySkipIncrement}}
+                            <div class="row cc_qty_control_row">
+                                <div class="col-md-10 col-md-offset-2">
+                                    <div class="form-group">
+                                        <div class="input-group cc_input_group">
+                            <span class="input-group-btn cc_input_group_btn">
+                            <input type="button" value="{{pageLabelMap 'Prod_QtyDecrFF'}}" class="btn btn-default btn-sm minusFF cc_minusff">
+                            <input type="button" value="{{pageLabelMap 'Prod_QtyDecrSingle'}}" class="btn btn-default btn-sm minus cc_minus">
+                            </span>
+                                            <input type="text" readonly="true" name="qty" value="0" class="entry form-control input-sm cc_entry" maxlength="7"/>
+                                            <span class="input-group-btn cc_input_group_btn">
+                            <input type="button" value="{{pageLabelMap 'Prod_QtyIncrSingle'}}" class="btn btn-default btn-sm plus cc_plus">
+                            <input type="button" value="{{pageLabelMap 'Prod_QtyIncrFF'}}" class="btn btn-default btn-sm plusFF cc_plusff">
+                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{else}}
+                            {{#ifEquals this.product.qtySingleIncrement 1}}
+                            <div class="row cc_qty_control_row">
+                                <div class="col-md-6 col-md-offset-6">
+                                    <div class="form-group">
+                                        <div class="input-group cc_input_group">
+                            <span class="input-group-btn cc_input_group_btn">
+                            <input type="button" value="{{pageLabelMap 'Prod_QtyDecrSingle'}}" class="btn btn-default btn-sm minus cc_minus">
+                            </span>
+                                            <input id="qty{{index}}" name="quickadd[{{index}}].qty" value="0" class="qty entry form-control input-sm cc_entry" maxlength="7"/>
+                                            <span class="input-group-btn cc_input_group_btn">
+                            <input type="button" value="{{pageLabelMap 'Prod_QtyIncrSingle'}}" class="btn btn-default btn-sm plus cc_plus">
+                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{else}}
+                            <div class="row cc_qty_control_row">
+                                <div class="col-md-12">
+                                    <div class="form-horizontal">
+                                        <div class="form-group">
+                                            <label for="qty" class="col-sm-7 control-label cc_qty">{{pageLabelMap 'Qty'}}</label>
+                                            <div class="col-sm-5">
+                                                <input type="text" id="qty" name="qty" value="1" class="input-text entry plus_minus cc_entry form-control" maxlength="7"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/ifEquals}}
+                            {{/if}}-->
+                            <input type="hidden" name="qtyIncrement" value="{{this.product.qtySingleIncrement}}" class="item_qtyIncrement cc_item_qty_increment"/>
+                            <input type="hidden" name="qtySkipIncrement" value="{{this.product.qtySkipIncrement}}" class="item_qtySkipIncrement cc_item_qty_skip_increment"/>
+                        </div>
+                        {{/ifDisplay }}
+                        {{#unless this.showNewSubscriptionSelection}}
+                        {{#if this.product.prodBean.showSubscriptionSelection}}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="cc_subscription_selection_div">
+                                    <p class="subscription_selection cc_subscription_selection">
+                                        <span class="subscriptionLabel cc_subscription_label">{{pageLabelMap 'Subscribe_And_Save_Label'}}</span>
+                                        <select class="subscriptionFrequencySelection cc_subscription_frequency_selection" data-subscription="{{this.product.prodBean.sku}}">
+                                            {{#each this.product.prodBean.subscriptionFrequencies}}
+                                            <option value="{{safeQuote this}}">{{pageLabelMapMultiString 'Subscribe_And_Save_' this}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {{/if}}
+                        {{#ifDisplay 'PD.dspladdcart'}}
+                        {{#if this.product.canAddtoCart}}
+                        <div class="row">
+                            <div class="col-md-10 col-md-offset-2">
+                                <div class="wishButtons plus_minus cc_plus_minus pull-right"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 est-time">
+                                                <p class="est-time-data"><b>Estimated Lead Time:</b> {{this.product.prodBean.ECommItemName}}</p>
+							</div>
+							<div class="col-md-6">
+								<div class="action cc_action" style="margin: auto;">
+
+									<button class="typemark-button" id="typeMarkButton">ADD TYPE MARK</button><button type="button" id="addtocartbuttonpdp" class="btn btn-default btn-sm addItem cc_add_item" data-sku="{{this.product.prodBean.sku}}" data-seller="{{this.product.sellerID}}" >Add to Cart
+									</button>
+									<a title="Calculate Commission" style="display: none;" class="showcommissionWidgetModalButton" data-id="{{this.product.prodBean.SKU}}~{{this.product.prodBean.sfid}}~{{this.product.prodBean.sfdcName}}~{{this.product.prodBean.sfid}}~{{this.product.prodBean.piecesPerUnit}}" id="commissionWidgetModal" >
+									<i class="fa fa-calculator" style="font-size:18px"></i>
+									</a>
+                        		</div>
+                          </div>
+                       </div>
+                        {{/if}}
+                        {{/ifDisplay}}
+                        {{/unless}}
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+            {{#if this.primaryAttr}}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="cc_product_attributes"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="cc_product_attributes_batch_header">
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            <div class="row">
+                <div class="col-md-7 col-md-offset-5">
+                    {{#if this.showNewSubscriptionSelection}}
+                    {{#if this.product.canAddtoCart}}
+                    <div class="cc_subscription_selection_div">
+                        <h4>{{pageLabelMap 'Subscribe_And_Save_Label'}}</h4>
+                        {{#each this.subProdTerms}}
+                        {{#if this.CC_NO_SUBSCRIPTION}}
+                        <div class="cc_item_container">
+                            <div class="radio cc_radio">
+                                <label class="cc_radio_name">
+                                    <input value="nosuboption" data-nme="nosuboption" type="radio" name="subOptionGuider{{this.productSKU}}" {{this.checked}}/>
+                                    {{pageLabelMap 'Prod_NoSubscriptionOption' (price this.productPrice)}}</label>
+                            </div>
+                        </div>
+                        {{else}}
+                        <div class="cc_item_container">
+                            <div class="radio cc_radio">
+                                <label class="cc_radio_name">
+                                    <input value="{{this.sfid}}" data-nme="{{this.name}}" type="radio" name="subOptionGuider{{this.productSKU}}" {{this.checked}}/>
+                                    {{#if this.modifierSubscriptions}}
+                                    {{insertTokens this.pdpDisplayName this.displayName (price this.productPrice) (price this.subscriptionPrice) (pageLabelPrefixMap 'Subscriptions_Frequency_'
+                                    this.orderFrequencyUOM) (pageLabelPrefixMap 'Subscriptions_Frequency_' this.installmentFrequencyUOM) this.orderFrequency this.installmentFrequency
+                                    this.installmentCount this.orderCount (price this.modifierSubscriptions.[0].productPrice) (price this.modifierSubscriptions.[0].subscriptionPrice)
+                                    this.modifierSubscriptions.[0].orderCount this.modifierSubscriptions.[0].installmentCount}}
+                                    {{else}}
+                                    {{insertTokens this.pdpDisplayName this.displayName (price this.productPrice) (price this.subscriptionPrice) (pageLabelPrefixMap 'Subscriptions_Frequency_'
+                                    this.orderFrequencyUOM) (pageLabelPrefixMap 'Subscriptions_Frequency_' this.installmentFrequencyUOM) this.orderFrequency this.installmentFrequency
+                                    this.installmentCount this.orderCount}}
+                                    {{/if}}
+                                </label>
+                            </div>
+                        </div>
+                        {{/if}}
+                        {{/each}}
+                        <div class="action pull-right cc_action">
+                            {{#ifDisplay 'PD.dspladdcart'}}
+                            <button type="button" class="btn btn-default btn-sm addItem cc_add_item" data-sku="{{this.product.prodBean.sku}}">{{pageLabelMap 'Component_MiniwishList_AddToCart'}}
+                            </button>
+                            {{/ifDisplay}}
+                        </div>
+                    </div>
+                    {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="tabSection"></div>
+        <div class="widgetSection"></div>
+    </script>
+
+    <script id="ProductDetail-ProductAttributes-Desktop-Override" type="text/template">
+        <!--<div class="gp_attr cc_prod_attr">
+            <div class="row cc_attr_row">
+                {{#each attr}}
+                {{#each .}}
+                <div class="col-md-3 cc_attr">
+        <span class="cc_attr_name">
+         {{{@key}}}
+        </span>
+                    <select id="cc_attr_{{@key}}" class="form-control input-sm cc_attr_{{@key}} gp_attr_select">
+                        {{#each this}}
+                        <option class="cc_attr_value" value="{{displayName}}" data-id="{{sfid}}" data-attr="{{parentAttribute}}-{{attributeID}}">{{{displayName}}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                {{/each}}
+                {{/each}}
+                <div class="col-md-3 cc_prod_attr_qty">
+                    {{#ifDisplay 'PD.dspladdcart'}}
+                    <span class="cc_attr_qty cc_qty">{{pageLabelMap 'ProductAttributes_Quantity'}}</span>
+                    <input type="text" class="form-control entry input-sm gp_attr_qty" value="1"/>
+                    {{/ifDisplay}}
+                </div>
+                <div class="col-md-3 cc_prod_attr_price">
+                    <span class="cc_attr_price cc_price_label">{{pageLabelMap 'ProductAttributes_Price'}}</span>
+                    <p class="gp_attribute_price"></p>
+                </div>
+            </div>
+            <div class="row cc_prod_attr_warning">
+                <div class="col-md-6">
+                    <p class="cc_add_to_batch_warning">
+                        {{pageLabelMap 'ProductAttributes_Warning'}}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    {{#ifDisplay 'PD.dspladdcart'}}
+                    <button class="btn btn-default btn-sm pull-right gp_addToBatch cc_add_to_batch">{{pageLabelMap 'ProductAttributes_AddToBatch'}}</button>
+                    {{/ifDisplay}}
+                </div>
+            </div>
+        </div>-->
+    </script>
+
+    <script id="ProductDetail-ProductsSection-Desktop" type="text/template">
+        <!--**************************************************************************************-->
+        <div class="quick_wishlist cc_quick_wishlist cc_addon_tab">
+            <div class="row">
+                {{#each this.pageData}}
+                <div class="{{#ifEquals ../pageData.length 1}}col-xs-12{{else}}{{#ifEquals ../pageData.length 2}}col-xs-6{{else}}{{#ifEquals ../pageData.length 3}}col-xs-4{{else}}col-xs-3{{/ifEquals}}{{/ifEquals}}{{/ifEquals}}">
+                    <div class="row">
+                        <div class="quick_wishlist_item col-md-12 cc_quick_wishlist_item">
+                            <div class="cc_cart_item">
+                                {{productLink this.prodBean 'cc_cart_item' image=(displayImage this.mediaWrapper 'prodDetRel img-responsive' alt=this.prodBean.name dataId=this.prodBean.sku)}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p class="cc_prod_name">
+                                {{productLink this.prodBean 'productName cc_data_link'}}<br>
+
+                                <!-- catalog number -->
+                                <span class="cc_sku_label">{{pageLabelMap 'FamilyName'}}</span>&#160;
+                                <span class="cc_sku_value">{{this.prodBean.productFamily}}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div>
+                                <input type="hidden" name="qtyIncrement" value="{{this.qtySingleIncrement}}" class="item_qtyIncrement"/>
+                                <input type="hidden" name="qtySkipIncrement" value="{{this.qtySkipIncrement}}" class="item_qtySkipIncrement"/>
+                                {{#ifDisplay 'PD.DsplPrc' }}
+                                {{#if this.prodBean.primaryAttr}}
+                                <span class="cc_attr_message">{{pageLabelMap 'ProductAttributes_PriceMessage'}}</span>
+                                {{else}}
+                                {{#if this.showNewSubscriptionSelection}}
+                                <p class="price priceSubscription cc_price_subscription">
+                                    <strong>{{pageLabelMap 'Prod_SubsAlternatePrice' (price this.price) (price this.minSubPrice) (price this.maxSubPrice)}}</strong>
+                                </p>
+                                {{else}}
+                                {{#if this.displayPrice}}
+                                <p class="price displayPrice cc_display_price">
+                                    {{pageLabelPrefixMap 'DisplayPrice_' this.displayPrice}}
+                                </p>
+                                {{else}}
+                                {{#if this.showPricing}}
+                                {{#if this.price}}
+                                <div class="cc_pricing">
+                                    <p class="price cc_price">{{price this.price}}</p>
+                                </div>
+                                {{/if}}
+                                {{/if}}
+                                {{/if}}
+                                {{#if this.isTierPriced}}
+                                <div class="cc_prt_tool_tip_div cc_prt_tool_tip_div_pdp">
+                    <span class="cc_prt_tool_tip_text cc_prt_tool_tip_text_pdp" data-toggle="tooltip" title="{{pageLabelMap 'ProductPricingTiers_VolumeHover'}}">
+                     {{pageLabelMap 'ProductPricingTiers_VolumePricing'}}
+                    </span>
+                                </div>
+                                {{/if}}
+                                {{/if}}
+                                {{/if}}
+                                {{/ifDisplay}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{#pdp-ifRowFull @index}}
+                <div class="clearfix"></div>
+                {{/pdp-ifRowFull}}
+                {{/each}}
+            </div>
+        </div>
+    </script>
+
+    <script>
+        function searchAccounts() {
+            // console.log(this);
+            var input, filter, table, tr, td1, td2, i, txtValue;
+            input = document.getElementById("accountSearch");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("accountsTable");
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+                td1 = tr[i].getElementsByTagName("td")[0];
+                td2 = tr[i].getElementsByTagName("td")[1];
+                if (td1) {
+                    txtValue = td1.textContent || td1.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        if (td2) {
+                            txtValue = td2.textContent || td2.innerText;
+                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                tr[i].style.display = "";
+                            } else {
+                                tr[i].style.display = "none";
+                            }
+                        }
+                        //tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('message', event => {
+            console.log(`event`, event);
+            console.log(`window.location.origin`, window.location.origin);
+            if (event.data.accountId != null) {
+                document.cookie = 'apex__effacc=' + event.data.accountId;
+                //location.reload();
+                document.querySelector(`i.pickAccount.cc_pick_account[data-id="${event.data.accountId}"]`).click();
+            }
+        });
+
+        function openModal(event) {
+            const accountId = event.currentTarget.dataset.accountId;
+            $Lightning.use("c:accountSelectorApp", function () {
+                $Lightning.createComponent("c:b2bCommerceAccountSelector",
+                    {accountId: accountId},
+                    "account-selector-lwc-container",
+                    function (cmp) {
+
+                    }
+                );
+            });
+        }
+        
+       
+    </script>
+
+    <style>
+        
+        #accountSearch {
+            background-image: url('images/search.svg');
+            background-position: 10px 10px;
+            background-repeat: no-repeat;
+            width: 60%;
+            font-size: 16px;
+            padding: 5px 5px 5px 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 12px;
+            margin-left: 30px;
+        }
+
+        .sku.cc_sku {
+            margin: 5px 0 5px;
+        }
+
+        .panel-title {
+            font-weight: 400 !important;
+        }
+
+        .sku-detials {
+            padding: 10px;
+        }
+
+        .sku-detials > div {
+            padding: 5px;
+        }
+
+        .product-price-box {
+            background-color: #eae9e9;
+            padding: 10px 0;
+            margin-top: 10px;
+        }
+
+        .product-price-box .product-price-content {
+            padding-bottom: 5px;
+        }
+
+        .mr-5 {
+            margin-right: 5px;
+        }
+
+        .min-order-mr {
+            margin: 0 0 5px !important;
+        }
+
+        .sub-text {
+            font-size: 10px;
+        }
+
+        .shortDesc table tr {
+            border-bottom: none;
+        }
+
+        .product-price-box .adp-price {
+            margin-left: 28px;
+        }
+
+        .product-price-box .floor-price {
+            margin-left: 31px;
+        }
+        .skuADPWithoutCommission > div {
+            display: inline-block;
+        }
+        .skuADPWithoutCommission .adp-price {
+            margin-left: 0 !important;
+        }
+        .est-time .est-time-data {
+		padding: 6px 0;
+        }
+    </style>
+</apex:component>

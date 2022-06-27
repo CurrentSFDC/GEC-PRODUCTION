@@ -1,0 +1,2 @@
+<apex:component id="B2B_PricingModal" controller="PriceAgreementController">
+</apex:component>

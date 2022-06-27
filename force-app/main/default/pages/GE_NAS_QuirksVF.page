@@ -1,0 +1,31 @@
+<apex:page expires="-1" id="theQuirksPage" standardcontroller="Account" showHeader="false" extensions="GE_NAS_Quirks" sidebar="false">
+<apex:form >
+ <apex:inputHidden value="{!deleteQuirkID}" id="deleteQuirk"/>
+ <apex:pageBlock title="Quirks">
+ <apex:pageBlockButtons location="top"  >
+     <apex:commandButton value="New Quirk" onclick="window.top.location='/a0Z/e?{!strOrgValue}={!URLENCODE(accCurrent.Name)}&{!strOrgValue}_lkid={!accCurrent.ID}&retURL=%2F{!accCurrent.ID}'" />
+    </apex:pageBlockButtons>
+    <apex:outputpanel rendered="{!!hasQuirks}">
+        No records to display.
+    </apex:outputpanel>
+    <apex:outputpanel rendered="{!hasQuirks}">
+    <apex:pageBlockTable value="{!lstQuirks}" var="item">
+        <apex:column headerValue="Action" styleClass="actionColumn">
+        <apex:commandLink styleClass="actionLink" onclick="window.top.location='/{!item.Id}/e?retURL=/{!accCurrent.ID}'"> 
+               Edit</apex:commandLink> |         
+             <apex:commandLink action="{!deleteQuirk}" styleClass="actionLink" oncomplete="window.top.location='/{!accCurrent.ID}'" onClick="if(!confirm('are you sure?'))return false;"> 
+         Del<apex:param name="deleteQuirkID" value="{!item.Id}"/></apex:commandLink>  
+               </apex:column>
+         <apex:column onclick="window.top.location='/{!item.GE_NAS_Account__c}'"  value="{!item.GE_NAS_Account__c}"/>
+        <apex:column value="{!item.GE_NAS_Quirk__c}"/>
+        <apex:column value="{!item.GE_NAS_Value__c}"/> 
+        <apex:column value="{!item.GE_NAS_Comments__c}"/> 
+        <apex:column > 
+        <apex:facet name="header">Quirk ID</apex:facet>
+         <apex:outputLink onclick="window.top.location='/{!item.ID}'" >{!item.Name}</apex:outputLink>
+        </apex:column>
+       </apex:pageBlockTable>
+        </apex:outputpanel> 
+    </apex:pageBlock>
+    </apex:form>
+</apex:page>

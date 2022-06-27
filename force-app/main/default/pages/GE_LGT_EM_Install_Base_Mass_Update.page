@@ -1,0 +1,106 @@
+<apex:page standardController="Install_Base__c" recordSetVar="InstallBaseLineItem">
+    <apex:form >
+        <apex:pageBlock >
+        <apex:pagemessages />
+            <apex:pageBlock >
+             
+            </apex:pageBlock>
+
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Save" action="{!save}"/>
+                <apex:commandButton value="Return" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockTable value="{!selected}" var="ibli">
+                <apex:column headerValue="Installed Base Name">  
+                   <apex:outputLink value="/{!ibli.Id}">{!ibli.Name}</apex:outputLink>
+                </apex:column>
+                <apex:column headerValue="Install Base Site ID">
+                    <apex:outputField value="{!ibli.Installation_Site_ID__c}"/>
+                </apex:column>
+                <apex:column headerValue="Install Base Type">
+                    <apex:inputField value="{!ibli.RecordTypeId}"/>
+                </apex:column>
+                <apex:column headerValue="Installed Base Owner">
+                    <apex:inputField value="{!ibli.OwnerId}"/>
+                </apex:column>
+                <apex:column headervalue="Audit to be completed by ">
+                    <apex:inputField value="{!ibli.Audit_to_be_completed_by__c}"/>
+                </apex:column>
+                <apex:column headerValue="Application Engineer">
+                    <apex:inputField value="{!ibli.Application_Engineer__c}"/>
+                </apex:column>
+                <apex:column headerValue="Design to be completed by ">
+                    <apex:inputField value="{!ibli.Design_to_be_completed_by__c}"/>
+                </apex:column>
+                <apex:column headerValue="Designer">
+                    <apex:inputField value="{!ibli.Designer__c}"/>
+                </apex:column>
+                <apex:column headerValue="File storage">
+                    <apex:inputField value="{!ibli.File_storage__c}"/>
+                </apex:column>
+                <apex:column headerValue="SAP SO number">
+                    <apex:inputField value="{!ibli.SAP_PO_number__c}"/>
+                </apex:column>
+                <apex:column headervalue="Invoice number ">
+                    <apex:inputField value="{!ibli.Invoice_number__c}"/>
+                </apex:column> 
+                <apex:column headervalue="Audit date (plan) ">
+                    <apex:inputField value="{!ibli.Planned_Audit_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Audit date (actual) ">
+                    <apex:inputField value="{!ibli.Actual_Audit_date__c}"/>
+                </apex:column> 
+                <apex:column headervalue="Quotation issue date (plan) ">
+                    <apex:inputField value="{!ibli.Quotation_issued_date_plan__c}"/>
+                </apex:column> 
+                <apex:column headervalue="Quotation issue date (Actual) ">
+                    <apex:inputField value="{!ibli.Quotation_issued_date_actual__c}"/>
+                </apex:column>                 
+                <apex:column headervalue="Design completed date (plan) ">
+                    <apex:inputField value="{!ibli.Planned_Designed_Completed_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Design completed date (actual) ">
+                    <apex:inputField value="{!ibli.Actual_Designed_Completed_date__c}"/>
+                </apex:column>  
+                <apex:column headervalue="Equipment order date (plan) ">
+                    <apex:inputField value="{!ibli.Equipment_ordered_date_plan__c}"/>
+                </apex:column> 
+                <apex:column headervalue="Equipment order date (actual) ">
+                    <apex:inputField value="{!ibli.Equipment_ordered_date_actual__c}"/>
+                </apex:column>
+                <apex:column headervalue="Equipment delivery date (plan) ">
+                    <apex:inputField value="{!ibli.Planned_Order_Receive_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Equipment delivery date (actual) ">
+                    <apex:inputField value="{!ibli.Actual_Order_Receive_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Installation start date (plan) ">
+                    <apex:inputField value="{!ibli.Planned_Installation_Start_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Installation start date (actual) ">
+                    <apex:inputField value="{!ibli.Inst_Completion_Date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Installation completion date (plan) ">
+                    <apex:inputField value="{!ibli.Planned_Installation_Completion_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Installation completion date (actual) ">
+                    <apex:inputField value="{!ibli.Actual_Installation_Completion_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Warranty start date ">
+                    <apex:inputField value="{!ibli.Warranty_start_date__c}"/>
+                </apex:column>
+                <apex:column headervalue="Daily Operating Hours ">
+                    <apex:inputField value="{!ibli.Daily_operating_hours__c}"/>
+                </apex:column>
+                <apex:column headervalue="Working days / week ">
+                    <apex:inputField value="{!ibli.Working_days_week__c}"/>
+                </apex:column>
+                <apex:column headervalue="Energy rate / KWh ">
+                    <apex:inputField value="{!ibli.Energy_rate_kw_h__c}"/>
+                </apex:column>
+            </apex:pageBlockTable>
+
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

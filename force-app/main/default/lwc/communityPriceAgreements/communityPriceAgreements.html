@@ -1,0 +1,85 @@
+<!-- Community Price Agreements -->
+<template>
+    <!-- <div class="slds-max-large-size_1-of-1 slds-large-size_1-of-2">
+        <input class="slds-input" placeholder="Search for Price Agreements" onkeyup={handleInputKeyUp}>
+    </div> -->
+    <!-- <div class="slds-grid slds-wrap"> -->
+    <div class="slds-grid slds-wrap search-inputs">
+        <!-- <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_8-of-12">
+            <input class="slds-input" placeholder="Search for Price Agreements" onkeyup={handleInputKeyUp}>
+        </div> -->
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_2-of-12 slds-p-horizontal_small hide-clear-icon">
+            <lightning-input type="search" class="slds-m-bottom_small" label="Search Agreement" name="Search" onkeyup={handleInputKeyUp} ></lightning-input>
+        </div>
+        <div class="slds-col slds-size_6-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12 slds-p-vertical_large slds-p-horizontal_small">
+            <button class="slds-button slds-button_brand" onclick={handleAgreementSearch}>Search</button>
+            <button class="slds-button slds-button_destructive" onclick={clearSearch}>Clear</button>
+            <!-- <lightning-button-icon if:true={priceAgreementsToDisplay} icon-name="utility:download" variant="brand" alternative-text="Export CSV" class="slds-m-left_xx-small tab-export-csv" title="Export CSV"></lightning-button-icon> -->
+        </div>
+        <div if:true={priceAgreementsToDisplay} class="slds-col slds-size_6-of-12 slds-medium-size_5-of-12 slds-large-size_6-of-12 slds-p-vertical_large slds-p-horizontal_small export-csv">
+            <lightning-button class="slds-float_right exportCSVBtn" icon-name="utility:download" 
+                label="Export CSV" 
+                title="Export CSV"
+                onclick={downloadCSVFile} variant="brand"></lightning-button>
+        </div>
+        <!-- <div if:true={priceAgreementsToDisplay} class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_4-of-12">
+            <lightning-button class="slds-float_right exportCSVBtn" icon-name="utility:download" 
+                label="Export CSV" 
+                title="Export CSV"
+                onclick={downloadCSVFile} variant="brand"></lightning-button>
+        </div> -->
+    </div>
+    <div class="status slds-m-bottom_medium">
+        <lightning-spinner if:true={isLoading} variant="brand"></lightning-spinner>
+    </div>
+    <div class="table-container">
+        <lightning-datatable
+                key-field="Id"
+                data={priceAgreementsToDisplay}
+                columns={columns}
+                hide-checkbox-column="true"
+                onrowaction={handleRowAction}
+                enable-infinite-loading
+                onloadmore={loadMorePriceAgreements}
+                class="slds-max-medium-table_stacked"
+        >
+        </lightning-datatable>
+    </div>
+    <!-- Pdf View Model By Sameer On (4-29-2021) -->
+    <section role="dialog" tabindex="-1" class="slds-modal slds-modal_large pdfViewModal">
+        <div class="slds-modal__container">
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <c-pdf-viewer-2 base-64-pdf={base64PDF}></c-pdf-viewer-2>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_brand" onclick={backToCSV}>Back</button>
+                <button class="slds-button slds-button_neutral" onclick={closeModal}>Close</button>
+            </footer>
+        </div>
+    </section>
+    <!-- Pdf & CSV View Model By Sameer On (4-29-2021) -->
+    <section role="dialog" tabindex="-1" class="slds-modal slds-modal_large pdfCsvViewModal">
+        <div class="slds-modal__container csv-modal-container">
+            <header class="slds-modal__header">
+                <h2 id="modal-heading-01" class="agreement-dialog-heading slds-hyphenate">View Price Agreement: {selectedAgreementNo}</h2>
+            </header>
+            <div class="slds-p-around_medium filePdfExcelView">
+                <div class="loader-wrapper" if:true={isSpinner}>
+                    <div class="loader-content">
+                        <div class="loader"></div>
+                        Please wait...
+                    </div>
+                </div>
+                <lightning-icon if:true={allowPdfDownload} icon-name="doctype:pdf" alternative-text="PDF file" title="View PDF" onclick={showPDF}></lightning-icon>
+                <lightning-icon if:true={allowCSVDownload} icon-name="doctype:csv" alternative-text="CSV file" title="Export CSV" onclick={downloadAgreementCSV}></lightning-icon>
+                <div if:true={showDownloadNote} class="slds-m-around_x-small slds-p-around_xxx-small file-download-note">
+                    <b>Note:</b> {fileDownloadNote}
+                </div>
+            </div>
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick={closeModal}>Close</button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop"></div>
+</template>

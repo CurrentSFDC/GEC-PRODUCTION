@@ -1,0 +1,103 @@
+<template>
+    <template if:true={type}>
+        <div class="slds-card">
+            <div class="slds-card__body slds-card__body_inner">
+                <lightning-datatable 
+                    key-field="id"
+                    data={noteItems}
+                    columns={columns}
+                    hide-checkbox-column="true"
+                    wrap-text-max-lines="4">
+                </lightning-datatable>
+            </div>
+        </div>
+    </template>
+
+<template if:false={type}>
+<lightning-accordion class="slds-scrollable_y" active-section-name={activeSections}>
+                    
+    <template if:true={data}>
+        <template for:each={data} for:item="dis">
+            
+            <lightning-accordion-section onclick={handleSelected} data-id={dis.Id} name={dis.disID} value={dis.Id} label={dis.releaseName} key={dis.Id}>
+                <!--Selected DR ID: {dis.Id}-->
+                <lightning-record-view-form record-id={dis.Id} object-api-name="Connect_Release_Notes__c" density="comfy">
+
+                    <div class="slds-card">
+                        <template if:true={isLoading}>
+                            <lightning-spinner  alternative-text="Loading" variant="brand"></lightning-spinner>
+                        </template>
+                       
+                            <div class="slds-card__header slds-grid slds-wrap">
+                                <!--<div class="slds-col headerSection">
+                                    <h2>
+                                        
+                                        <label class="slds-form-element__label itemFont" for="form-element-01">Release Date</label> <br>
+                                        
+                                    </h2> <lightning-output-field variant="label-hidden" field-name="Release_Date__c"></lightning-output-field>
+                                </div>-->
+                                
+                                <div class="slds-col headerSection">
+                                    <h2>
+                                        
+                                        <label class="slds-form-element__label itemFont" for="form-element-01">Release Version</label> <br>
+                                        
+                                    </h2> <!--<lightning-output-field variant="label-hidden" field-name={dis.Release_Version__c}></lightning-output-field>-->
+                                    {dis.Release_Version__c}
+                                </div>
+                                <div class="slds-col headerSection">
+                                    <h2>
+                                        
+                                        <label class="slds-form-element__label itemFont" for="form-element-01">Category</label> <br>
+                                        
+                                    </h2> <!--<lightning-output-field variant="label-hidden" field-name="Category__c"></lightning-output-field>-->
+                                    {dis.Category__c}
+                                </div>
+
+                                <div class="slds-col headerSection">
+                                    <h2>
+                                        <label class="slds-form-element__label itemFont" for="form-element-01">Release Description</label> <br>
+                                                
+                                            </h2> <!--<lightning-output-field variant="label-hidden" field-name="User_Description__c"></lightning-output-field>-->
+                                            {dis.User_Description__c}
+                                </div>
+                                
+
+                            </div>
+                         
+                            <br>
+
+                        <div class="slds-card__body slds-card__body_inner slds-is-relative">
+                            <template if:true={isLoading}>
+                                <lightning-spinner  alternative-text="Loading" variant="brand"></lightning-spinner>
+                            </template>
+                            <lightning-datatable 
+                            key-field="id"
+                            data={noteItems}
+                            columns={columns}
+                            hide-checkbox-column="true"
+                            wrap-text-max-lines="4">
+                        </lightning-datatable>
+                        </div>
+
+                    </div>
+
+                </lightning-record-view-form>
+                <br>
+                <!--<lightning-datatable 
+                            key-field="id"
+                            data={disputeProducts}
+                            columns={disputeColumns}
+                            hide-checkbox-column="true">
+                            
+                        </lightning-datatable>-->
+                
+            </lightning-accordion-section>
+
+            
+            </template>
+            </template>
+            </lightning-accordion>
+</template>
+    
+</template>

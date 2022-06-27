@@ -1,0 +1,39 @@
+<!--
+        2021-02-17.
+ -->
+
+<!-- Community Product Detail -->
+<template>
+    <lightning-spinner class="page-loader" if:true={isLoading} variant="brand"></lightning-spinner>
+    <div class="container" if:true={communityContent}>
+        <div class="slds-m-bottom_large">
+            <h2 class="slds-m-bottom_small">{communityContent.Title__c}</h2>
+            <p class="slds-m-bottom_small">{communityContent.Description__c}</p>
+            <!--<lightning-icon icon-name="utility:cart" class="slds-m-horizontal_large"></lightning-icon>-->
+            <a href={communityContent.Hyperlink__c}>{communityContent.Hyperlink_Mask__c}</a>
+        </div>
+        <div class="slds-grid slds-wrap slds-m-bottom_xx-large">
+            <div class="slds-col slds-max-large-size_1-of-1 slds-large-size_3-of-4">
+                <c-community-media-carousel community-content-media= {productDetails.communityContentMedia}></c-community-media-carousel>
+            </div>
+            <div class="slds-hide_large slds-size_1-of-1 slds-p-bottom_medium"></div>
+            <div class="slds-col slds-max-large-size_1-of-1 slds-large-size_1-of-4 slds-p-left_small">
+                <div class="slds-m-bottom_medium">
+                    <h3 class="slds-m-bottom_small">{communityContent.Subtitle_1_Header__c}</h3>
+                    <lightning-formatted-rich-text
+                            value={communityContent.Subtitle_1_Description__c}
+                    ></lightning-formatted-rich-text>
+                </div>
+                <div class="">
+                    <h3 class="slds-m-bottom_small">{communityContent.Subtitle_2_Header__c}</h3>
+                    <lightning-formatted-rich-text
+                            value={communityContent.Subtitle_2_Description__c}
+                    ></lightning-formatted-rich-text>
+                </div>
+            </div>
+        </div>
+        <div class="">
+            <c-community-product-documents title={communityContent.Accordion_Header__c} product-documents= {productDetails.productDocuments} onisloading={handleIsLoading}></c-community-product-documents>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,131 @@
+<!-- Marketing And Promotions -->
+<template>
+    <h2 class="heading-main slds-max-medium-size_1-of-1 slds-small-size_1-of-2 slds-m-bottom_medium">
+        {header}
+    </h2>
+    <table if:true={communityContentRecords} class="slds-table slds-table_bordered">
+        <thead>
+        <tr class="slds-text-heading_label">
+            <th scope="col">
+                <!--<span>Image</span>-->
+            </th>
+            <th class="slds-is-sortable" scope="col" onclick={sort} data-sort-by="Content_Type__c">
+                <span class="slds-p-right_small">Type</span>
+                <lightning-icon icon-name={typeSortDirectionArrow} size="x-small"></lightning-icon>
+            </th>
+            <th class="slds-is-sortable" scope="col" onclick={sort} data-sort-by="Title__c">
+                <span class="slds-p-right_small">Title</span>
+                <lightning-icon icon-name={titleSortDirectionArrow} size="x-small"></lightning-icon>
+            </th>
+            <th class="slds-is-sortable" scope="col" onclick={sort} data-sort-by="Description__c">
+                <span class="slds-p-right_small">Description</span>
+                <lightning-icon icon-name={descriptionSortDirectionArrow} size="x-small"></lightning-icon>
+            </th>
+            <th class="slds-is-sortable" scope="col" onclick={sort} data-sort-by="Display_Date__c">
+                <span class="slds-p-right_small">Date</span>
+                <lightning-icon icon-name={dateSortDirectionArrow} size="x-small"></lightning-icon>
+            </th>
+            <th scope="col">Call to Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <template for:each={communityContentRecords} for:item="record" for:index="index">
+            <tr key={record.Id}>
+                <td data-label="Image">
+                    <img src={record.IMG_URL__c}>
+                </td>
+                <td data-label="Type">
+                    {record.Content_Type__c}
+                </td>
+                <td data-label="Title">
+                    {record.Title__c}
+                </td>
+                <td data-label="Description">
+                    {record.Description__c}
+                </td>
+                <td data-label="Date">
+                    <lightning-formatted-date-time value={record.Display_Date__c} time-zone="UTC" date-local="true" hour12="false" month="2-digit" day="2-digit" year="numeric"></lightning-formatted-date-time>
+                </td>
+                <td data-label="Call to Action">
+                    <a href={URL} onclick={openLink} target={record.Open_Hyperlink_In__c}>
+                    <!--a href={URL} onclick={openLink} target="_self"></a-->
+                        <button value={index} class="slds-button slds-button_brand">
+                            {record.Call_To_Action__c}
+                        </button>
+                    </a>
+                </td>
+            </tr>
+        </template>
+        </tbody>
+    </table>
+
+    <template if:true={videoModal}>
+        <section role="dialog" tabindex="-1"
+                aria-labelledby="modal-heading-01"
+                aria-modal="true"
+                aria-describedby="modal-content-id-1"
+                class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+            <lightning-record-view-form layout-type="Full" record-id={contentID} object-api-name="Community_Content__c">
+            <header class="slds-modal__header">
+                <text class="info">{recordName}</text>  <br> <br>
+                
+            </header>
+            
+            <!-- modal body -->
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" >
+
+            
+              
+                
+                <br>
+           
+         
+                
+
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-4">
+                            <div class="box">
+                                <img class="slds-align_absolute-center" src={logo}>
+                            </div><br>
+                            <text class="info">Title: </text> <br>
+                            <text >{recordName}</text>  <br> <br>
+                            <text class="info">Type: </text> <br>
+                            <text >{recordType}</text>  <br> <br>
+                            <text class="info">Description: </text> <br>
+                            <text >{recordDescription}</text>  <br> 
+                        </div>
+                        <div class="slds-col slds-size_1-of-4">
+                            <div class="container slds-max-large-size_1-of-1 slds-large-size_2-of-3 slds-container_center">
+                                <div class="media-container">
+                                    <div class="slds-align_absolute-center video-box">
+                                        <iframe src={videoSrc} class="video-box" allowfullscreen="" frameborder="0" contorls="false"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--<text class="slds-align_absolute-center">{recordDescription}</text>-->
+
+                        </div>
+                    </div>               
+                    
+            
+               
+            </div>
+            
+           
+
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+                <lightning-button variant="brand"
+                                  label="Close"
+                                  title="Close"
+                                  onclick={closeVideoModal}></lightning-button>
+            </footer>
+        </lightning-record-view-form><br/>
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+       
+    </template>
+
+</template>

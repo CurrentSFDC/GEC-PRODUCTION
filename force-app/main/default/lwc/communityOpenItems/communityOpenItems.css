@@ -1,0 +1,7 @@
+.THIS.slds-card__header {
+    background-color: burlywood;
+}
+
+:host {
+    --sds-c-card-heading-color-background: rgb(212, 212, 214);
+  }

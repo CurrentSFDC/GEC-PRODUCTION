@@ -1,0 +1,154 @@
+<apex:page standardController="NPS_Survey__c" extensions="GE_LGT_EM_CEMSurvey_Extension">
+    <apex:pageMessages />
+    <script>
+    function colorPageBlock(pageblock) 
+    {
+        if (pageblock != null) 
+            pageblock.firstChild.style.cssText = " background-image: url('/img/alohaSkin/opacity75.png');";
+    }
+    function colorPageBlock1(pageblock) 
+    {
+        if (pageblock != null) 
+            pageblock.firstChild.style.cssText = "background-color:#299517;";
+        
+    }
+    </script>
+    <apex:sectionHeader title="CEM Survey Edit" subtitle="{!subtitle}"/>
+    <apex:form >
+        <apex:pageBlock title="CEM Survey Edit">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Edit" action="{!edit}"/>
+                <apex:commandButton value="Delete" action="{!delete}"/>
+                <apex:commandButton value="Clone" action="{!cloneFun}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Information" id="Information" columns="2" collapsible="false">
+                <apex:facet name="header"><font size="2" color="Black">Information</font></apex:facet>
+                <apex:outputField value="{!NPS_Survey__c.Name}"/>
+                <apex:outputField value="{!NPS_Survey__c.ownerId}"/>
+                <apex:outputField value="{!NPS_Survey__c.Opportunity_name__c}"/>
+                <apex:outputField value="{!NPS_Survey__c.Site__c}"/>
+                <apex:outputField value="{!NPS_Survey__c.Case__c}"/>
+                <apex:outputField value="{!NPS_Survey__c.Role__c}"/>
+                <apex:outputField value="{!NPS_Survey__c.Install_Base_Name__c}"/><br/>
+                <apex:outputField value="{!NPS_Survey__c.IB_Installation_Date__c}"/><br/>
+                <apex:outputField value="{!NPS_Survey__c.Site_contact_phone__c}"/><br/>
+                
+                <script>colorPageBlock(document.getElementById("{!$Component.Information}"));</script>
+                </apex:pageBlockSection>
+                <apex:outputPanel rendered="{!flag1}">
+                    <apex:pageBlockSection title="11. What is the thing you were most pleased within your experience with GEL?" columns="1" collapsible="false" id="id11">
+                        <script>colorPageBlock1(document.getElementById("{!$Component.id11}"));</script>
+                <apex:facet name="header"><font size="2">11. What is the thing you were most pleased within your experience with GEL?</font></apex:facet>
+                <apex:outputField value="{!NPS_Survey__c.Q11__c}"  style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="12. What is the thing you were most disappointed with in your experience with GE" columns="1" collapsible="false" id="id12">
+                <script>colorPageBlock1(document.getElementById("{!$Component.id12}"));</script>
+                <apex:facet name="header"><font size="2">12. What is the thing you were most disappointed with in your experience with GE</font></apex:facet>
+                    <apex:outputField value="{!NPS_Survey__c.Q12__c}" style="width:60%"/>
+                        </apex:pageBlockSection>
+                    <apex:pageBlockSection title="13. Based on yr experience, 'd you refer GEL to s'one else as Lighting Solution?" columns="1" collapsible="false" id="id13">
+                        <script>colorPageBlock1(document.getElementById("{!$Component.id13}"));</script>
+                <apex:facet name="header"><font size="2">13. Based on yr experience, 'd you refer GEL to s'one else as Lighting Solution?</font></apex:facet>
+                <apex:outputField value="{!NPS_Survey__c.Q13__c}"  style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="14. What would be the message that you'd like to post as tweet about GE?" columns="1" collapsible="false" id="id14">
+                <script>colorPageBlock1(document.getElementById("{!$Component.id14}"));</script>
+                <apex:facet name="header"><font size="2">14. What would be the message that you'd like to post as tweet about GE?</font></apex:facet>
+                <apex:outputField value="{!NPS_Survey__c.Q14__c}" style="width:60%"/>
+                    </apex:pageBlockSection>
+                </apex:outputPanel>
+                <apex:pageBlockSection title="1. Project status at Survey" columns="1" collapsible="false"  id="id1">
+                    <apex:facet name="header"><font size="2" color="Black">1. Project status at Survey</font></apex:facet>
+                        <script>colorPageBlock(document.getElementById("{!$Component.id1}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q1__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="2. Project Site / Trial Store" columns="1" collapsible="false" id="id2">
+                <apex:facet name="header"><font size="2" color="Black">2. Project Site / Trial Store</font></apex:facet>
+                <script>colorPageBlock(document.getElementById("{!$Component.id2}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q2__c}" style="width:60%"/>
+                    </apex:pageBlockSection>
+                <apex:pageBlockSection title="3. Project Name" columns="1" collapsible="false"  id="id3">
+                    <apex:facet name="header"><font size="2" color="Black">3. Project Name</font></apex:facet>
+                        <script>colorPageBlock(document.getElementById("{!$Component.id3}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q3__c}"  style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="4. Please provide the Name of the Company you are interviewing" columns="1" collapsible="false"  id="id4">
+                <apex:facet name="header"><font size="2" color="Black">4. Please provide the Name of the Company you are interviewing</font></apex:facet>
+                <script>colorPageBlock(document.getElementById("{!$Component.id4}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q4__c}" style="width:60%"/>
+                    </apex:pageBlockSection>
+                <apex:pageBlockSection title="5. Opportunity ID / Order Number" columns="1" collapsible="false"  id="id5">
+                    <apex:facet name="header"><font size="2" color="Black">5. Opportunity ID / Order Number</font></apex:facet>
+                        <script>colorPageBlock(document.getElementById("{!$Component.id5}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q5__c}" style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="6. Please provide the customer country / region you are interviewing" columns="1" collapsible="false"  id="id6">
+                <apex:facet name="header"><font size="2" color="Black">6. Please provide the customer country / region you are interviewing</font></apex:facet>
+                <script>colorPageBlock(document.getElementById("{!$Component.id6}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q6__c}"  style="width:60%"/>
+                    </apex:pageBlockSection>
+                <apex:pageBlockSection title="7. Please specify the company's partnership relation" columns="1" collapsible="false"  id="id7">
+                    <apex:facet name="header"><font size="2" color="Black">7. Please specify the company's partnership relation</font></apex:facet>
+                    <script>colorPageBlock(document.getElementById("{!$Component.id7}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q7__c}"/>
+                <apex:outputField value="{!NPS_Survey__c.Other__c}" style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="8. Please provide the name of the person providing you the information" columns="1" collapsible="false"  id="id8">
+                <apex:facet name="header"><font size="2" color="Black">8. Please provide the name of the person providing you the information</font></apex:facet>
+                <script>colorPageBlock(document.getElementById("{!$Component.id8}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q8__c}"  style="width:60%"/>
+                    </apex:pageBlockSection>
+                <apex:pageBlockSection title="9. Please provide the professional title of the person you are interviewing" columns="1" collapsible="false"  id="id9">
+                    <apex:facet name="header"><font size="2" color="Black">9. Please provide the professional title of the person you are interviewing</font></apex:facet>
+                        <script>colorPageBlock(document.getElementById("{!$Component.id9}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q9__c}" style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="10. Please provide the contact details of the person you are interviewing" columns="1" collapsible="false"  id="id10">
+                <apex:facet name="header"><font size="2" color="Black">10. Please provide the contact details of the person you are interviewing</font></apex:facet>
+                <script>colorPageBlock(document.getElementById("{!$Component.id10}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q10__c}" style="width:60%"/>
+                    </apex:pageBlockSection>
+                <apex:outputPanel rendered="{!flag2}">
+                    <apex:pageBlockSection title="11. What is the thing you were most pleased within your experience with GEL?" columns="1" collapsible="false" id="id111">
+                        <script>colorPageBlock1(document.getElementById("{!$Component.id111}"));</script>
+                <apex:facet name="header"><font size="2">11. What is the thing you were most pleased within your experience with GEL?</font></apex:facet>
+                <apex:outputField value="{!NPS_Survey__c.Q11__c}"  style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="12. What is the thing you were most disappointed with in your experience with GE" columns="1" collapsible="false" id="id121">
+                <script>colorPageBlock1(document.getElementById("{!$Component.id121}"));</script>
+                <apex:facet name="header"><font size="2">12. What is the thing you were most disappointed with in your experience with GE</font></apex:facet>
+                    <apex:outputField value="{!NPS_Survey__c.Q12__c}" style="width:60%"/>
+                        </apex:pageBlockSection>
+                    <apex:pageBlockSection title="13. Based on yr experience, 'd you refer GEL to s'one else as Lighting Solution?" columns="1" collapsible="false" id="id131">
+                        <script>colorPageBlock1(document.getElementById("{!$Component.id131}"));</script>
+                <apex:facet name="header"><font size="2">13. Based on yr experience, 'd you refer GEL to s'one else as Lighting Solution?</font></apex:facet>
+                <apex:outputField value="{!NPS_Survey__c.Q13__c}"  style="width:60%"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="14. What would be the message that you'd like to post as tweet about GE?" columns="1" collapsible="false" id="id141">
+                <script>colorPageBlock1(document.getElementById("{!$Component.id141}"));</script>
+                <apex:facet name="header"><font size="2">14. What would be the message that you'd like to post as tweet about GE?</font></apex:facet>
+                <apex:outputField value="{!NPS_Survey__c.Q14__c}" style="width:60%"/>
+                    </apex:pageBlockSection>
+                </apex:outputPanel>
+                <apex:pageBlockSection title="15. Overall, how satisfied or dissatisfied are you with our company?" columns="1" collapsible="false"  id="id15">
+                    <apex:facet name="header"><font size="2" color="Black">15. Overall, how satisfied or dissatisfied are you with our company?</font></apex:facet>
+                        <script>colorPageBlock(document.getElementById("{!$Component.id15}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q15__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="16. Call back promise has been given to customer?" columns="1" collapsible="false"  id="id16">
+                <apex:facet name="header"><font size="2" color="Black">16. Call back promise has been given to customer?</font></apex:facet>
+                <script>colorPageBlock(document.getElementById("{!$Component.id16}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Q16__c}"/>
+                    <apex:outputField value="{!NPS_Survey__c.Explain_Comment__c}" style="width:60%"/>
+                        </apex:pageBlockSection>
+                    <apex:pageBlockSection title="Survey Status" columns="1" collapsible="false"  id="idss">
+                        <apex:facet name="header"><font size="2" color="Black">Survey Status</font></apex:facet>
+                            <script>colorPageBlock(document.getElementById("{!$Component.idss}"));</script>
+                <apex:outputField value="{!NPS_Survey__c.Survey_status__c}"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:relatedList list="OpenActivities"/>
+    <apex:relatedList list="ActivityHistories" />
+    <apex:relatedList list="CombinedAttachments"/>
+</apex:page>

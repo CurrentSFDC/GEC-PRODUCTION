@@ -1,0 +1,200 @@
+.deskLayout.cc_deskLayout > header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin-bottom: 12px;
+    width: 100%;
+    background-color: #212322;
+}
+
+header .menu_container.cc_menu_container {
+    position: relative;
+}
+
+.home_slider.cc_home_slider {
+    margin-top: 160px;
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+.home_slider.cc_home_slider div#breadcrumb_desktop_container,
+.home_slider.cc_home_slider .row > .col-xs-12 {
+    top: 0;
+}
+
+.contentBody.cc_content_body {
+    padding: 0 !important;
+    margin-bottom: 80px;
+}
+
+.contentBody.cc_content_body .container.cc_main_container {
+    margin-top: 0 !important;
+}
+
+header .header.cc_header {
+    height: 80px;
+    max-width: 1400px;
+    margin: 10px auto 0;
+}
+
+.header-box {
+    display: flex;
+    height: 100%;
+}
+
+.header-box a {
+    text-decoration: none;
+    color: white;
+}
+
+.effAccount a {
+    font-size: 16px;
+}
+
+.header-box a:hover {
+    text-decoration: none;
+}
+
+.header-box .header-box__items {
+    flex-grow: 1;
+}
+
+header #logoUrl {
+    display: block;
+    width: auto;
+    padding: 10px 20px 10px 0;
+    margin: 0;
+    position: initial;
+}
+
+header #logoUrl #cc_store_logo_img {
+    position: initial;
+}
+
+.header-box .menu-items {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    align-items: baseline;
+}
+
+.header-box .menu-items > span {
+    padding-right: 8px;
+}
+
+.header-box .menu-items .cc_my_chead {
+    margin-left: auto;
+}
+
+.header-box__items .menu-items .cc_misc_function {
+    position: initial;
+    float: none;
+    padding-right: 28px;
+}
+
+.header-box__items .cc_navbar_form .cc_input-group {
+    position: initial;
+    float: none;
+}
+
+.header-box__items .search_form.cc_search_form {
+    text-align: right;
+}
+
+.header-box #searchText {
+    height: 30px;
+    border: none;
+}
+
+.menu_container.cc_menu_container .dropdown.cc_dropdown {
+    white-space: nowrap;
+}
+
+
+.cc_effective_accounts_modal .cc_modal_content {
+    border-radius: 5px;
+    z-index: 9999;
+}
+
+.cc_effective_accounts_modal .btn {
+    border-radius: 5px;
+    padding: 4px 10px;
+    text-transform: initial;
+}
+
+.cc_effective_accounts_modal .table-responsive {
+    margin: 0 auto;
+}
+
+.cc_effective_accounts_modal .modal-dialog {
+    max-width: 1024px;
+    width: auto;
+}
+
+.cc_effective_accounts_modal .search-input-container input {
+    width: 200px;
+    line-height: 18px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.cc_effective_accounts_modal .search-input-container label {
+    display: block;
+}
+
+.cc_effective_accounts_modal .change-agent {
+    margin: 15px 0;
+}
+
+.cc_effective_accounts_modal .dynamic-content {
+    height: 500px;
+    overflow: auto;
+    position: relative;
+}
+
+.cc_effective_accounts_modal .table-responsive {
+    box-sizing: border-box;
+    position: relative;
+}
+
+.cc_effective_accounts_modal th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+}
+
+
+@media only screen and (max-width: 1199px) {
+
+    .home_slider.cc_home_slider {
+        margin-top: 180px;
+    }
+
+    .header-box__items .cc_misc_function {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    header .header.cc_header {
+        height: 100px;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+
+    .home_slider.cc_home_slider {
+        margin-top: 200px;
+    }
+
+    .header-box .menu-items .cc_loginoutsec {
+        margin-left: auto;
+    }
+}
+
+.impersonate{
+    background: #e90606;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+    text-align: center;
+}

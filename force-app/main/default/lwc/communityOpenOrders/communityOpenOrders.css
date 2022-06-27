@@ -1,0 +1,15 @@
+.component{
+    height: 350px;
+}
+
+h4 {
+    font-size: 17px;
+    font-family: Segoe UI,serif;
+    color: #fff;
+    font-weight: 700;
+    text-align: left;
+}
+
+p{
+    height: 25px;
+}

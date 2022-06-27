@@ -1,0 +1,119 @@
+.border{
+    border-color: #070707;
+}
+
+h3{
+    background: #6082B6;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+}
+
+h4{
+    font-style: italic;
+    font-size: 12px;
+    text-align: center;
+}
+
+h5{
+    font-style: italic;
+    font-size: 9px;
+    color: #5c5c5c;
+}
+
+h6{
+    font-style: italic;
+    font-size: 9px;
+    color: #5c5c5c;
+    text-align: right;
+}
+
+.items{
+    font-size: 15px;
+    color: #5c5c5c;
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.error{
+    color: #f80606;
+    font-family: "Segoe UI";
+    font-style: italic;
+    font-size: 12px;
+    
+}
+
+.notify{
+    color: #6082B6;
+    font-family: "Segoe UI";
+    font-style: italic;
+    font-size: 10px;
+    text-align: right;
+    
+}
+
+.cartNumber{
+    border-radius: 0%;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    background: #6082B6;
+    border: 0px solid #000;
+    color: white;
+    text-align: center;
+    font: 15px Segoe UI;
+}
+
+.THIS .disabled {
+    color: lightgray;
+}
+
+.spins::after {
+    position: absolute;
+    content: 'Adding to Request...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    font-weight: bold;
+    
+}
+
+.removal::after {
+    position: absolute;
+    content: 'Removing Items from Cart...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    font-weight: bold;
+    
+}
+
+.headerSection{
+    text-align: center;
+}
+
+.footerSection{
+    text-align: right;
+}
+
+.boxSize{
+    height: 278px;
+}
+
+.THIS .disabled {
+    color: lightgray;
+}
+
+
+.slds-button_icon-container {
+    width: var(--lwc-squareIconMediumBoundary,2rem);
+    height: var(--lwc-squareIconMediumBoundary,2rem);
+    background-color: red;
+}
+
+.itemFont{
+    font-size: 15px;
+    color:dimgray;
+    font-family: 'Segoe UI';
+    font-weight: bold;
+}

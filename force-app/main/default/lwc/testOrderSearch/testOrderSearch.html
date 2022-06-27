@@ -1,0 +1,42 @@
+<template>
+    <c-test-order-lookup
+                                            label="Order Search"
+  
+                                            required
+                                            place-holder="Search Orders..."
+                                            object-api-name="order"
+                                            filter-field-name="0013j00002dOYam"
+                                            
+                                            onorderselection={handleChange}
+                                            onclearselection={clearResults}
+                                            
+                                    ></c-test-order-lookup>
+
+                                    <div if:true={isOrderIdAvailable}>
+            
+                                        <div class="slds-col slds-size_8-of-8">
+                                            <h3 class="slds-section-title--divider">Select Order Products</h3> 
+                                            <div class="slds-box slds-theme_shade border orderProducts">
+                                                
+                                                <template if:true={orderItemList}>
+                                                    <lightning-datatable wrap-text-max-lines="2" data={orderItemList} columns={columns}  key-field="Id" draft-values={draftValues} onsave={handleSave} onrowselection={handleSelect} onrowaction={handleRowActions} suppress-bottom-bar="true" hide-checkbox-column>
+                                                    </lightning-datatable>
+                                                    <template if:true={isLoading}>
+                                                        <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                                                    </template>
+                                                    
+                                                </template>
+                                                <template if:true={error}>
+                                                    {error}
+                                                </template>
+                            
+                                                <!--<template if:true={flagIndi}>
+                                                <c-confirmation-details item={valuetopass}> 
+                                                </c-confirmation-details>
+                                                </template>-->
+                                    
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+</template>

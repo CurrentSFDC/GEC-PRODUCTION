@@ -1,0 +1,90 @@
+<apex:page standardController="Opportunity_Support_Request__c" extensions="GE_LGT_NewEMEAcreation" >
+    <apex:form >
+        <apex:pageMessages ></apex:pageMessages>
+        <apex:pageBlock title="Opportunity Support Request Edit" mode="edit">
+            <apex:pageBlockButtons location="both">
+                <apex:commandButton value="Save" action="{!saveOSR}"/>
+                <apex:commandButton value="Save&Clone" action="{!saveAndClone}"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Project Details" columns="2">
+                <apex:inputField value="{!OSR.Opportunity_Name__c}"/>
+                <apex:inputField value="{!OSR.Which_business_orders_the_sample_s__c}" required="True"/>
+                <apex:inputField value="{!OSR.OSR_Comments__c}"/>
+                <apex:inputField value="{!OSR.Purpose__c}" required="True"/>
+                <apex:inputField value="{!OSR.Full_approver_name__c}"/>
+                
+                <apex:inputField value="{!OSR.Reviewer_proposal__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Approving_Function__c}"/>
+                <apex:inputField value="{!OSR.StepsOrder__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Shipping & Billing address - where to ship & bill the Sample Product" columns="2">
+                <apex:inputField value="{!OSR.Ship_to_Account__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Shipment_Mode__c}" required="True"/>
+                <apex:inputField value="{!OSR.Sold_to_Account__c}" required="True"/>
+                <apex:inputField value="{!OSR.carrier_account_number__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Shipment_street__c}" required="True"/>
+                <apex:inputField value="{!OSR.Contact_person_name__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Shipment_City__c}" required="True"/>
+                <apex:inputField value="{!OSR.Contact_person_phone_number__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Shipment_State_Province__c}" required="True"/>
+                <apex:inputField value="{!OSR.Billing_address_is_same_as_shipping__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Shipment_Zip_Postal_Code__c}" required="True"/>
+                <apex:inputField value="{!OSR.EMEA_Billing_Street__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Shipment_Country__c}" required="True"/>
+                
+                <apex:inputField value="{!OSR.EMEA_Billing_City__c}"/>
+                <br/>
+                <apex:inputField value="{!OSR.EMEA_Billing_Country__c}"/>
+                <br/>
+                <apex:inputField value="{!OSR.Billing_State_Province__c}"/>
+                <br/>
+                <apex:inputField value="{!OSR.Billing_Zip_Postal_Code__c}"/>
+                
+                
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Sample Product Request details" columns="2">
+                <apex:inputField value="{!OSR.EMEA_Product_line__c}" required="True"/>
+                <apex:inputField value="{!OSR.EMEA_Who_Pays_It__c}" required="True"/>
+                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Order logic" />
+                    <apex:outputPanel layout="block">
+                        <apex:inputField label="Order logic" id="activationCounter" value="{!OSR.EMEA_Order_logic__c}"/>
+                        <apex:outputLink value="{!URLFOR('/servlet/servlet.FileDownload?file=01531000008gkk7')}"><h2><font color='#37938C'>Help:CAT logic templetes</font></h2></apex:outputLink>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>      
+                <apex:inputField value="{!OSR.GE_LGT_Quantity_of_Product__c}"  required="True"/>
+                <apex:inputField value="{!OSR.EMEA_Generic_SKU__c}"/>
+                <apex:inputField value="{!OSR.EMEA_SampleProduct_Price__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Existing_SKU_code__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Required_Arrival_Date__c}" required="True"/>
+                <apex:inputField value="{!OSR.EMEA_Order_logic_Validation__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Special_option_code_required__c}"/>
+                <apex:inputField value="{!OSR.EMEA_custom_specification_was_attached__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Special_Certification_Requirement__c}"/>
+                
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="CRC section - filled after submittion by Customer Service & PM if needed" columns="2">
+                <apex:inputField value="{!OSR.Sku_existing_on_the_plant__c}"/>
+                <apex:inputField value="{!OSR.EMEA_SAP_Order_and_item_numbers__c}"/>
+                <apex:inputField value="{!OSR.SKU_Extension_SalesOrgChanPlant__c}"/>
+                <apex:inputField value="{!OSR.SAP_item_numbers__c}"/>
+                <apex:inputField value="{!OSR.EMEA_Manufacturing_Plant_Location__c}"/>
+                <apex:inputField value="{!OSR.EMEA_SKU_from_Wrapper__c}"/>
+                <apex:inputField value="{!OSR.Stock_available_on_this_plant__c}"/>
+                
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Supply Chain section - OTR filled by Production Plant" columns="2">
+                <apex:inputField value="{!OSR.EMEA_Production_Order_PO_Number__c}"/>
+                <apex:inputField value="{!OSR.EMEA_PO_estimated_finish_date__c}"/>
+                <apex:inputField value="{!OSR.EMEA_BOM_Updated__c}"/>
+                <apex:inputField value="{!OSR.EMEA_SampleProdReq_Production_Completed__c}"/>
+                <apex:inputField value="{!OSR.EMEA_PO_Released__c}"/>
+                <apex:inputField value="{!OSR.Shipment_tracking_number__c}"/>
+            </apex:pageBlockSection>
+            
+            
+        </apex:pageBlock> 
+    </apex:form>
+</apex:page>

@@ -1,0 +1,253 @@
+<!--
+ - Created by Paksy Andras on 2021. 03. 22..
+ -->
+
+<!-- Stock Balancing Return Lwc -->
+<template>
+    <div class="slds-media__body">
+        <div class="slds-page-header__name">
+            <div class="slds-page-header__name-title">
+                <h1>
+                    <span class="slds-page-header__title slds-truncate" title="Stock Accommodation Return">Stock Accommodation Return</span>
+                </h1>
+            </div>
+        </div>
+    </div>
+        <br>
+    <div class="slds-readonly-path">
+    <lightning-progress-indicator
+            current-step={currentStep}
+            type="path"
+            variant="base"
+    >
+        <lightning-progress-step
+                label="1. Requestor Information"
+                value="1"
+        ></lightning-progress-step>
+        <lightning-progress-step
+                label="2. Product Selection"
+                value="2"
+        ></lightning-progress-step>
+        <lightning-progress-step
+                label="3. Review"
+                value="3"
+        ></lightning-progress-step>
+        <lightning-progress-step
+                label="4. Confirmation"
+                value="4"
+        ></lightning-progress-step>
+    </lightning-progress-indicator> <br>
+    </div>
+    <lightning-messages> </lightning-messages>
+
+    <div class="slds-align_absolute-center" style="height:3rem">Please note: stock accommodation return requests placed in July or December will not be processed.</div>
+
+    <!--STEP ONE-->
+    <div class="stepOne">
+        <div class="slds-box">
+            <div class="slds-grid slds-gutters">
+                <div class="slds-col slds-size_4-of-8">
+                    <h3 class="slds-section-title_divider">Requestor Information</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <lightning-combobox
+                                        name="progress"
+                                        label="Return Type"
+                                        value={value}
+                                        placeholder="Select Return Type"
+                                        options={returnTypeOptions}
+                                        onchange={handleReturnTypeChange}
+                                        required
+                                        class="rto validValue"></lightning-combobox>
+                                <lightning-record-edit-form object-api-name="Case"  >
+                                    <lightning-input-field if:false={isDistributor} required label="Account" field-name='AccountId' onchange={handleAccountChange} value={accountID} disabled=TRUE class="acc"></lightning-input-field>
+                                    <lightning-input-field if:true={isDistributor} required label="Account" field-name='AccountId' onchange={handleAccountChange} value={soldToAccountId} disabled=TRUE class="acc"></lightning-input-field>
+                                </lightning-record-edit-form>
+                                <lightning-input
+                                        type="text"
+                                        placeholder="Name..."
+                                        label="Requestor Name"
+                                        required
+                                        disabled
+                                        value={reqName}
+                                        class="rn validValue"></lightning-input>
+                                <lightning-input
+                                        type="email"
+                                        placeholder="test@example.com"
+                                        label="Requestor Email"
+                                        minlength="5"
+                                        message-when-too-short="Your email address must be more 5 characters."
+                                        value={reqEmail}
+                                        required
+                                        disabled
+                                        class="em validValue"></lightning-input>
+                                <lightning-input
+                                        type="tel"
+                                        placeholder="xxx-xxx-xxxx"
+                                        label="Requestor Phone"
+                                        pattern="\([0-9]{3}\) [0-9]{3}-[0-9]{4}"
+                                        value={reqPhone}
+                                        onkeydown={handlePhoneChange}
+                                        required
+                                        disabled
+                                        class="rp validValue"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slds-col slds-size_4-of-8">
+                    <h3 class="slds-section-title_divider">Type &amp; Account Information</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                                <lightning-combobox
+                                        name="progress"
+                                        label="Submission Type"
+                                        value={value}
+                                        placeholder="Select Order Type"
+                                        options={orderTypeOptions}
+                                        onchange={handleOrderTypeChange}
+                                        required
+                                        class="ra validValue"></lightning-combobox>
+                                <lightning-input
+                                        type="text"
+                                        value={returnRefNumber}
+                                        label="Return Reference Number"
+                                        placeholder="Type your reference number here"
+                                        required
+                                        class="rrn validValue">>
+                                </lightning-input>
+                                <div class="slds-m-bottom_x-small">
+                                    <c-sold-to-account-lookup
+                                            label="Sold to Account"
+                                            type="soldto"
+                                            required
+                                            place-holder="Search Accounts..."
+                                            selected-account={soldToAccount}
+                                            account-id={accountID}
+                                            onaccountselect={handleSoldToAccountLookupSelect}
+                                            onreset={handleSoldToAccountLookupReset}
+                                            class={hideIfDistributor}
+                                    ></c-sold-to-account-lookup>
+                                </div>
+                                <!--<div class="slds-m-bottom_x-small">
+                                    <c-ship-to-account-lookup
+                                            label="Ship to Account"
+                                            type="shipto"
+                                            disabled={isShipToAccountLookupDisabled}
+                                            place-holder="Search Accounts..."
+                                            required
+                                            sold-to-account-id={soldToAccountId}
+                                            selected-account={shipToAccount}
+                                            onaccountselect={handleShipToAccountLookupSelect}
+                                            onreset={handleShipToAccountLookupReset}
+                                    ></c-ship-to-account-lookup>
+                                </div>-->
+
+                                <lightning-textarea
+                                        name="comments"
+                                        value={comments}
+                                        label="Comments"
+                                        placeholder="Type here..."
+                                        class="cm"></lightning-textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><br>
+        </div>
+        <div class="slds-align_absolute-center">
+            <lightning-button
+                    class="slds-m-top_small"
+                    label="Next"
+                    onclick={handleValidation}
+                    variant="brand"
+            ></lightning-button>
+<!--            <lightning-button
+                    class="slds-m-top_small"
+                    label="Next (no Validation)"
+                    onclick={moveOn}
+                    variant="destructive"
+            ></lightning-button>-->
+        </div>
+        <br><br>
+    </div>
+    <!--END OF STEP ONE-->
+
+    <!--STEP TWO-->
+    <div class="stepTwo slds-hide">
+        <!--MANUAL PRODUCT ENTRY SCREEN STARTS HERE! -->
+        <c-stock-Balancing-Return-Prod-Entry-Manual onreturnitemschange={handleProductChange}
+                                                    is-return-number-not-null={isReturnNumberNotNull}
+                                                    is-stock-balancing-returns-file-upload={isStockBalancingReturnsFileUpload}
+                                                    remaining-returns={remainingReturns}
+                                                    return-type={selectedReturnType}
+                                                    product-families={prodFamilies}
+                                                    agent-code-options={agentCodeOptions}
+                                                    >
+        </c-stock-Balancing-Return-Prod-Entry-Manual>
+        <div class="slds-align_absolute-center">
+            <lightning-button-group>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepOne}
+                ></lightning-button>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label={toggleValidationLabel}
+                        onclick={stepThreeValidation}
+                        variant="brand"
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+        <br><br>
+    </div>
+    <!--END OF STEP TWO-->
+
+    <!--STEP THREE-->
+    <div class="stepThree slds-hide">
+
+        <c-stock-balancing-return-review account-currency={accountCurrency}></c-stock-balancing-return-review>
+        <div class="slds-align_absolute-center">
+            <lightning-button-group>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label="Back"
+                        onclick={goBackToStepTwo}
+                ></lightning-button>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label={toggleSubmitLabel}
+                        type="submit"
+                        variant="brand"
+                        onclick={handleSave}
+                ></lightning-button>
+            </lightning-button-group>
+        </div>
+        <br><br>
+    </div>
+    <!--END OF STEP THREE-->
+
+    <!--STEP FOUR-->
+    <div class="stepFour slds-hide">
+        <div class="slds-col slds-size_8-of-8">
+            <h3 class="slds-section-title_divider">Confirmation</h3>
+            <div class="slds-box slds-theme_shade border confirmation">
+                <h2><b>THANK YOU FOR YOUR SUBMISSION! </b><br/><br/>
+
+                    CASE NUMBER FOR YOUR REQUEST:  {caseNumberNew} </h2>
+                <lightning-button
+                        class="slds-m-top_small"
+                        label="Go to Case"
+                        onclick={goToCase}
+                        variant="brand"
+                ></lightning-button>
+            </div>
+        </div>
+    </div>
+    <!--END OF STEP FOUR-->
+
+</template>

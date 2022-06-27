@@ -1,0 +1,25 @@
+<apex:page standardController="Opportunity" extensions="GE_LGT_inlinecontrol_OpptyProd" >
+<apex:form >
+<apex:pageBlock title="Opportunity Products">
+<apex:outputPanel style="overflow:scroll;width:100%;height:150px;" layout="block">
+<apex:pageBlockTable value="{!prreclist}" var="pr" style="overflow:scroll;" border="1" align="left">
+<apex:column headerValue="Product Family"> <apex:outputLink target="_top" value="{!URLFOR($Action.OpportunityLineItem.View,pr.id)}"> {!if(pr.product2.Hierarchy_Level_3_Description__c =='',MID(pr.product2.Levels_3__c,FIND("-", pr.product2.Levels_3__c) + 1,LEN(pr.product2.Levels_3__c) - FIND("-", pr.product2.Levels_3__c) - 2),pr.product2.Hierarchy_Level_3_Description__c)} </apex:outputLink></apex:column> 
+  <!--<apex:column headerValue="Product Name" >{!MID(pr.product2.Name,FIND("-", pr.product2.Name) + 1,LEN(pr.product2.Name) - FIND("-", pr.product2.Name) - 2)}</apex:column> -->
+  <apex:column headerValue="Product Name" >{!if(pr.product2.Hierarchy_Level_4_Description__c=='',IF(CONTAINS(pr.product2.Name,"-"),MID(pr.product2.Name,FIND("-", pr.product2.Name) + 1,LEN(pr.product2.Name) - FIND("-", pr.product2.Name) - 2),IF(ISNUMBER(pr.product2.Name),IF(VALUE(pr.product2.Name)==0,'000000000',VALUE(pr.product2.Name)),pr.product2.Name)),pr.product2.Hierarchy_Level_4_Description__c)}</apex:column> 
+  <apex:column headerValue="CAT Logic/Description" value="{!pr.Description}"/>
+  <!--<apex:column headerValue="Product Code/SKU/Material #" value="{!pr.SKU_Number__r.GE_LGT_EM_SAP_MaterialNumber__c}"/>-->
+  <apex:column headerValue="Product Code/SKU/Material #">
+      <apex:outputText value="{!IF(pr.Product2.Material_No__c!=NULL,IF(ISNUMBER(pr.Product2.Material_No__c),VALUE(pr.Product2.Material_No__c),pr.Product2.Material_No__c),IF(pr.SKU_Number__r.GE_LGT_EM_SAP_MaterialNumber__c!=NULL,pr.SKU_Number__r.GE_LGT_EM_SAP_MaterialNumber__c,pr.SKUNumber__c))}"/>
+  </apex:column>
+   <apex:column headerValue="Alternate Description" value="{!pr.Alternate_Description__c}"/> 
+  <apex:column headerValue="Expected Ship Date" value="{!pr.ServiceDate}"/> 
+  <apex:column headerValue="Quantity" value="{!pr.quantity}"/>
+   <apex:column headerValue="Unit of measure?" value="{!pr.Unit_of_measure__c}"/>
+  <apex:column headerValue="Sales Price per Unit" value="{!pr.UnitPrice}" />
+  <apex:column headerValue="Revenue" value="{!pr.totalprice}" />
+ </apex:pageBlockTable> 
+</apex:outputPanel>   
+</apex:pageBlock>
+</apex:form>
+ <c:TLS_NiceWarningJquery />
+</apex:page>

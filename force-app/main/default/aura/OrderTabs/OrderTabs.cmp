@@ -1,0 +1,440 @@
+<aura:component controller="OrderController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+    <aura:attribute name="ordertData" type="Map" default="{}"/>
+    <aura:attribute name="orderNumber" type="String" default=""/>
+    <aura:attribute name="orderSoldTo" type="String" default =""/>
+    <aura:attribute name="inProgress"       type="Boolean"  default="false"     description="Getting the latest shipment details." />
+    <aura:attribute name="pageMessages"     type="List"     default="[]"        description="Page messages" />
+    <!-- <aura:attribute name="orderDetails" type="Map" default="{key1 : 'test', key2: 'testing'}"/> -->
+    <aura:attribute name="shipmentdata" type="List" default="[]"/>
+    <aura:attribute name="shipmentcolumns" type="List"/>
+    <aura:attribute name="orderItemData" type="List" default="[]"/>
+    <aura:attribute name="orderShipData" type="List" default="[]"/>
+    <aura:attribute name="orderSFDCFields" type="List" default="[]"/>
+    <aura:html tag="style">.toastMessage.forceActionsText{white-space : pre-line !important;}</aura:html>
+    <aura:attribute name="bShowModal" type="Boolean"  default="false"     description="Display Shipment Details" />
+    <aura:handler event="aura:waiting" action="{!c.showSpinner}"/>
+    <aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}"/>
+    <aura:attribute name="spinner" type="boolean" default="FALSE"/>
+    <aura:attribute name="accordionLoaded" type="boolean" default="FALSE"/>
+    <aura:attribute name="userIsAgent" type="boolean" default="FALSE"/>
+
+    <aura:attribute name="debugMode" type="boolean" default="TRUE"/>
+
+    <aura:attribute name="downloadAgreementPdf" type="boolean" default="TRUE"/>
+    <aura:attribute name="viewCommissionAmount" type="boolean" default="TRUE"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <!-- <lightning:button variant="brand" label="Back" title="Back" onclick="{! c.handleBackButton }" /> -->
+    <div class="slds-grid">
+        <div class="slds-col slds-size_1-of-2">
+        </div>
+        <div class="slds-col slds-size_1-of-2">
+            <div class="custom-container">
+                <aura:if  isTrue="{!not(empty(v.ordertData))}">
+                    <aura:if  isTrue="{!v.ordertData.salesHeaderData[0].ORDER_TYPE == 'ZRE'}">
+                        <button class="ordCfmPdfbutton slds-button slds-button_outline-brand" type="button" onclick="{!c.showRmaPdfModal}" id="{!v.orderSFDCFields[0].GE_Order_NO__c}">{!$Label.c.PrintRMA}</button>
+                        <aura:set attribute="else">
+                            <button class="ordCfmPdfbutton slds-button slds-button_outline-brand" type="button" onclick="{!c.showOrderConfirmationPdfModal}" id="{!v.orderSFDCFields[0].GE_Order_NO__c}">{!$Label.c.OrderConfirmation}</button>
+
+                        </aura:set>
+                    </aura:if>
+                </aura:if>
+                <c:ordersButton  order-sold-to="{!v.orderSoldTo}" orderId="{!v.recordId}"></c:ordersButton>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="custom_order_details" id="custom_order_details">        
+        <div>
+            <span class="slds-form-element__label orderFieldSpacing">Current Order No.</span>
+            <span class="orderFieldFix">
+                <ui:outputText value="{!v.orderSFDCFields[0].GE_Order_NO__c}"/>
+            </span>
+        </div>
+        <div>
+            <span class="slds-form-element__label orderFieldSpacing" >Customer PO No.</span>
+            <span class="orderFieldFix">
+                <ui:outputText value="{!v.orderSFDCFields[0].Customer_PO_Number__c}"/>
+            </span>
+        </div>
+        <div>
+            <!--span class="slds-form-element__label orderFieldSpacing">Sold to Account No.</span-->
+            <span class="slds-form-element__label orderFieldSpacing">Account No.</span>
+            <span class="orderFieldFix">
+                <ui:outputText value="{!v.orderSFDCFields[0].Sold_To__r.GE_LGT_EM_SAP_Customer_Number__c}"/>
+
+            </span>
+        </div>
+        <div>
+            <span class="slds-form-element__label orderFieldSpacing">Account Name</span>
+            <span class="orderFieldFix">
+                <ui:outputText value="{!v.orderSFDCFields[0].Sold_To__r.Name}"/>
+            </span>
+        </div>
+    </div>
+
+    <div class="custom-tabset-for-info-text">
+        <lightning:tabset selectedTabId="detail">
+            <!--onactive="{! c.hideDetailElement }"-->
+            <lightning:tab  label="{!$Label.c.Details}" id="detail">
+
+                <lightning:recordViewForm recordId="{!v.recordId}" objectApiName="Order">
+                    <lightning:card title="{!$Label.c.Details}">
+                        <!-- lightning:card body section starts -->
+                        <p class="slds-p-horizontal_small">
+                            <!-- Forming a grid of two equal columns -->
+                        <div class="slds-grid">
+                            <div class="slds-col slds-size_1-of-2">
+                                <lightning:outputField fieldName="GE_Order_NO__c" />
+                                <lightning:outputField fieldName="EffectiveDate" />
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.RequestedDeliveryDate}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.ordertData.salesHeaderData[0].REQ_DEL_DATE}"/>
+                                        </span>
+                                <!--<lightning:outputField fieldName="TotalAmount" /> -->
+
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.OrderAmount}</span>
+                                <span class="orderFieldFix">
+                                    <!-- <ui:outputText value="{!v.orderSFDCFields[0].currency_y}"/> -->
+                                    <ui:outputText value="{!v.orderSFDCFields[0].TotalAmount}"/>
+                                </span>
+
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.OrderFees}</span>
+                                <span class="orderFieldFix">
+                                    <ui:outputText value="{!v.orderSFDCFields[0].SURCHARGES__c}"/>
+                                </span>
+
+                                <aura:if isTrue="{!v.userIsAgent}">
+                                    <aura:if isTrue="{!v.viewCommissionAmount}">
+                                        <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.TotalCommission}</span>
+                                        <span class="orderFieldFix">
+                                            <!-- <ui:outputText value="{!v.orderSFDCFields[0].currency_y}"/> -->
+                                            <ui:outputText value="{!v.orderSFDCFields[0].TotalCommission__c}"/>
+                                        </span>
+                                    </aura:if>    
+                                </aura:if>
+
+                                <aura:if isTrue="{!v.userIsAgent}">
+                                    <aura:if isTrue="{!v.viewCommissionAmount}">
+                                        <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.Total_Commission}</span>
+                                        <span class="orderFieldFix">
+                                            <!-- <ui:outputText value="{!v.orderSFDCFields[0].currency_y}"/> -->
+                                            <ui:outputText value="{!v.orderSFDCFields[0].TotalCommission_per}"/>
+                                        </span>
+                                    </aura:if>    
+                                </aura:if>
+
+
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.OrderSource}</span>
+                                <span class="orderFieldFix">
+                                             <ui:outputText value="{!v.orderSFDCFields[0].OrderSourceCode__c}"/>
+                                </span>
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.BlockStatus}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].BlockDescription__c}"/>
+                                        </span>
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.ProjectName}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.ordertData.salesHeaderData[0].OPPORTUNITY_ID}"/>
+                                        </span>
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.SoldToAccountNo}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].Sold_To__r.GE_LGT_EM_SAP_Customer_Number__c}"/>
+                                        </span>
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.SoldToAccount}</span>
+                                <span class="orderFieldFix">
+                                                <ui:outputText value="{!v.orderSFDCFields[0].Sold_To__r.Name}"/>
+                                            </span>
+                                <!--span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.SoldToAddress}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].BillingAddress.street +'\n' + v.orderSFDCFields[0].BillingAddress.city +' '+ v.orderSFDCFields[0].BillingAddress.state +' '+ v.orderSFDCFields[0].BillingAddress.postalCode + '\n' + v.orderSFDCFields[0].BillingAddress.country}"/>
+                                        </span-->
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-2">
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.DeliveryContact}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.ordertData.salesHeaderData[0].SHIP_CONTACT_NAME}"/>
+                                        </span>
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.DeliveryContactNumber}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.ordertData.salesHeaderData[0].SHIP_CONTACT_NUMBER}"/>
+                                        </span>
+                                <lightning:outputField fieldName="Customer_PO_Number__c" />
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.AgentName}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].Agent_Account__r.Name}"/>
+                                        </span>
+                                <lightning:outputField fieldName="Agent_rep_code__c" />
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.StrategicAccount}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].Strategic_Account__r.Name}"/>
+                                        </span>
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.StrategicAccountNo}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].Strategic_Account__r.GE_LGT_EM_SAP_Customer_Number__c}"/>
+                                        </span>
+
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.OrderType}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].Type}"/>
+                                        </span>
+
+                              <!-- <lightning:outputField fieldName="Type" /> -->
+                                <lightning:outputField fieldName="GBSTK__c" />
+
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.ShipComplete}</span>
+                                <aura:if  isTrue="{!v.ordertData.salesHeaderData[0].ORDER_STATUS == 'Ship Complete'}">
+                                            <span class="orderFieldFix">
+                                                <ui:outputText value='Yes'/>
+                                            </span>
+                                    <aura:set attribute="else">
+                                            <span class="orderFieldFix">
+                                                <ui:outputText value='No'/>
+                                            </span>
+                                    </aura:set>
+                                </aura:if>
+
+                                <span  class="slds-form-element__label orderFieldSpacing">{!$Label.c.ShippingAddress}</span>
+                                <span class="orderFieldFix">
+                                            <ui:outputText value="{!v.orderSFDCFields[0].ShippingAddress.street +'\n' + v.orderSFDCFields[0].ShippingAddress.city +' '+ v.orderSFDCFields[0].ShippingAddress.state +' '+ v.orderSFDCFields[0].ShippingAddress.postalCode + '\n' + v.orderSFDCFields[0].ShippingAddress.country}"/>
+                                        </span>
+                            </div>
+
+                        </div>
+                        </p>
+                    </lightning:card>
+                </lightning:recordViewForm>
+
+
+
+
+
+                <!-- <p class="slds-p-horizontal_small">
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_1-of-2">
+                            <span  class="slds-form-element__label">GE Order NO</span>
+                            <div class="slds-form-element_readonly">
+                                <ui:outputText value="{!v.orderDetails.key1}"/>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <span lightning-outputfield_outputfield="" class="slds-form-element__label">Order Source Code</span>
+                            <ui:outputText value="{!v.orderDetails.key2}"/>
+                        </div>
+                    </div>
+                </p>
+            </lightning:card> -->
+
+
+
+            </lightning:tab>
+            <lightning:tab onactive="{! c.accordionLoaded }" label="{!$Label.c.LineItems}" id="lineitem">
+                <!--loading spinner start-->
+                <aura:if isTrue="{!v.spinner}">
+                    <div aura:id="spinnerId" class="slds-spinner_container">
+                        <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                            <span class="slds-assistive-text">Loading...</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div>
+                </aura:if>
+                <!-- Loading spinner end-->
+                <lightning:card title="">
+                    <div id="accordionDiv">
+                        <lightning:accordion aura:id="orderItemsAccordion" allowMultipleSectionsOpen="true">
+                            <aura:iteration items="{!v.orderItemData}" var="item">
+                                <!-- <lightning:card class="fixTitle" title="{!'Item No. '+item.ITEM_NUMBER}"> -->
+                                <lightning:accordionSection name="{!item.PRODUCT_DESCRIPTION}" label="{!item.accordionTitle}" aura:id="{!item.PRODUCT_DESCRIPTION}">
+
+                                    <div class="slds-grid">
+                                        <div class="slds-col slds-size_1-of-2">
+                                           <!-- <span class="slds-form-element__label">{!$Label.c.InvoiceNo}</span>
+                                            <span class="fieldFormatting"><button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.showInvoicePdfModal}" id="{!item.salesDelInvData.INVOICE_NUMBER}">{!item.salesDelInvData.INVOICE_NUMBER}</button> </span><br /> -->
+                                            <span class="slds-form-element__label">{!$Label.c.OrderLineNo}</span>
+                                            <span class="fieldFormatting">{!item.ITEM_NUMBER}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.CatalogNo}</span>
+                                            <span class="fieldFormatting">{!item.PRODUCT_DESCRIPTION}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.PoductCode}</span>
+                                            <span class="fieldFormatting">{!item.PRODUCT_NUMBER}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.PriceAgreementNo}</span>
+                                            <!-- <span class="fieldFormatting">{!item.PRICE_AGR_NUMBER}</span><br /> -->
+                                            <!-- <span class="fieldFormatting"><button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.showAgreementPdfModal}" id="{!item.PRICE_AGR_NUMBER}">{!item.PRICE_AGR_NUMBER}</button> </span><br /> -->
+                                            <aura:if isTrue="{!v.downloadAgreementPdf}">
+                                                    <span class="fieldFormatting">
+                                                        <!-- <button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.showAgreementPdfModal}" id="{!item.PRICE_AGR_NUMBER}">{!item.PRICE_AGR_NUMBER}</button> -->
+                                                        <a class="pdf-view-link" href="javascript:void(0);" onclick="{!c.showAgreementPdfModal}" id="{!item.PRICE_AGR_NUMBER}">{!item.PRICE_AGR_NUMBER}</a>
+                                                    </span><br />
+                                                <aura:set attribute="else">
+                                                    <span class="fieldFormatting">{!item.PRICE_AGR_NUMBER}</span><br /> 
+                                                </aura:set>
+                                            </aura:if>
+
+                                            <span class="slds-form-element__label">{!$Label.c.QuantityOrdered}</span>
+                                            <span class="fieldFormatting">{!item.QUANTITY}</span><br />
+
+                                            <span class="slds-form-element__label">{!$Label.c.Unit_of_Measure}</span>
+                                            <span class="fieldFormatting">{!item.SALES_UNIT}</span>
+                                            <br/>
+
+                                            <span class="slds-form-element__label">{!$Label.c.PricePerUnit}</span>
+                                            <!-- <span class="fieldFormatting">{!item.CURRENCY_y}  {!item.UNIT_PRICE}</span><br /> -->
+                                            <span class="fieldFormatting">{!item.UNIT_PRICE}</span><br />
+                                            <!--span class="slds-form-element__label">{!$Label.c.ADP}</span>
+                                            <span class="fieldFormatting">{!item.CURRENCY_y}  {!item.ADP_PRICE}</span><br />-->
+                                            <span class="slds-form-element__label">{!$Label.c.LineTotal}</span>
+                                            <span class="fieldFormatting">{!item.ITEM_NET_VALUE}</span><br />
+                                            <aura:if isTrue="{!v.userIsAgent}">
+                                                <aura:if isTrue="{!v.viewCommissionAmount}">
+                                                    <span class="slds-form-element__label">{!$Label.c.StandardCommission}</span>
+                                                    <span class="fieldFormatting">{!item.STANDARD_COMMISSION}</span><br />
+                                                    <span class="slds-form-element__label">{!$Label.c.OverageCommission}</span>
+                                                    <span class="fieldFormatting">{!item.OVERAGE_COMMISSION}</span><br />
+                                                    <span class="slds-form-element__label">{!$Label.c.TotalCommission}</span>
+                                                    <span class="fieldFormatting">{!item.ITEM_COMM_VALUE}</span><br />
+                                                </aura:if>
+                                            </aura:if>
+                                            <!--<span class="slds-form-element__label">Extended price: </span>
+                                            <span class="fieldFormatting">{!item.CURRENCY_y} {!item.ITEM_NET_VALUE}</span><br/> -->
+
+                                            <!--span class="fieldFormatting">{!item.CURRENCY_y}  {! ((item.UNIT_PRICE) * (item.QUANTITY)) }</span><br /-->
+                                            
+                                            <!--<span class="slds-form-element__label">{!$Label.c.Requested_Delivery_Date1}</span>
+                                            <span class="fieldFormatting">{!item.REQ_DEL_DATE}</span>-->
+
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2">
+                                           <!-- <span class="slds-form-element__label">{!$Label.c.QuantityOrdered}</span>
+                                            <span class="fieldFormatting">{!item.QUANTITY}</span><br /> -->
+                                            <span class="slds-form-element__label">{!$Label.c.QuantityShipped}</span>
+                                            <span class="fieldFormatting">{!item.QTY_SHIPPED}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.QuantityRemaining}</span>
+                                            <span class="fieldFormatting">{!item.QTY_REMAINING}</span><br />
+                                            <!-- <span class="slds-form-element__label">{!$Label.c.Carrier}</span>
+                                            <span class="fieldFormatting">{!item.scheduleData.CARRIER_NAME}</span><br /> -->
+                                            <span class="slds-form-element__label">{!$Label.c.Requested_Delivery_Date1}</span>
+                                            <span class="fieldFormatting">{!item.REQ_DEL_DATE}</span><br />
+                                            <!-- <span class="slds-form-element__label">{!$Label.c.FirstProDate}</span>
+                                            <span class="fieldFormatting">{!item.scheduleData.FPDD}</span><br /> -->
+                                            <!-- <span class="slds-form-element__label">{!$Label.c.EstimatedShipDate}</span>
+                                            <span class="fieldFormatting">{!item.scheduleData.EST_SHIP_DATE}</span><br /> -->
+                                            <!-- <span class="slds-form-element__label">{!$Label.c.SheduledDelDate}</span>
+                                            <span class="fieldFormatting">{!item.SCH_DEL_DATE}</span><br /> -->
+                                            <!-- <span class="slds-form-element__label">{!$Label.c.ShippedFrom}</span> -->
+                                            <!--span class="fieldFormatting">{!item.scheduleData.SHIPPED_FROM}</span-->
+                                            <!-- <span class="fieldFormatting">{!item.scheduleData.SHIPPED_FROM}</span><br/> -->
+                                            <span class="slds-form-element__label">{!$Label.c.ShipmentStatus}</span>
+                                            <span class="fieldFormatting">{!item.ITEM_STATUS}</span><br />
+
+                                        </div>
+                                    </div>
+
+                                </lightning:accordionSection>
+
+
+                                <!-- </lightning:card> -->
+                            </aura:iteration>
+                        </lightning:accordion>
+                    </div>
+                </lightning:card>
+                <c:InvoicePdf aura:id="compInvoicePdfOrderLineItems"/>
+                <c:AgreementPdf aura:id="AgreementPDFLineItems"/>
+
+
+            </lightning:tab>
+            <!--onactive="{! c.hideDetailElement }"-->
+            <lightning:tab  label="{!$Label.c.ShipmentInfo}" id="shipment">
+                <!--loading spinner start-->
+                <aura:if isTrue="{!v.spinner}">
+                    <div aura:id="spinnerId" class="slds-spinner_container">
+                        <div class="slds-spinner--brand  slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                            <span class="slds-assistive-text">Loading...</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div>
+                </aura:if>
+                <!-- Loading spinner end-->
+               <!-- <div id="shipmentTable" style="height: 600px;">
+                    <lightning:datatable
+                            keyField="id"
+                            data="{! v.shipmentdata }"
+                            onrowaction="{! c.handleRowAction }"
+                            columns="{! v.shipmentcolumns }"
+                            hideCheckboxColumn="true" onrowselection="{! c.getSelectedName }"/>
+                </div>-->
+                <lightning:card title="">
+                    <div id="accordionShipDiv">
+                        <lightning:accordion aura:id="orderShipAccordion" allowMultipleSectionsOpen="true">
+                            <aura:iteration items="{!v.orderShipData}" var="item">
+                                <!-- <lightning:card class="fixTitle" title="{!'Item No. '+item.ITEM_NUMBER}"> -->
+                                <lightning:accordionSection name="{!item.PRODUCT_DESCRIPTION}" label="{!item.accordionTitle}" aura:id="{!item.PRODUCT_DESCRIPTION}">
+
+                                    <div class="slds-grid">
+                                        <div class="slds-col slds-size_1-of-2">
+                                           <!-- <span class="slds-form-element__label">{!$Label.c.InvoiceNo}</span>
+                                            <span class="fieldFormatting"><button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.showInvoicePdfModal}" id="{!item.salesDelInvData.INVOICE_NUMBER}">{!item.salesDelInvData.INVOICE_NUMBER}</button> </span><br /> -->
+                                            <span class="slds-form-element__label">{!$Label.c.FirstProDate}</span>
+                                            <span class="fieldFormatting">{!item.FPDD}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.SheduledShipDate}</span>
+                                            <span class="fieldFormatting">{!item.EST_SHIP_DATE}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.SheduledDelDate}</span>
+                                            <span class="fieldFormatting">{!item.EST_DEL_DATE}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.Aftership_Carrier}</span>
+                                            <span class="fieldFormatting">{!item.CARRIER_NAME}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.Tracking}</span>           
+                                            <span class="fieldFormatting">
+                                                <!-- <button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.handleRowAction}" name="{!item.CARRIER_NAME}" id="{!item.TRACKING_NUMBER}">{!item.TRACKING_NUMBER}</button> -->
+                                                <a class="pdf-view-link" href="javascript:void(0);" onclick="{!c.handleRowAction}" name="{!item.CARRIER_NAME}" id="{!item.TRACKING_NUMBER}">{!item.TRACKING_NUMBER}</a>
+                                            </span><br />
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2">
+                                           <!-- <span class="slds-form-element__label">{!$Label.c.QuantityOrdered}</span>
+                                            <span class="fieldFormatting">{!item.QUANTITY}</span><br /> -->
+                                            <span class="slds-form-element__label">{!$Label.c.ShippedFrom}</span>
+                                            <span class="fieldFormatting">{!item.SHIPPED_FROM}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.InvoiceNo}</span>
+                                            <span class="fieldFormatting">
+                                                <!-- <button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.handleRowAction}" name="Invoice" id="{!item.INVOICE_NUMBER}">{!item.INVOICE_NUMBER}</button> -->
+                                                <a class ="pdf-view-link" href="javascript:void(0);" onclick="{!c.handleRowAction}" name="Invoice" id="{!item.INVOICE_NUMBER}">{!item.INVOICE_NUMBER}</a>
+                                            </span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.InvoiceDate}</span>
+                                            <span class="fieldFormatting">{!item.INVOICE_DATE}</span><br />
+                                            <span class="slds-form-element__label">{!$Label.c.DeliveryNote}</span>
+                                            <span class="fieldFormatting">
+                                                <!-- <button class="pdfbutton slds-button slds-button_neutral" type="button" onclick="{!c.handleRowAction}" name="DeliveryNote" id="{!item.DEL_NUMBER}">{!item.DEL_NUMBER}</button> -->
+                                                <a class="pdf-view-link" href="javascript:void(0);" onclick="{!c.handleRowAction}" name="DeliveryNote" id="{!item.DEL_NUMBER}">{!item.DEL_NUMBER}</a>
+                                            </span><br />
+                                           
+            
+                                        </div>
+                                    </div>
+
+                                </lightning:accordionSection>
+
+
+                                <!-- </lightning:card> -->
+                            </aura:iteration>
+                        </lightning:accordion>
+                    </div>
+                </lightning:card>
+
+                <c:AfterShip aura:id="compB"/>
+                <c:InvoicePdf aura:id="compInvoicePdf"/>
+                <c:DeliveryNotesPdf aura:id="compDeliveryNotesPdf"/>
+            </lightning:tab>
+
+        </lightning:tabset>
+        <p class="custom-shipping-info">
+            *Note: Tracking may take up to 24-hours after shipment to update, depending on the carrier.
+        </p>
+    </div>
+
+
+    <c:OrderRMAPdf aura:id="RMAPdf"/>
+    <c:OrderAckPdf aura:id="compOrderAckPdf"/>
+
+</aura:component>

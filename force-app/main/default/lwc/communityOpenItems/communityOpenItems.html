@@ -1,0 +1,92 @@
+<template>
+    <lightning-layout-item>
+    <div style="width: 300px">
+    <lightning-combobox
+            name="progress"
+            label="Select Account"
+            value={accountID}
+            placeholder="Select Related Account"
+            options={options}
+            onchange={handleAccountChange} ></lightning-combobox>
+
+    <!--<p>Selected value is: {selectedID}</p>-->
+    <br>
+    </div>
+    <div class="slds-grid slds-gutters_x-small slds-wrap">
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+            <lightning-card title="Open Orders" >
+                
+                <div style="height: 300px">
+                    <template if:false={orderItemsMessage}>
+                        <lightning-datatable
+                                key-field="id"
+                                data={orderItems}
+                                columns={orderColumns}
+                                hide-checkbox-column="true">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={orderItemsMessage}>
+                        <div style="margin-left: 15px;">{orderItemsMessage}</div>
+                    </template>
+                </div>
+                <p slot="footer">
+                    <template if:false={orderItemsMessage}>
+                        <lightning-button label="View All" variant="brand" onclick={viewAllOrderItems}></lightning-button>
+                    
+                    </template>
+                </p>
+            </lightning-card>
+        </div>
+
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+            <lightning-card  title="Open Price Agreements">
+                    <div style="height: 300px">
+                        <template if:false={paItemsMessage}>
+                            <lightning-datatable
+                                    key-field="id"
+                                    data={paItems}
+                                    columns={paColumns}
+                                    hide-checkbox-column="true">
+                            </lightning-datatable>
+                        </template>
+                        <template if:true={paItemsMessage}>
+                            <div style="margin-left: 15px;">{paItemsMessage}</div>
+                        </template>
+                    </div>
+                    <p slot="footer">
+                        <template if:false={paItemsMessage}>
+                            <lightning-button label="View All" variant="brand" onclick={viewAllpaItems}></lightning-button>
+                        </template>
+                    </p>
+            </lightning-card>
+        </div>
+
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+            <lightning-card  title="Open Service Requests">
+                
+                <div style="height: 300px">
+                    <template if:false={caseItemsMessage}>
+                        <lightning-datatable
+                                key-field="id"
+                                data={caseItems}
+                                columns={caseColumns}
+                                hide-checkbox-column="true">
+                        </lightning-datatable>
+                    </template>
+                    <template if:true={caseItemsMessage}>
+                        <div style="margin-left: 15px;">{caseItemsMessage}</div>
+                    </template>
+                </div>
+                <p slot="footer">
+                    <template if:false={caseItemsMessage}>
+                        <lightning-button label="View All" variant="brand" onclick={viewAllcaseItems}></lightning-button>
+                        
+                    </template>
+                </p>
+            </lightning-card>
+        </div>
+    </div>
+
+
+</lightning-layout-item>
+</template>

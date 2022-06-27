@@ -1,0 +1,616 @@
+<apex:component >
+    <script id="Review-Desktop" type="text/template">
+        <div class="panel panel-default cc_panel cc_checkout_review">
+            <div class="panel-heading cc_heading">
+                <h3 class="panel-title cc_title">{{pageLabelMap 'CheckOut_GeneralInformation'}}</h3>
+            </div>
+            <div class="panel-body cc_body">
+                <form enctype="multipart/form-data" class="margin_form cc_OrderReview_new">
+                    <div class="messagingSection-Error" style="display: none"></div>
+                    <div class="messagingSection-Info" style="display: none"></div>
+                    <div class="messagingSection-Warning" style="display: none"></div>
+                    <div class="well cc_well cc_order_review">
+                        <div class="row">
+                            <div class="col-xs-12 col-md-3">
+                                <h5 class="cc_buyer_information">{{pageLabelMap 'CheckOut_BuyerInformation'}}</h5>
+                                <p class="cc_buyer">
+                                    <a id="edit_UserInfo" href="#edit_UserInfo" class="editAddressInfo cc_edit_address_info">{{pageLabelMap 'CheckOut_edit'}}</a><br>
+                                {{#ifNotEquals this.soldToAccountR.sfdcName NULL}}
+                                <span class="cc_shipping_delivery_date_label" style="font-weight: bold;">Sold To Account&#58;&#160;</span><br>
+                                <p class="cc_buyer_firstname">{{this.soldToAccountR.sfdcName}} (<span id="accountNumber"></span>)</p>
+                                <p class="cc_buyer_firstname">&nbsp;</p>
+                                {{/ifNotEquals}}
+                                <p class="cc_buyer_firstname">{{this.buyerFirstName}} {{this.buyerLastName}}</p>
+                                <p class="cc_buyer_phone">{{this.buyerPhone}}</p>
+                                <p class="cc_buyer_email">{{this.buyerEmail}}</p>
+                                </p>
+                                {{#if this.strategicAccountL}}
+                                <h5 class="cc_buyer_information">{{pageLabelMap 'CheckOut_StrategicAccountNo'}}</h5>
+                                <p class="cc_buyer">
+                                    <a id="edit_General" href="#edit_General" class="editGeneral cc_edit_general" onclick="location.reload()">{{pageLabelMap 'CheckOut_edit'}}</a><br>
+                                <p class="cc_buyer_firstname">{{this.strategicAccountLName}}</p>
+                                </p>
+                                {{/if}}
+                                {{#ifNotEquals this.agreementNumber NULL}}
+                                <h5 class="cc_shipping_information">Price Agreement</h5>
+                                <span class="cc_addr_postal">{{this.agreementNumber}}</span>
+                                {{/ifNotEquals}}
+                            </div>
+                            <div class="col-xs-12 col-md-3">
+                                <h5 class="cc_shipping_information">{{pageLabelMap 'CheckOut_ProjectInfo'}}</h5>
+                                <p class="cc_shipping">
+                                    <a id="edit_General" href="#edit_General" class="editGeneral cc_edit_general" onclick="location.reload()">{{pageLabelMap 'CheckOut_edit'}}</a><br>
+                                <p class="cc_buyer_firstname">{{this.projectName}}</p>
+                                <p class="cc_buyer_firstname">{{this.projectDescription}}</p>
+                                <span class="cc_addr_country">{{this.projectAddress.countryCode}}</span><br/>
+                                <span class="cc_addr_city">{{this.projectAddress.city}}</span><br/>
+                                <span class="cc_addr_state">{{this.projectAddress.stateCode}}</span><br/>
+                                <span class="cc_addr_postal">{{this.projectAddress.postalCode}}</span>
+                                </p>
+                            </div>
+
+                            {{#ifNotEquals this.orderType "Purchase Order"}}
+                            <div class="col-xs-12 col-md-3">
+                                <h5 class="cc_shipping_information">Validity Dates</h5>
+                                <p class="cc_shipping">
+                                    <a id="edit_General" href="#edit_General" class="editGeneral cc_edit_general" onclick="location.reload()">{{pageLabelMap 'CheckOut_edit'}}</a><br>
+                                {{#if this.validFrom}}
+                                <p class="cc_shipping_method_section">
+                                    <span class="cc_shipping_method_label" style="font-weight: bold;">Valid From&#58;&#160;</span><br>
+                                    <span class="cc_shipping_method">{{formatDateForDisplay this.validFrom}}</span>
+                                </p>
+                                {{/if}}
+
+                                {{#if this.shipNotBeforeDate}}
+                                <p class="cc_shipping_notes_section" style="font-weight: bold;">
+                                    <span class="cc_shipping_notes_label">Ship Not Before Date&#160;</span>
+                                </p>
+                                {{/if}}
+
+                                {{#if this.validTo}}
+                                <p>
+                                    <span class="cc_shipping_delivery_date_label" style="font-weight: bold;">Valid To&#58;&#160;</span><br>
+                                    <span class="cc_shipping_delivery_date">{{formatDateForDisplay this.validTo}}</span>
+                                </p>
+                                {{/if}}
+                                {{#if this.lotPricing}}
+                                <p>
+                                    <span class="cc_shipping_delivery_date_label" style="font-weight: bold;">Lot Pricing&#58;&#160;</span><br>
+                                    <span class="cc_shipping_delivery_date">{{#ifEquals this.currencyISOCode 'CAD'}}CA{{/ifEquals}}${{formatCurrency this.lotPricingAmount}}</span>
+
+                                </p>
+                                {{/if}}
+                            </div>
+                            {{/ifNotEquals}}
+
+                            {{#ifEquals this.orderType "Purchase Order"}}
+                            <div class="col-xs-12 col-md-3">
+                                <h5 class="cc_shipping_information">{{pageLabelMap 'CheckOut_ShipmentInformation'}}</h5>
+                                <p class="cc_shipping">
+                                    <a id="edit_Shipping" href="#edit_Shipping" class="editShippingInfo cc_edit_shipping_info">{{pageLabelMap 'CheckOut_edit'}}</a><br>
+                                    {{#if this.shippingMethod}}
+                                <p class="cc_shipping_method_section">
+                                    <span class="cc_shipping_method_label" style="font-weight: bold;">{{pageLabelMap 'CheckOut_ShippingMethod'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_method">{{this.shippingMethod}}</span>
+                                </p>
+                                {{/if}}
+                                {{#if this.shipNotBeforeDate}}
+                                <p class="cc_shipping_notes_section" style="font-weight: bold;">
+                                    <span class="cc_shipping_notes_label">Ship Not Before Date&#160;</span>
+                                </p>
+                                {{/if}}
+                                {{#if this.requestedDeliveryDateStr}}
+                                <p>
+                                    <span class="cc_shipping_delivery_date_label" style="font-weight: bold;">{{pageLabelMap 'Checkout_RequestedDeliveryDt'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_delivery_date">{{this.requestedDeliveryDateStr}}</span>
+                                </p>
+                                {{/if}}
+                                {{#if this.shipComplete}}
+                                <p class="cc_shipping_notes_section" style="font-weight: bold;">
+                                    <span class="cc_shipping_notes_label">{{pageLabelMap 'CheckOut_ShipComplete'}}&#160;</span>
+                                </p>
+                                {{/if}}
+                                {{#if this.partialShip}}
+                                <p class="cc_shipping_notes_section" style="font-weight: bold;">
+                                    <span class="cc_shipping_notes_label">{{pageLabelMap 'CheckOut_PartialShip'}}&#160;</span>
+                                </p>
+                                {{/if}}
+                                {{#if this.deliveryContactName}}
+                                <p>
+                                    <span class="cc_shipping_delivery_date_label" style="font-weight: bold;">{{pageLabelMap 'CheckOut_DeliveryContactName'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_delivery_date">{{this.deliveryContactName}}</span>
+                                </p>
+                                {{/if}}
+                                {{#if this.deliveryContactPhone}}
+                                <p>
+                                    <span class="cc_shipping_delivery_date_label" style="font-weight: bold;">{{pageLabelMap 'CheckOut_DeliveryContactPhone'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_delivery_date">{{this.deliveryContactPhone}}</span>
+                                </p>
+                                {{/if}}
+                                <!-- {{#if this.requestedDateStr}}
+                                <p class="cc_shipping_delivery_section">
+                                <span class="cc_shipping_delivery_date_label">{{pageLabelMap 'Checkout_RequestedDeliveryDt'}}&#58;&#160;</span>
+                                <span class="cc_shipping_delivery_date">{{this.requestedDateStr}}</span>
+                                </p>
+                                {{/if}} -->
+                                </p>
+                                <!-- <h5 class="cc_billing_address_label">{{pageLabelMap 'CheckOut_BillingAddress'}}</h5> -->
+                                <!-- <a id="edit_UserInfo" href="#edit_UserInfo" class="editAddressInfo cc_edit_address_info">{{pageLabelMap 'CheckOut_edit'}}</a><br> -->
+                                <!-- <span class="cc_billing_address">{{> addressDisplay this.billingAddress}}</span> -->
+
+
+                            </div>
+                            {{/ifEquals}}
+
+
+                            {{#if this.hasCoupon}}
+                            <div class="col-xs-12 col-md-3">
+                                <h5 class="cc_coupon_label">{{pageLabelMap 'CartInc_AppliedCoupon'}}</h5>
+                                <p class="cc_coupon_section">
+                                    <span class="cc_coupon">{{this.couponName}}</span>
+                                </p>
+                            </div>
+                            {{/if}}
+
+                            {{#ifEquals this.orderType "Purchase Order"}}
+                            <div class="col-xs-12 col-md-3">
+                                <a href="javascript:void(0)" onclick="$('#shipNotes').modal('show');"><h5 class="cc_shipping_address_label">{{pageLabelMap 'CheckOut_ShippingNotes'}}</h5></a>
+                                <div id="shipNotes" class="modal fade cc_modal cc_cart_comments_modal in" tabindex="-1" role="dialog" aria-labelledby="TypeMarks" style="display: none;">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content cc_modal_content">
+                                            <div class="modal-header cc_modal_header">
+                                                <button type="button" class="close cc_close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                                                <h4 class="modal-title cc_modal_title" id="shipNotes">
+                                                    {{pageLabelMap 'CheckOut_ShippingNotes'}}
+                                                </h4>
+                                            </div>
+                                            <div id="shipNotesModalBody" class="modal-body cc_modal_body container form-group">
+                                                <form id="shipNotesModalForm" class="cc_comments_form">
+                                                    <div class="row">
+                                                        <div id="shipNotesLeftCol" class="col-sm-6">
+                                                            <!-- <label for="willCall" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_WillCall'}}</label>
+                                                            <input type="checkbox" id="willCall" name="willCall" value="Will Call"><br> -->
+                                                            <label for="doNotDoubleStack" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Donotdoublestackpallets'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="doNotDoubleStack" name="doNotDoubleStack" value="Do not double stack pallets" {{#if this.shippingNotes.doNotDoubleStack}} checked {{/if}}><br>
+                                                            <label for="doNotShipDoubles" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Donotshipdoubles'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="doNotShipDoubles" name="doNotShipDoubles" value="Do not ship doubles" {{#if this.shippingNotes.doNotShipDoubles}} checked {{/if}}><br>
+                                                            <label for="doNotSlipSheet" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Donotslipsheetfluorlamps'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="doNotSlipSheet" name="doNotSlipSheet" value="Do not slip sheet fluor lamps" {{#if this.shippingNotes.doNotSlipSheet}} checked {{/if}}><br>
+                                                            <label for="userHampers" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_UseHampers'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="userHampers" name="userHampers" value="Use Hampers" {{#if this.shippingNotes.userHampers}} checked {{/if}}><br>
+                                                            <label for="useCornerGuards" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_UseCornerGuards'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="useCornerGuards" name="useCornerGuards" value="Use Corner Guards" {{#if this.shippingNotes.useCornerGuards}} checked {{/if}}><br>
+                                                            <label for="mixedSkus" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_MixedSKUs'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="mixedSkus" name="mixedSkus" value="Mixed SKUs?" {{#if this.shippingNotes.mixedSkus}} checked {{/if}}><br>
+                                                            <label for="liftGate" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Liftgate'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="liftGate" name="liftGate" value="Lift gate" {{#if this.shippingNotes.liftGate}} checked {{/if}}><br>
+                                                            <label for="palletJack" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Palletjack'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="palletJack" name="palletJack" value="Pallet jack" {{#if this.shippingNotes.palletJack}} checked {{/if}}><br>
+                                                            <label for="dockHeightTruck" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Dockheighttruck'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="dockHeightTruck" name="dockHeightTruck" value="Dock height truck" {{#if this.shippingNotes.dockHeightTruck}} checked {{/if}}><br>
+                                                            <label for="makeAppointment" class="cc_shipnotes_label"> {{pageLabelMap 'shipNotes_Makeappointment'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="makeAppointment" name="makeAppointment" value="Make appointment" {{#if this.shippingNotes.makeAppointment}} checked {{/if}}><br>
+                                                            <label for="signatureOnPOD" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_SignatureonPOD'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="signatureOnPOD" name="signatureOnPOD" value="Signature on POD" {{#if this.shippingNotes.signatureOnPOD}} checked {{/if}}><br>
+                                                            <!-- <label for="useScanGun" class="cc_shipnotes_label" value="">{{pageLabelMap 'shipNotes_Usescangun'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="useScanGun" name="useScanGun" value="Use scan gun"><br> -->
+                                                            <label for="includePackingList" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_IncludePackingList'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="includePackingList" name="includePackingList" value="Include Packing List" {{#if this.shippingNotes.includePackingList}} checked {{/if}}><br>
+                                                            <!-- <label for="edisonElite" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_EdisonEliteCustomer'}}</label>
+                                                            <input disabled="disabled" type="checkbox" id="edisonElite" name="edisonElite" value="Edison Elite Customer"><br> -->
+                                                            <label for="receivingHoursFrom" data-id="Receiving Hours" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_ReceivingHours'}}</label>
+                                                            <input disabled="disabled" type="time" id="receivingHoursFrom" data-id="Receiving Hours" name="receivingHoursFrom" value="{{this.shippingNotes.receivingHoursFrom}}"><br>
+                                                            <input disabled="disabled" type="time" id="receivingHoursTo" name="receivingHoursTo" value="{{this.shippingNotes.receivingHoursTo}}"><br>
+                                                            <label for="deliverOnText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_DeliverOn'}}</label>
+                                                            <select disabled="disabled" name="deliverOnText" data-id="Deliver On" id="deliverOn">
+                                                                <option disabled selected value> -- </option>
+                                                                <option value="monday" {{#ifEquals 'monday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Monday</option>
+                                                                <option value="tuesday" {{#ifEquals 'tuesday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Tuesday</option>
+                                                                <option value="wednesday" {{#ifEquals 'wednesday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Wednesday</option>
+                                                                <option value="thursday" {{#ifEquals 'thursday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Thursday</option>
+                                                                <option value="friday" {{#ifEquals 'friday' this.shippingNotes.deliverOnText}} selected {{/ifEquals}}>Friday</option>
+                                                            </select><br>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <label for="palletHeightText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Palletheightrestriction'}}</label>
+                                                            <input disabled="disabled" type="text" data-id="Pallet Height" id="palletHeightText" name="palletHeightText" class="shipnotes form-control cc_shipnotes" value="{{this.shippingNotes.palletHeightText}}"/><br>
+                                                            <label for="useOverwrapText"  class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_UseOverwrapon'}}</label>
+                                                            <input disabled="disabled" type="text" id="useOverwrapText" data-id="Use Overwrap on" name="useOverwrapText" class="shipnotes form-control cc_shipnotes"  value="{{this.shippingNotes.useOverwrapText}}"/><br>
+                                                            <label for="maxLayersHighText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Maxlayershigh'}}</label>
+                                                            <input disabled="disabled" type="text" data-id="Max layers High" id="maxLayersHighText" name="maxLayersHighText" class="shipnotes form-control cc_shipnotes"  value="{{this.shippingNotes.maxLayersHighText}}"/><br>
+                                                            <label for="maxTruckHeightText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Maxtruckheight'}}</label>
+                                                            <input disabled="disabled" type="text" data-id="Max truck height" id="maxTruckHeightText" name="maxTruckHeightText" class="shipnotes form-control cc_shipnotes"  value="{{this.shippingNotes.maxTruckHeightText}}"/><br>
+                                                            <label for="maxTruckLengthText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Maxtrucklength'}}</label>
+                                                            <input disabled="disabled" type="text" data-id="Max truck length" id="maxTruckLengthText" name="maxTruckLengthText" class="shipnotes form-control cc_shipnotes"  value="{{this.shippingNotes.maxTruckLengthText}}"/><br>
+                                                            <label for="callAheadText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Callahead'}}</label>
+                                                            <input disabled="disabled" type="text" data-id="Call Ahead" id="callAheadText" name="callAheadText" class="shipnotes form-control cc_shipnotes"  value="{{this.shippingNotes.callAheadText}}"/><br>
+                                                            <label for="emailAheadText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Emailaheadaddress'}}</label>
+                                                            <input disabled="disabled" type="text" data-id="Email ahead address" id="emailAheadText" name="emailAheadText" class="shipnotes form-control cc_shipnotes"  value="{{this.shippingNotes.emailAheadText}}"/><br>
+                                                            {{#if this.showDayAirBoxes}}
+                                                                <div class="form-group">
+                                                                    <label for="nextDayAir" class="cc_shipnotes_label">Next Day Air</label>
+                                                                    <input disabled="disabled" type="checkbox" id="nextDayAir" name="nextDayAir" value="Next Day Air" {{#if this.shippingNotes.nextDayAir}} checked {{/if}}>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="secondDayAir" class="cc_shipnotes_label">2nd Day Air</label>
+                                                                    <input disabled="disabled" type="checkbox" id="secondDayAir" name="secondDayAir" value="2nd Day Air" {{#if this.shippingNotes.secondDayAir}} checked {{/if}}>
+                                                                </div>
+                                                            {{/if}}
+                                                            <label for="fedexText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_FedEx'}}</label>
+                                                            <input disabled="disabled" type="text" data-id="FedEx #" id="fedexText" name="fedexText" class="shipnotes form-control cc_shipnotes"  value="{{this.shippingNotes.fedexText}}"/><br>
+                                                            <label for="otherText" class="cc_shipnotes_label">{{pageLabelMap 'shipNotes_Other'}}</label>
+                                                            <textarea disabled="disabled" id="otherText" data-id="Other" name="otherText" rows="6" maxlength="1000" class="shipnotes form-control cc_shipnotes" >{{this.shippingNotes.otherText}}</textarea>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer cc_modal_footer">
+                                                <input type="button" class="btn btn-default btn-sm" value="Close" onclick="$('#shipNotes').modal('hide');"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h5 class="cc_shipping_address_label">{{pageLabelMap 'CheckOut_OrderReviewShippingAddress'}}</h5>
+                                <a id="edit_UserInfo" href="#edit_UserInfo" class="editAddressInfo cc_edit_address_info">{{pageLabelMap 'CheckOut_edit'}}</a><br>
+                                <br>	{{#ifEquals this.shippingType "Z002"}} <p>
+                                    <span class="cc_shipping_address_label" style="font-weight: bold;">{{pageLabelMap 'Shipping Type'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_address_label">Ship To </span>
+                                </p>
+                                    {{/ifEquals}}
+                     {{#ifEquals this.shippingType "Will Call"}} <p>
+                                    <span class="cc_shipping_address_label" style="font-weight: bold;">{{pageLabelMap 'Shipping Type'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_address_label">{{this.shippingType}}</span>
+                                </p>
+                                    {{/ifEquals}}
+                                    {{#ifEquals this.shippingType "Drop Ship"}} <p>
+                                    <span class="cc_shipping_address_label" style="font-weight: bold;">{{pageLabelMap 'Shipping Type'}}&#58;&#160;</span><br>
+                                    <span class="cc_shipping_address_label">{{this.shippingType}}</span>
+                                </p>
+                                    {{/ifEquals}}
+                                <div class="cc_shipping_Z002Absent">
+
+                   					 <span class="cc_shipping_address">{{> addressDisplay this.shippingAddress}}</span>
+                     
+                   
+                    		  </div>
+                                    <span class="cc_z002_address"></span>
+                    
+                            </div>
+                            
+                            {{/ifEquals}}
+
+                        </div>
+                    </div>
+                    <div class="reviewCartSection"></div>
+                    <div class="reviewPaymentSection"></div>
+                    <p class="link_button cc_link_button">
+                        <input class="btn btn-default btn-sm processBack cc_process_back" type="button" value="{{pageLabelMap 'Back'}}" alt="{{pageLabelMap 'Back'}}"/>
+                        {{#ifEquals this.orderType "Purchase Order"}}
+                        <input class="btn btn-default btn-sm processReview proceed cc_process_review" type="button" value="{{pageLabelMap 'CheckOut_MobileGotoPayment'}}"
+                               alt="{{pageLabelMap 'CheckOut_AcceptAndProceed'}}"/>
+                        {{else}}
+                        <input class="btn btn-default btn-sm submitPA " type="button" value="Submit Price Agreement" alt="{{pageLabelMap 'CheckOut_AcceptAndProceed'}}"/>
+                        {{/ifEquals}}
+                    </p>
+                </form>
+            </div>
+        </div>
+    </script>
+    <script id="Review-Cart-DesktopV2" type="text/template">
+        <div id="cart_items_container reviewSection" class="">
+            <div class="cart_item_list">
+                <span class="reverseOrder">{{reverseCartItems this.cartItems}}</span>
+                {{#each this.cartItems}}
+                <div class="cart_item row">
+                    {{#ifNotEquals this.cartItemType 'Coupon'}}
+                    <div class="col-md-2">
+                        {{#if product.EProductMediasS.[0]}}
+                        {{displayImage this 'orderReview img-responsive'
+                        src=(displayEProductMedia this.product.EProductMediasS.[0])
+                        alt=this.product.EProductMediasS.[0].altMessage
+                        dataId=this.product.SKU}}
+                        {{/if}}
+                    </div>
+                    <div class="col-md-6">
+                        <p class="cc_item_title">
+                            {{#ifEquals pricingType 'external'}}
+                            {{#if extName}}
+                            {{#ifEquals this.product.SKU 'requestedSku'}}
+                            <span class="cc_ext_name">{{displayProductName 'Aggregate_Display' displayProduct.sfdcName extName }}</span>
+                            {{else}}
+                            <span class="cc_ext_name">{{productLink this.product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName extName)}}</span>
+                            {{/ifEquals}}
+                            {{else}}
+                            {{#if itemLabel}}
+                            {{#ifEquals this.product.SKU 'requestedSku'}}
+                            <span class="cc_ext_name">{{displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel }}</span>
+                            {{else}}
+                            <span class="cc_ext_name">{{productLink this.product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel)}}</span>
+                            {{/ifEquals}}
+                            {{else}}
+                            {{#ifEquals this.product.SKU 'requestedSku'}}
+                            <span class="cc_ext_name">{{displayProductName 'Aggregate_Display' displayProduct.sfdcName product.sfdcName }}</span>
+                            {{else}}
+                            <span class="cc_ext_name">{{productLink this.product 'cc_prod_link' text=(displayProductName 'Aggregate_Display' displayProduct.sfdcName this.product.sfdcName)}}</span>
+                            {{/ifEquals}}
+                            {{/if}}
+                            {{/if}}
+                            {{else}}
+                            {{#if itemLabel}}
+                            <span class="cc_ext_name">{{displayProductName 'Aggregate_Display' displayProduct.sfdcName itemLabel }}</span>
+                            {{else}}
+                            <span class="cc_ext_name">{{displayProductName 'Aggregate_Display' displayProduct.sfdcName product.sfdcName }}</span>
+                            {{/if}}
+                            {{/ifEquals}}
+                        </p>
+                          <p> {{this.extSKU}}</p>
+                        <span id="itemdetaildisplay-{{this.sfid}}" style="display:none">
+                          <p>{{pageLabelMap 'Checkout_RequestedDeliveryDt'}}&#58; {{#ifNotEquals this.requestedDeliveryDate NULL}} {{formatDateForDisplay this.requestedDeliveryDate}} {{/ifNotEquals}}</p>
+                          <p>Type Mark&#58; {{#ifNotEquals this.typeMarks NULL}} {{this.typeMarks}} {{/ifNotEquals}}</p>
+                          <p>Price Agreement: {{#ifNotEquals this.agreementNumber NULL}} {{this.agreementNumber}} {{/ifNotEquals}}</p>
+                          <p>Comment: {{#ifNotEquals this.comments NULL}} {{this.comments}} {{/ifNotEquals}}</p>
+                        </span>
+                        {{#ifContains this.pricingModifierTypes 'tiered'}}
+                        <div class="cc_prt_tool_tip_div cc_prt_tool_tip_div_or" data-toggle="tooltip" title="{{pageLabelMap 'ProductPricingTiers_VolumeHover'}}">
+                            <span class="cc_prt_tool_tip_text cc_prt_tool_tip_text_or">{{pageLabelMap 'ProductPricingTiers_VolumePricingApplied'}}</span>
+                        </div>
+                        {{/ifContains}}
+                    </div>
+                    <div class="col-md-4">
+                        <div class="price cc_price">
+                            {{#ifNotEquals this.cartItemType 'Coupon'}}
+                            <p class="cc_order_quantity">
+                                <span class="cc_quantity_label">{{pageLabelMap 'CartInc_Qty'}}&#58;&#160;</span>
+                                <span class="cc_quantity">{{this.quantity}}</span>
+                            </p>
+                            <p class="cc_order_quantity">
+                                <span class="cc_quantity_label">{{pageLabelMap 'UOM'}}&#58;&#160;</span>
+                                <span class="cc_quantity">{{getUOMlabel this.unitOfMeasure}}</span>
+                            </p>
+                            <p class="cc_item_price">
+                                {{#if this.price}}
+                                <span class="cc_price_label">{{pageLabelMap 'CartInc_Price'}}&#58;&#160;</span>
+                                <span class="cc_price">{{price this.price}}</span>
+                                {{/if}}
+                                {{#if this.absoluteDiscount}}
+                                {{#ifGreater this.absoluteDiscount 0}}
+                                <span class="cc_price_label">{{pageLabelMap 'Checkout_YouSave'}}&#58;&#160;</span>
+                                <span class="cc_price">{{price this.absoluteDiscount}}</span>
+                                {{/ifGreater}}
+                                {{#ifLessThan this.absoluteDiscount 0}}
+                                <span class="cc_price_label">{{pageLabelMap 'CartInc_Surcharge'}}&#58;&#160;</span>
+                                <span class="cc_price">{{priceAbs this.absoluteDiscount}}</span>
+                                {{/ifLessThan}}
+                                {{/if}}
+                            </p>
+                            {{/ifNotEquals}}
+                            <p class="cc_item_total">
+                                <span class="cc_total_label">{{pageLabelMap 'CartInc_Total'}}&#58;&#160;</span>
+                                <span class="cc_total">{{price this.itemTotal}}</span>
+                            </p>
+                            <p class="cc_external">
+                                {{#ifEquals this.pricingType 'external'}}
+                                {{#if this.extName}}
+                                <span class="cc_ext_sku_label">{{pageLabelMap 'CatalogNo'}}</span>
+                                <span class="cc_ext_sku">{{this.extSKU}}</span>
+                                {{else}}
+                                {{#if this.product.productFamily}}
+                                <span class="cc_checkout_sku_label">{{pageLabelMap 'FamilyName'}}</span>
+                                <span class="cc_checkout_sku">{{this.product.productFamily}}</span>
+                                {{/if}}
+                                {{/if}}
+                                {{else}}
+                                {{#if this.product.productFamily}}
+                                <span class="cc_checkout_sku_label">{{pageLabelMap 'FamilyName'}}</span>
+                                <span class="cc_checkout_sku">{{this.product.productFamily}}</span>
+                                {{/if}}
+                                {{/ifEquals}}
+                            </p>
+                            {{#if sellerName}}
+                            <p class="cc_seller">
+                                <span class="cc_soldby_label">{{pageLabelMap 'Prod_SoldBy'}}&#58;&#160;</span>
+                                <span class="cc_soldby">{{sellerName}}</span>
+                            </p>
+                            {{/if}}
+                            {{#if this.isSubscription}}
+                            <p class="cc_subscription_summary">
+                                {{subscriptionSummary 'Order_Subscription_' this.subscriptionFrequency mockProduct.sku itemTotal}}
+                            </p>
+                            <p class="cc_subscription_next_date">
+                                {{pageLabelMap 'Order_Subscription_Next_Payment'}} {{this.nextSubscriptionDateStr}}
+                            </p>
+                            {{#if this.isLimitedSubscription}}
+                            <p class="cc_subscription_summary">
+                                {{pageLabelMap 'Order_Subscription_End_Date'}} {{this.subscriptionEndDateStr}}
+                            </p>
+                            {{/if}}
+                            {{/if}}
+                            {{#each minorLines}}
+                            {{#if this.isSubscription}}
+                            <p class="cc_subscription_summary">
+                                {{subscriptionSummary 'Order_Subscription_' this.subscriptionFrequency mockProduct.sku itemTotal}}
+                            </p>
+                            <p class="cc_subscription_next_date">
+                                {{pageLabelMap 'Order_Subscription_Next_Payment'}} {{this.nextSubscriptionDateStr}}
+                            </p>
+                            {{#if this.isLimitedSubscription}}
+                            <p class="cc_subscription_end_date">
+                                {{pageLabelMap 'Order_Subscription_End_Date'}} {{this.subscriptionEndDateStr}}
+                            </p>
+                            {{/if}}
+                            {{/if}}
+                            {{/each}}
+                            {{#if this.minorLines}}
+                            {{#ifNotEquals this.pricingType "attrGroup"}}
+                            <p class="cc_included_items">
+                                <a href="#included_items{{this.itemID}}" id="includedItemsLink" class="includedItemsLink cc_included_items_link" data-toggle="modal" data-id="{{this.itemID}}">{{pageLabelMap
+                                    'CheckOut_IncludedItems'}}</a>
+                            </p>
+                            <div id="included_items{{this.sfid}}" class="modal fade cc_modal cc_cart_included_items_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content cc_modal_content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span>
+                                            </button>
+                                            {{#ifEquals this.pricingType 'external'}}
+                                            {{#if extName}}
+                                            <h3 id="myModalLabel">{{this.extName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                            {{else}}
+                                            <h3 id="myModalLabel">{{this.product.sfdcName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                            {{/if}}
+                                            {{else}}
+                                            {{#if itemLabel}}
+                                            <h3 id="myModalLabel">{{this.itemLabel}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                            {{else}}
+                                            <h3 id="myModalLabel">{{this.product.sfdcName}}&#58;&#160;{{pageLabelMap 'CheckOut_IncludedItems'}}</h3>
+                                            {{/if}}
+                                            {{/ifEquals}}
+                                        </div>
+                                        <div class="modal-body cc_modal-body modal-body_included_items{{this.sfid}}" id="included_items_body{{sfid}}">
+                                            <i class="fa fa-spinner fa-pulse fa-lg slds-m-top--medium"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/ifNotEquals}}
+                            {{/if}}
+                            {{#if this.minorLines}}
+                            {{#ifEquals this.pricingType "attrGroup" }}
+                            <p class="cc_cart_attribute_items">
+                                <a href="#order_attribute_items{{this.itemID}}" id="orderAttributeItemsLink" class="orderAttributeItemsLink cc_attribute_items_link" data-toggle="modal"
+                                   data-id="{{this.itemID}}">{{pageLabelMap 'CheckOut_UOMPricing'}}</a>
+                            </p>
+                            <div id="order_attribute_items{{this.itemID}}" class="modal fade cc_modal cc_order_attribute_items_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content cc_modal_content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span>
+                                            </button>
+                                            <h3 id="myModalLabel">{{this.product.sfdcName}}:&#160;{{pageLabelMap 'CheckOut_UOMPricing'}}</h3>
+                                        </div>
+                                        <div class="modal-body cc_modal-body modal-order_attribute_items{{this.sfid}}" id="modal-order_attribute_items{{sfid}}">
+                                            <i class="fa fa-spinner fa-pulse fa-lg slds-m-top--medium"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/ifEquals}}
+                            {{/if}}
+                        </div>
+                    </div>
+                    {{/ifNotEquals}}
+                    {{#ifEquals this.cartItemType 'Coupon'}}
+                    <div class="col-md-8">
+                        <p class="item_title coupon_title cc_coupon_title">
+                            <span class="cc_label">{{pageLabelMap 'CartInc_AppliedCoupon'}}</span>
+                            <span class="cc_value">{{this.product.sfdcName}}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="price cc_price">
+                            <p class="cc_item_total">
+                                <span class="cc_total_label">{{pageLabelMap 'CartInc_Total'}}&#58;&#160;</span>
+                                <span class="cc_total">{{price this.itemTotal}}</span>
+                            </p>
+                        </div>
+                    </div>
+                    {{/ifEquals}}
+                </div>
+                <hr>
+                {{/each}}
+            </div>
+        </div>
+        {{> totalsSection}}
+    </script>
+    <script>
+
+    Handlebars.registerHelper('formatCurrency', function(value) {
+        var formattedValue = value.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+        if (!formattedValue.includes('.')) {
+            formattedValue += '.00';
+        }
+        return formattedValue;
+    });
+     Handlebars.registerHelper('reverseCartItems', function(orderItems) {
+         console.log("Cart Items Before Reverse: ", orderItems);
+         let cartOrigin = localStorage.getItem('CartOrigin');
+         console.log("Cart Origin: " + cartOrigin);
+         return cartOrigin == 'Reorder' ? orderItems.reverse() : orderItems;
+    });
+
+        jQuery(function ($) {
+
+            Backbone.on('view:OrderReviewView:created', function (viewPrototype) {
+                viewPrototype.events['click .submitPA'] = 'submitPA';
+
+                viewPrototype.submitPA = function (ev) {
+                    // Show Loader On Black Overlay By Sameer Mahadik On(6-15-2021)
+                    $("header").before('<div class="customLoader"></div>');
+                    var cartId = CCRZ.cartCheckoutModel.attributes.sfid;
+                    var remoteCall = _.extend(CCRZ.RemoteInvocation, {className: 'CheckoutActions'});
+                    const urlParams = new URLSearchParams(window.location.search);
+                    remoteCall.invokeContainerLoadingCtx($('.deskLayout'), 'submitPA', cartId, (res, err) => {
+                        // Remove Loader By Sameer Mahadik On(6-15-2021)
+                        $(".customLoader").remove();
+
+                        if (res.success) {
+                            console.log('Order review response', res);
+                            let redirectURL = CCRZ.pagevars.sitePrefix;
+                            if (urlParams.get('portalUser') != null) {
+                                redirectURL += '/apex';
+                            }
+                            redirectURL += '/ccrz__OrderConfirmation?o=' + res.data;
+                            if (urlParams.get('portalUser') != null) {
+                                redirectURL += '&portalUser=' + urlParams.get('portalUser');
+                            }
+                            window.location = redirectURL;
+                        } else {
+                            console.log(res);
+                        }
+                    }, {
+                        nmsp: false, escape: false
+                    });
+
+                };
+            });
+
+
+        });
+
+            var displayItemDetailsTimer = setInterval(function () {
+                if (typeof(CCRZ.cartCheckoutModel.attributes.orderType) == 'undefined') return;
+                if (CCRZ.cartCheckoutModel.attributes.orderType != 'Purchase Order') {
+                    clearInterval(displayItemDetailsTimer);
+                } else if (typeof($('[id*="itemdetaildisplay-"]')[0]) != 'undefined') {
+                    clearInterval(displayItemDetailsTimer);
+                    for (let i = 0; i < CCRZ.cartCheckoutModel.attributes.cartItems.length; i++) {
+                        document.getElementById('itemdetaildisplay-' + CCRZ.cartCheckoutModel.attributes.cartItems[i].sfid).style.display='inline';
+                    }
+                }
+            }, 267);
+
+            var displayAccountNumberTimer = setInterval(function () {
+                if (typeof($('#accountNumber')) != 'undefined') {
+                    try {
+                        let accountNumber = localStorage.getItem(JSON.parse(localStorage.getItem('LSSIndex:LOCAL{"namespace":"c"}'))['DistributorAccount']);
+                        if (accountNumber == null || accountNumber == '') {
+                            for (let i = 0; i < CCRZ.effSelectorView.dataSet.effectiveList.length; i++) {
+                                if (CCRZ.effSelectorView.dataSet.effectiveList[i].sfid == CCRZ.cartCheckoutModel.attributes.soldToAccount) {
+                                    accountNumber = CCRZ.effSelectorView.dataSet.effectiveList[i].accountNumber;
+                                    break;
+                                }
+                            }
+                        }
+                        if (accountNumber != null && accountNumber != '') {
+                            $('#accountNumber').text(accountNumber.replace(/^0+/, ''));
+                        }
+                    } catch(error) {}
+                }
+            }, 232);
+    </script>
+    <style>
+    .reverseOrder {
+       display: none;
+    }
+ </style>
+</apex:component>

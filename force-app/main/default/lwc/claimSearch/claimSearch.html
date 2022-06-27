@@ -1,0 +1,149 @@
+<template>
+    <lightning-card>
+        <h1 slot="title">Claim Search</h1>
+        <div slot="footer">
+            <lightning-button label="Search Claims" variant="brand" title="Search Claims" onclick={startSearch}></lightning-button>
+        </div>
+        <template if:true={isWorking}>
+            <lightning-spinner variant="brand" alternative-text="Loading"></lightning-spinner>
+        </template>
+        <template if:false={isWorking}>
+            <lightning-layout multiple-rows pull-to-boundary="medium" class="slds-p-around_small">
+                <lightning-layout-item size="12" small-device-size="12" medium-device-size="6" large-device-size="6" padding="around-small">
+                    <lightning-input type="date" name="dateFrom" label="Date From" required value={claimSearchRequest.dateFrom} onchange={handleFieldChange}></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" small-device-size="12" medium-device-size="6" large-device-size="6" padding="around-small">
+                    <lightning-input type="date" name="dateTo" label="Date To" required value={claimSearchRequest.dateTo} onchange={handleFieldChange}></lightning-input>
+                </lightning-layout-item>
+
+                <lightning-layout-item size="12" small-device-size="12" medium-device-size="6" large-device-size="6" padding="around-small">
+                    <c-sold-to-account-lookup
+                        label="Sold to Account"
+                        type="soldto"
+                        required
+                        place-holder="Search Accounts..."
+                        selected-account={soldToAccount}
+                        onaccountselect={handleSoldToAccountLookupSelect}
+                        onreset={handleSoldToAccountLookupReset}
+                    ></c-sold-to-account-lookup>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" small-device-size="12" medium-device-size="6" large-device-size="6" padding="around-small">
+                    <c-material-lookup
+                        label="Material"
+                        account-id={soldToAccountId}
+                        return-type={returnType}
+                        product-families={productFamilies}
+                        selected-material={materialMaster}
+                        onselect={handleMaterialMasterSelect}
+                        onreset={handleMaterialMasterReset}
+                        disabled="true"
+                        placeholder=""
+                    ></c-material-lookup>
+                </lightning-layout-item>
+
+                <lightning-layout-item size="12" small-device-size="12" medium-device-size="6" large-device-size="6" padding="around-small">
+                    <lightning-input type="text" name="referenceNumber" label="Reference Number" value={claimSearchRequest.referenceNumber} onchange={handleFieldChange}></lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" small-device-size="12" medium-device-size="6" large-device-size="6" padding="around-small">
+                    <lightning-input type="text" name="claimNumber" label="Claim Number" value={claimSearchRequest.claimNumber} onchange={handleFieldChange}></lightning-input>
+                </lightning-layout-item>
+            </lightning-layout>
+
+            <template if:true={claimResults}>
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered" aria-labelledby="element-with-table-label other-element-with-table-label">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col">
+                                <div class="slds-truncate" title="Claim Num">Claim Num</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Claim Date">Claim Date</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Ref Num">Ref Num</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Sales Org">Sales Org</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Dist Ch">Dist Ch</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Div">Div</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Cust No">Cust No</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Claimed Amount">Claimed Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Submitted Amount">Submitted Amount</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Job">Job</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Inv Date">Inv Date</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Inv Num">Inv Num</div>
+                            </th>
+                            <th scope="col">
+                                <div class="slds-truncate" title="Inv Amount">Inv Amount</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={claimResults} for:item="claim">
+                            <tr key={claim.claimNumber} class="slds-hint-parent">
+                                <td data-label="Claim Num">
+                                    <lightning-formatted-text value={claim.claimNumber}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Claim Date">
+                                    <lightning-formatted-text value={claim.claimDate}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Ref Num">
+                                    <lightning-formatted-text value={claim.referenceNumber}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Sales Org">
+                                    <lightning-formatted-text value={claim.salesOrg}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Dist Ch">
+                                    <lightning-formatted-text value={claim.distributionChannel}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Div">
+                                    <lightning-formatted-text value={claim.division}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Cust No">
+                                    <lightning-formatted-text value={claim.soldToNumber}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Claimed Amount">
+                                    <lightning-formatted-number value={claim.claimedTotalAmount} format-style="currency" currency-display-as="code" currency-code={currency}></lightning-formatted-number>
+                                </td>
+                                <td data-label="Submitted Amount">
+                                    <lightning-formatted-number value={claim.submittedAmount} format-style="currency" currency-display-as="code" currency-code={currency}></lightning-formatted-number>
+                                </td>
+                                <td data-label="Job">
+                                    <lightning-formatted-text value={claim.jobName}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Inv Date">
+                                    <lightning-formatted-text value={claim.invoiceDate}></lightning-formatted-text>
+                                </td>
+                                <td data-label="Inv Num">
+                                    <span>
+                                      <c-test-p-d-f-viewer-l-w-c  number={claim.invoiceNum} label="Invoice Details" variant="brand-inverse" type="Invoice"></c-test-p-d-f-viewer-l-w-c>
+                                    </span>
+                                   <!--<lightning-formatted-text value={claim.invoiceNum}></lightning-formatted-text>-->
+                               </td>
+                                <td data-label="Inv Amount">
+                                    <lightning-formatted-number value={claim.invoiceAmount} format-style="currency" currency-display-as="code" currency-code={currency}></lightning-formatted-number>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+        </template>
+    </lightning-card>
+</template>

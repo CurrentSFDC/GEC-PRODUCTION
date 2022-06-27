@@ -1,0 +1,54 @@
+<template>
+    <div class="container">
+        <h2 class="heading-secondary slds-p-left_medium">{title}</h2>
+        <div class="slds-text-align_right">
+            <lightning-input type="checkbox" label="SELECT ALL" onchange={selectAllFiles}></lightning-input>
+        </div>
+        <lightning-accordion if:true={documentSections}
+                             class=""
+                             allow-multiple-sections-open>
+            <template for:each={documentSections} for:item="section">
+                <lightning-accordion-section key={section.sectionName} name={section.sectionName} label={section.sectionName}>
+                    <template for:each={section.documents} for:item="document">
+                        <div key={document.Id} class="slds-grid slds-wrap">
+                            <div class="slds-col slds-max-small-size_1-of-2 slds-small-size_6-of-12"><a href={document.source}>{document.Name}</a></div>
+                            <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_2-of-12">{document.size}</div>
+                            <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_3-of-12">
+                                <lightning-formatted-date-time value={document.CreatedDate} month="2-digit" day="2-digit" year="numeric"></lightning-formatted-date-time>
+                            </div>
+                            <div class="slds-col slds-max-small-size_1-of-1 slds-small-size_1-of-12">
+                                <input type="checkbox" class="slds-checkbox" onchange={document.setDocumentSelected} checked={document.isSelected}>
+                            </div>
+                        </div>
+                    </template>
+                </lightning-accordion-section>
+            </template>
+        </lightning-accordion>
+        <div class="button-container slds-m-top_medium">
+            <button class="slds-button" onclick={downloadSelectedFiles}>DOWNLOAD SELECTED</button>
+            <div class="slds-hide_small slds-m-bottom_medium"></div>
+            <div class="slds-show_small slds-show_inline-block slds-m-right_medium"></div>
+            <!-- <button class="slds-button slds-button_brand" onclick={openEmailModal}>EMAIL SELECTED</button>-->
+        </div>
+
+        <section role="dialog" tabindex="-1" class="slds-modal slds-modal_small ">
+            <div class="slds-modal__container ">
+                <div class="slds-is-relative">
+                    <lightning-spinner class="slds-hidden" alternative-text="Loading" size="medium"></lightning-spinner>
+                    <div class="slds-modal__content slds-p-around_small">
+                        <p class="slds-m-vertical_small">From: {userEmail}</p>
+                        <div class="slds-size_1-of-1">
+                            <lightning-input type="email" label="Email Address" required></lightning-input>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button variant="brand" label="Send" class="slds-p-right_medium" onclick={sendSelectedFilesInEmail}></lightning-button>
+                        <lightning-button label="Close" onclick={closeEmailModal}></lightning-button>
+                    </footer>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop"></div>
+
+    </div>
+</template>

@@ -1,0 +1,528 @@
+<template>
+    <div class="slds-media__body">
+        <div class="slds-page-header__name">
+            <div class="slds-page-header__name-title">
+                <h1>
+                    <span class="slds-page-header__title slds-truncate" title="Expedite">Expedite</span>
+                </h1>
+                <text class="message">Note: While progressing through an Expedite, please DO NOT use the Browser Back button. Instead, use the Back/Next buttons on bottom of the page</text>
+
+            </div>
+        </div>
+    </div>
+    <br>
+    <lightning-progress-indicator
+        current-step={currentStep}
+        type="path"
+        variant="base"
+    >
+        <lightning-progress-step
+            label="1. Requestor Information"
+            value="1"
+        ></lightning-progress-step>
+        <lightning-progress-step
+            label="2. Order Selection"
+            value="2"
+        ></lightning-progress-step>
+        <lightning-progress-step
+            label="3. Review"
+            value="3"
+        ></lightning-progress-step>
+        <lightning-progress-step
+            label="4. Submitted"
+            value="4"
+        ></lightning-progress-step>
+    </lightning-progress-indicator> <br>
+    <lightning-messages> </lightning-messages>
+
+<!--STEP ONE-->
+<div class="stepOne">
+    
+    <div class="slds-box"> 
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title--divider">Requestor Information</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <lightning-record-edit-form object-api-name="Case"  >
+        
+                                <!--lightning-input-field required label="Account Name" field-name='AccountId' value={soldToAccount}  onchange={handleChangeAcc} class="sta"></lightning-input-field--> 
+                                <c-account-search-custom  required object-api-name="account" icon-name="standard:account"  
+                                default-acc-value={accName} filter-field-val ={contactID}  variant="label-hidden" onaccountselection={handleChangeAcc}  class="sta"></c-account-search-custom > 
+                                <!--  <lightning-input-field required label="Sold To Account" field-name='Sold_To_Account__c'  onchange={handleChange} class="stb"></lightning-input-field> -->  
+                               
+                            </lightning-record-edit-form>
+                                    <lightning-input
+                                        name="requestorName" 
+                                        type="text" 
+                                        placeholder="Name..." 
+                                        label="Requestor Name"
+                                        value={reqName}
+                                        required
+                                        onchange={handleNameChange}
+                                        class="rn validValue"></lightning-input>
+                                    <lightning-input
+                                        name="requestorEmail" 
+                                        type="email" 
+                                        placeholder="test@example.com" 
+                                        label="Requestor Email"
+                                        value={reqEmail}
+                                        minlength="5"
+                                         message-when-too-short="Your email address must be more 5 characters."
+                                         required
+                                        class="em validValue"></lightning-input>
+                                    <lightning-input 
+                                        type="tel" 
+                                        placeholder="(xxx) xxx-xxxx" 
+                                        label="Requestor Phone"   
+                                        pattern="[0-9()]{5} [0-9]{3}-[0-9]{4}"                                        
+                                        value={reqPhone}
+                                        onkeydown={handlePhoneChange}
+                                        required
+                                        class="rp validValue"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <br>
+            <div class="slds-col slds-size_8-of-8">
+                <h3 class="slds-section-title--divider">Documentation</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col slds-size_2-of-8">
+                            <lightning-file-upload
+                                label="Attach Files"
+                                class="fileupload"
+                                name="uploadFile"
+                                accept={acceptedFormats}  
+                                onuploadfinished={handleUploadFinished} multiple>
+                            </lightning-file-upload>
+                            <h4>Accepted Formats and Max file size: <lightning-helptext content={acceptedFormats}></lightning-helptext></h4>
+                        </div>
+                        <div class="slds-col slds-border_left slds-size_6-of-8">
+                                <div class="slds-p-left_medium">
+                                    <h2 class="slds-section-title--divider">Uploaded Files</h2>
+                                    <template if:true={files}>
+                                        <!-- <lightning-datatable data={files} columns={columns} key-field="Id">
+                                        </lightning-datatable> -->
+                                        <c-file-list files={files} onfiledelete={handleActionFinished}></c-file-list>
+                                    </template>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <div class="slds-align_absolute-center">
+            <lightning-button
+                class="slds-m-top_small"
+                label="Next"
+                disabled={stepOneButton}
+                onclick={handleValidation}
+                variant="brand" 
+            ></lightning-button>
+        </div>   
+    </div>  
+</div> 
+<!--STEP TWO-->
+<div class="stepTwo slds-hide">
+    <div class="slds-text-title_caps">Order Selection</div><br>
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Search Orders</h3>
+                            <div class="slds-box slds-theme_shade border">
+                    
+                                <div class="slds-grid">
+                                    <!--<div class="slds-col slds-size_2-of-4">
+
+                                        <lightning-record-edit-form object-api-name="Case"  >-->
+                                    
+                                            
+                                            <!--lightning-input-field field-name='Order_Name__c' onchange={handleChange} value={paramString}></lightning-input-field-->
+                                            <div class="slds-col slds-size_2-of-4">
+                                                <c-order-search-custom  required object-api-name="orderExp" icon-name="standard:form"  
+                                                filter-field-name ={soldToAccount} filter-field-val ={disAccount}  variant="label-hidden" onorderselection={handleChange}></c-order-search-custom > 
+                                           
+                                                <!--<c-test-order-lookup
+                                            label="Order Search"
+                                            required
+                                            place-holder="Search Orders..."
+                                            filter-field-name={soldToAccount}
+                                            filter-field-val ={disAccount}
+                                            onorderselection={handleChange}
+                                            onclearselection={clearResults}
+                                            
+                                            ></c-test-order-lookup>-->
+                                                <h5>Search by Current Order # or Customer PO#</h5>
+                                            </div>
+
+                                            <div class="slds-col slds-size_2-of-4">
+                                                <template if:true={showDistroField}>
+                                                    <c-distributor-search-custom  required object-api-name="account" icon-name="standard:account"  
+                                                         filter-field-name = "Z001" filter-field-val ={agentNumber}  variant="label-hidden" onrecordselection={confirmchange}></c-distributor-search-custom >                                  
+                                                 </template>
+                                            </div>
+                                                                        
+                                    
+                                        <!--</lightning-record-edit-form>
+                                    </div>-->
+                                </div>
+                            </div>
+                    </div>
+    
+                    <div class="slds-col slds-size_4-of-8">
+                        <h3 class="slds-section-title--divider">Add to Cart</h3>
+                            <div class="slds-box slds-theme_shade border">
+                                <div class="slds-grid">
+                                    <div class="slds-col">
+                                        <lightning-button-group>
+                                       
+                                            <lightning-button icon-name="utility:preview" label="View Cart" onclick={showCart}></lightning-button>
+                                           
+                                        </lightning-button-group> 
+                                    </div>   
+                                    <div class="slds-border_left slds-col">
+                                        <div class="items"><lightning-icon icon-name="utility:cart" alternative-text="Cart" size="x-medium" variant="brand"
+                                            title="x-small size"></lightning-icon>&nbsp; <text class="cartNumber">{cartCount}</text> &nbsp; Items in Cart </div>
+                                    </div>
+                                    <div class="slds-border_left slds-col">
+                                        <h4>Transaction ID: <br>{transactionID}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+        <br>    
+    
+        <div if:true={isOrderItemAvailable}>
+    
+            <div class="slds-col slds-size_8-of-8">
+                <h3 class="slds-section-title--divider">Order Details</h3>
+                    <div class="slds-box slds-theme_shade border">
+                        <div class="slds-grid">
+                            <div class="slds-col">
+                            <!-- <lightning-record-edit-form object-api-name="Order"  >-->
+                                <b>Order Number: </b>{newRow}<br>
+                                <!--<b>Order Req. Delivery Date: </b>{reqDeliveryDate}<br>-->
+                                <b>Order Ship From: </b>{shipDate}<br>
+                                <b>Order Expected Ship Date: </b>{expShipDate}<br>
+                            </div>                    
+                            <div class="slds-col">
+                                <!-- <lightning-record-edit-form object-api-name="Order"  >-->
+                                 <b>Customer Name: </b>{accountName}<br> 
+                                 <!--<b>Distributor Name: </b>{soldToName}<br>-->
+                                  <lightning-record-edit-form>
+                                    <b>Ship Complete: </b>{shipCompFlg} <br>
+                                  </lightning-record-edit-form>                      
+                            </div>                    
+                            <div class="slds-col"> 
+                                <lightning-textarea 
+                                    type="text"
+                                    placeholder="Comments..." 
+                                    label="Reason for Expedite" 
+                                    required                                    
+                                    class="pn validValue">
+                                </lightning-textarea> 
+                                <lightning-combobox 
+                                    name="Checkbox Group"
+                                    label="Ship Complete"
+                                    options={options}
+                                    value={value}     
+                                    required                                 
+                                    onchange={handleCheckChange}                                 
+                                    class="cb validValue">
+                                </lightning-combobox>  
+                                <template if:true={isYes}>
+                                    <lightning-input 
+                                        type="date"
+                                        placeholder="Date..."                                    
+                                        label="New Requested Delivery Date" 
+                                        required={makerequired}
+                                        class="on validVal">
+                                    </lightning-input>
+                                </template>                                  
+
+                            </div>                         
+                        </div>                   
+                    </div>
+            </div> <br>
+    
+            <div class="slds-col slds-size_8-of-8">
+                <h3 class="slds-section-title--divider">Order Product Selection Table</h3> 
+                <div class="slds-box slds-theme_shade border orderProducts">
+                    
+                    <template if:true={oItemList}>
+                        <lightning-datatable wrap-text-max-lines="2" data={oItemList} columns={columns} key-field="Id" onsave={handleUpdate} onrowselection={handleSelect}
+                         onrowaction={handleRowActions} suppress-bottom-bar="true" hide-checkbox-column>
+                        </lightning-datatable>
+                        
+                    </template>
+                    <template if:true={error}>
+                        {error}
+                    </template>
+        
+                </div>
+            </div>            
+        </div> 
+        <!-- Detail view modal -->
+        <template if:true={bShowModal1}>
+            <section role="dialog" tabindex="-1"
+                    aria-labelledby="modal-heading-01"
+                    aria-modal="true"
+                    aria-describedby="modal-content-id-1"
+                    class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- modal header -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal1}>
+                        <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                    </button>
+                    
+                    <h2 id="modal-heading-02" class="slds-text-heading_medium slds-hyphenate" if:false={isEditForm}>Record Detail</h2>
+                    <h2 id="modal-heading-03" class="slds-text-heading_medium slds-hyphenate" if:true={isEditForm}>Add to Expedite Request</h2>
+                    <p class="error">{errorMessage}</p>
+                </header>
+                <!-- modal body -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1" if:false={isEditForm}>
+                    <dl class="slds-list_horizontal slds-wrap">
+                        <dt class="slds-item_label slds-truncate" title="New_Requested_Delivery_Date__c">New_Requested_Delivery_Date__c</dt>
+                        <dd class="slds-item_detail slds-truncate">{record.New_Requested_Delivery_Date__c}</dd>
+                        <dt class="slds-item_label slds-truncate" title="Id">Id</dt>
+                        <dd class="slds-item_detail slds-truncate">{record.Id}</dd>
+                    </dl>
+                </div>
+                
+                <!-- showing record edit form -->
+                <div if:true={isEditForm} class="slds-theme_default">
+                    <template if:true={isLoading}>
+                        <lightning-spinner class="cartSpin" alternative-text="Loading" variant="brand"></lightning-spinner>
+                    </template>
+                    <lightning-record-edit-form layout-type="Full" record-id={currentRecordId} draft-values={draftValues} object-api-name="OrderItem" onsubmit={handleSubmit} onsuccess={handleSuccess}>
+                        <lightning-messages></lightning-messages>
+                        <div class="slds-box">
+                            <div class="slds-grid">
+                                <div class="slds-col slds-size_3-of-6">
+                                    <label class="slds-form-element__label" for="form-element-01">Catalog #</label>
+                                    <lightning-output-field variant="label-hidden" field-name="SKU_Description_Cat_Logic__c"></lightning-output-field>
+                                    <label class="slds-form-element__label" for="form-element-01">SKU</label>
+                                    <lightning-output-field variant="label-hidden" field-name="SKU__c"></lightning-output-field>
+                                    <lightning-output-field field-name="Order_Line_Number__c"></lightning-output-field>
+                                    <lightning-output-field field-name="Quantity" class="qty"></lightning-output-field>
+                                    <lightning-output-field field-name="UnitPrice"></lightning-output-field>
+                                </div>
+                                <div>
+                                    <lightning-output-field field-name="PO__c"></lightning-output-field>
+                                    <!--<lightning-output-field field-name="Requested_Delivery_Date__c"></lightning-output-field>-->
+                                    <lightning-output-field field-name="Expected_Shipment_Date__c"></lightning-output-field>
+                                    <lightning-output-field field-name="Shipment_Date__c"></lightning-output-field>
+                                    <!--<lightning-input-field field-name="Distributor_Name__c" value={disName} readonly=true></lightning-input-field>-->
+                                    <lightning-input-field field-name="New_Requested_Delivery_Date__c" required class="dq"></lightning-input-field>                                
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align:center;">
+                            <lightning-button class="slds-m-top_small"
+                                              variant="brand"
+                                              type="submit"
+                                              name="update"
+                                              label={cartLabel}></lightning-button>
+                        </div>
+                    </lightning-record-edit-form><br/>
+                    <div></div>
+                </div>
+
+                <!-- modal footer start-->
+                <footer class="slds-modal__footer" if:false={isEditForm}>
+                    <lightning-button variant="brand"
+                                      label="Close"
+                                      title="Close"
+                                      onclick={closeModal1}></lightning-button>
+                </footer>
+            </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+           
+        </template>
+
+         <!-- MODAL FOR SHOWING THE CART-->    
+    <!-- Detail view modal start -->
+    <template if:true={bShowModal}>
+        <section role="dialog" tabindex="-1"
+                aria-labelledby="modal-heading-01"
+                aria-modal="true"
+                aria-describedby="modal-content-id-1"
+                class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+            <!-- modal header start -->
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                    <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                </button>
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Cart Details</h2>
+                Transaction ID: {transactionID}
+            </header>
+            <!-- modal body start -->
+            <div class="slds-theme_default">
+                    
+                    <lightning-card title="Your Cart" >
+                        <div if:true={storedLines} >
+                        <div style="height: 180px;">
+                            <lightning-datatable 
+                                key-field="id"
+                                data={storedLines}
+                                hide-checkbox-column="true"
+                                columns={cartColumns}>                                
+                            </lightning-datatable>
+                        </div>
+                        </div>
+                        <div if:false={storedLines}>
+                            <div class="items">No Items In Your Cart</div>
+                        </div>
+                        <!-- <div class="slds-m-around_medium">
+                            <p class="slds-m-vertical_medium content">
+                                    Displaying {startingRecord} to {endingRecord} of {totalRecountCount} records.
+                                    Page {page} of {totalPage}. </p>
+                            <c-paginator onprevious={previousHandler} onnext={nextHandler}></c-paginator>
+                        </div> -->
+                    
+                    </lightning-card>
+            </div>
+                
+            <!-- modal footer start-->
+            <footer class="slds-modal__footer">
+                <lightning-button variant="brand"
+                label="Close"
+                title="Close"
+                onclick={closeModal}
+                ></lightning-button>
+            </footer>
+        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <!-- Detail view modal end -->
+
+    <div class="slds-align_absolute-center">
+        <lightning-button-group>
+            <lightning-button
+                class="slds-m-top_small"
+                label="Back"
+                onclick={goBackToStepOne}
+            ></lightning-button>
+            <lightning-button
+                class="slds-m-top_small"
+                label="Next"                
+                onclick={handleValid}
+                disabled={showNextButton}
+                variant="brand"
+            ></lightning-button>
+        </lightning-button-group>
+    </div>
+</div> 
+
+<!--End Of Step Two--> 
+<!--STEP THREE-->  
+<div class="stepThree slds-hide">
+    <template if:true={isSpinner}>
+        <lightning-spinner class="spins" alternative-text="Loading" variant="brand"></lightning-spinner>
+    </template>
+    <div class="slds-text-title_caps">Review</div> <br>       
+        <div class="slds-grid slds-gutters">
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title--divider">Requestor Information</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">                            
+                            <b>Requestor Name: </b>{reqName}<br>
+                            <b>Requestor Email: </b>{reqEmail}<br>
+                            <b>Requestor Phone: </b>{reqPhone}<br>
+                        </div>
+                    </div>
+                </div>   <br>                                    
+                <h3 class="slds-section-title--divider">Expedite Information</h3>
+                    <div class="slds-box slds-theme_shade border">
+                         <div class="slds-grid--vertical">
+                            <div class="slds-col">                            
+                                <b>Expedite Reason: </b>{expReason}<br>
+                                <b>New Requested Delivery Date: </b>{newShpNotBfrDt}<br>
+                                <b>Ship Complete: </b>{shpCmpltFlg} <br>
+                            </div>
+                        </div>
+                    </div>
+                <!--</div>-->
+            </div><br>
+            <div class="slds-col slds-size_4-of-8">
+                <h3 class="slds-section-title--divider">Order Details</h3>
+                <div class="slds-box slds-theme_shade border">
+                    <div class="slds-grid">
+                        <div class="slds-col">                            
+                            <b>Order Number: </b>{newRow}<br>
+                            <b>Customer Name: </b>{accountName}<br>
+                            <!--<b>Requested Delivery Date: </b>{reqDeliveryDate}<br>-->
+                            <b>Order Ship From: </b>{shipDate}<br>
+                            <b>Order Expected Ship Date: </b>{expShipDate}<br>
+                            <b>Ship Complete: </b>{shipCompFlg}<br>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </div><br><br>
+    <div class="slds-col slds-size_8-of-8">
+        <h3 class="slds-section-title--divider">Expedite Data Review</h3> 
+        <div class="slds-box slds-theme_shade border">
+            <template if:true={storedLines}>
+                <lightning-datatable data={storedLines} columns={cartColumns} key-field="Id" hide-checkbox-column>
+                </lightning-datatable>
+            </template>
+        </div>
+    </div>
+    <div class="slds-align_absolute-center">
+        <lightning-button-group>
+            <lightning-button
+                class="slds-m-top_small"
+                label="Back"
+                onclick={goBackToStepTwo}
+            ></lightning-button>
+            <lightning-button
+                class="slds-m-top_small"
+                label= {toggleSubmitLabel}
+                type="submit"
+                variant="brand"
+                onclick={handleSave}
+            ></lightning-button>
+        </lightning-button-group>
+    </div>
+</div>
+<!--END OF STEP THREE-->
+<!--STEP FOUR-->
+<div class="stepFour slds-hide">
+    <div class="slds-col slds-size_8-of-8">
+        <h3 class="slds-section-title--divider">Confirmation</h3>
+            <div class="slds-box slds-theme_shade border confirmation">
+                <h2><b>THANK YOU FOR YOUR SUBMISSION! </b><br/><br/>
+
+                    CASE NUMBER FOR YOUR REQUEST:  {caseNumberNew} </h2><br>
+
+                    <div class="slds-align_absolute-center">
+                        <div style="text-align:center;">
+                            <lightning-button variant="brand"
+                                    label="Home"
+                                    title="Home"
+                                    onclick={goHome}>
+                                </lightning-button>
+                            <lightning-button class="slds-m-top_small slds-p-left_x-small"
+                                    variant="brand-outline"
+                                    onclick={goToCase}
+                                    label="Go To Case"
+                                    title="Go To Case">
+                                </lightning-button>
+                        
+                        </div>
+                    </div>                                            
+            </div> 
+    </div>           
+</div>
+<!--END OF STEP FOUR-->
+</template>

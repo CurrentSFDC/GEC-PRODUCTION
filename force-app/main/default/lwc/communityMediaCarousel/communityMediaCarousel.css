@@ -1,0 +1,88 @@
+* {
+    box-sizing: border-box;
+}
+
+.video-box{
+    height: 500px;
+    width: 750px;
+}
+
+.container {
+    background-color: white;
+    width: 100%;
+}
+
+.carousel-container {
+    display: flex;
+    height: 120px;
+    width: 100%;
+    background-color: white;
+    overflow: hidden;
+}
+
+.carousel-container .carousel-content {
+    width: calc(100% - 60px);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.carousel-container .carousel-navigator {
+    background-color: #161616;
+    height: 100%;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.media-container {
+    height: 500px;
+    width: 750px;
+    margin-bottom: 1rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.media-container video, .media-container img {
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+.media-thumbnail-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    text-align: center;
+    height: 120px;
+    width: 25%;
+    transition: all 400ms;
+    padding: 2px 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.media-thumbnail-container:hover {
+    cursor: pointer;
+}
+
+.media-thumbnail-container video,
+.media-thumbnail-container img {
+    height: 114px;
+    width: 171px;
+}
+
+
+@media screen and (max-width: 700px) {
+    .media-container {
+        height: 240px;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .media-thumbnail-container {
+        width: 100%;
+    }
+}

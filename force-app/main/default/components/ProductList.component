@@ -1,0 +1,1520 @@
+<apex:component >
+    <apex:includeLightning ></apex:includeLightning>
+
+    <script id="EffAcctSel-Head-View-Desktop" type="text/template">
+        <ul class="list-inline navbar-nav cc_navbar-nav">
+            {{#if this.ro}}
+            <li class="effAccount cc_eff_account">
+                <a href="#" data-account-id="{{this.workingEffAccount.sfid}}" onclick="openModal(event);">
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city
+                    workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                </a>
+            </li>
+            {{else}}
+            <li class="effAccount cc_eff_account" data-toggle="modal" data-target="#effAccounts">
+                <a href="#" data-account-id="{{this.workingEffAccount.sfid}}" onclick="openModal(event);">
+                    {{#if this.workingEffAccount }}
+                    {{pageLabelMap 'SELECTED_ACCOUNT' workingEffAccount.name workingEffAccount.accountNumber workingEffAccount.shippingAddress.address1 workingEffAccount.shippingAddress.city
+                    workingEffAccount.shippingAddress.state workingEffAccount.shippingAddress.countryCode}}
+                    {{else}}
+                    {{pageLabelMap 'SELECT_ACCOUNT' }}
+                    {{/if}}
+                    <span class="launchSel cc_launch_sel" aria-hidden="true"></span>
+                </a>
+            </li>
+            {{/if}}
+        </ul>
+        <div id="account-selector-lwc-container"></div>
+        <div style="display: none;">
+            <div class="modal fade cc_modal cc_effective_accounts_modal" id="effAccounts" tabindex="-1" role="dialog" aria-labelledby="effAccountsLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content cc_modal_content">
+                        <div class="modal-header cc_modal_header">
+                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                            <h4 class="modal-title cc_modal_title" id="effAccountsLabel">{{pageLabelMap 'EFFECTIVE_ACCOUNT_TITLE'}}</h4>
+                        </div>
+                        <div class="modal-body cc_modal_body">
+                            <input type="text" id="accountSearch" onkeyup="searchAccounts()" placeholder="Search Account" title="Type in an account">
+                            <div class="table-responsive">
+                                <table id="accountsTable" class="table table-hover cc_table">
+                                    <thead class="cc_thead">
+                                    <tr class="cc_tr">
+                                        <th class="cc_th_name">{{{pageLabelMap 'Name'}}}</th>
+                                        <th class="cc_th_name">{{{pageLabelMap 'Customer_Segmentation'}}}</th>
+                                        <th class="cc_th_account_number">{{{pageLabelMap 'ACCOUNT_NUMBER'}}}</th>
+                                        <th class="cc_th_address">{{{pageLabelMap 'Address'}}}</th>
+                                        <th class="cc_th_picked"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="cc_tbody">
+                                    {{#each this.effectiveList}}
+                                    <tr class="cc_tr_values">
+                                        <td class="cc_td_name">{{{name}}}</td>
+                                        <td class="cc_td_name">{{{customerSegmentation}}}</td>
+                                        <td class="cc_td_account_number">{{{accountNumber}}}</td>
+                                        <td class="cc_td_address">{{{pageLabelMap 'ADDRESS_FORMAT' shippingAddress.address1 shippingAddress.city shippingAddress.state shippingAddress.postalCode
+                                            shippingAddress.countryCode}}}
+                                        </td>
+                                        <td><a href="#"><i class="pickSel pickAccount cc_pick_account fa fa-chevron-right" data-id="{{sfid}}" aria-hidden="true"></i><span class="sr-only">{{pageLabelMap 'EffectiveAccount_SelectAccount'}}</span></a>
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="Product-List-Header-Override" type="text/template">
+        <div class="cc_product_list_header col-md-12">
+            <div class="messagingSection-Error" style="display: none"></div>
+            <div class="messagingSection-Warning" style="display: none"></div>
+            <div class="messagingSection-Info" style="display: none"></div>
+            <div class="panel panel-default cc_panel">
+                <div class="panel-body cc_body">
+                    {{#if this.isCategory}}
+                    <div class="cc_category_details">
+                        <div class="cc_category_row row">
+                            {{#if this.category.categoryMediasS}}
+                            <div class="hidden-xs hidden-sm col-md-3 cc_category_media">
+                                <img src="{{displayEProductMedia this.category.categoryMediasS.[0]}}" class="img-responsive img-thumbnail cc_category_img pull-left"/>
+                            </div>
+                            {{/if}}
+                            <div class="{{#if this.category.categoryMediasS}}col-md-9{{else}}col-md-12{{/if}}">
+                                <h1 class="cc_category_name">{{this.category.sfdcName}}</h1>
+                                {{#ifGreater this.renderedCount 0}}
+                                {{#ifGreater this.prodCount 0}}
+                                <small class="cc_product_results_tagline pull-right">
+                                    {{pageLabelMap 'ProductList_ResultsTagline' this.renderedCount this.prodCount}}
+                                </small>
+                                {{/ifGreater}}
+                                {{/ifGreater}}
+                                <p class="cc_category_desc">
+                                    {{unescape this.category.shortDesc}}
+                                </p>
+                                <div class="cc_subcategories row">
+                                    {{#each this.subcategories}}
+                                    {{#if this.categoryMediasS}}
+                                    <div class="cc_subcategory_media hidden-xs hidden-sm col-md-2">
+                                        {{categoryLink this 'cc_subcategory_img' image=(displayImage this 'img-responsive center-block img-thumbnail pull-left' src=(displayEProductMedia
+                                        this.categoryMediasS.[0]) alt=this.sfdcName)}}
+                                    </div>
+                                    {{/if}}
+                                    <!--<div class="{{#if this.categoryMediasS}}col-md-10{{else}}col-md-12{{/if}} cc_subcategory_details">
+                                        {{categoryLink this 'cc_subcategory_link' text=this.sfdcName}}
+                                        <p class="cc_subcategory_desc">
+                                            {{unescape this.shortDesc}}
+                                        </p>
+                                    </div>-->
+                                    <div class="clearfix"></div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{else}}
+                    <!--h4 class="cc_search_title">{{pageLabelMap 'ProductList_SearchResults'}} {{#ifGreater prodCount 0}}<small class="cc_product_results_tagline pull-right">{{pageLabelMap
+                            'ProductList_ResultsTaglineSearch' this.renderedCount this.prodCount this.searchString}}</small>{{/ifGreater}}</h4-->
+					<!-- Added Connect Search page in B2B Home-->
+                    {{#if this.isSearch}}
+                    {{#ifEquals this.prodCount 0}}
+
+
+                    {{/ifEquals}}
+                    {{else}}
+                        <!-- Product Search Banner -->
+                        {{#ifEquals this.multiProductEntryView false}}
+                            <div class="row">
+                                {{#if this.multiProductPricePermission}}
+                                    <div class="col-md-6 col-sm-12 col-xs-12 search-section">
+                                        <img class="goToMultiSearch" src="{!$Resource.ConnectMultiSearch}" alt="Description of image here"/>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 col-xs-12 search-section">
+                                        <img id="theImage12" src="{!$Resource.ConnectSearch2}" alt="Description of image here"/>
+                                    </div>
+                                {{else}}
+                                    <div class="col-md-12 search-section">
+                                        <img id="theImage12" src="{!$Resource.ConnectSearch}" alt="Description of image here"/>
+                                    </div>
+                                {{/if}}
+                            </div>
+                            <!-- End Product Search Banner -->
+                        {{else}}
+                        <!-- Multi Serach Product View -->
+                            <div class="row multi-search-row">
+                                <div class="col-md-12 multi-search-validate">
+                                    <h2>Price & Availability Quick Check</h2>
+                                    <span>Enter product code or catalog logic below and click on validate</span>
+                                    <div class="col-md-12 validate-product-inputs">
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center mutli-pr" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <span>
+                                                <input type="text" class="form-control text-center" placeholder="SKU/Catalog No." name="product-skus[]" />
+                                            <span>
+                                        </div>
+                                        <div class="form-group">
+                                            <button class="btn btn-default btn-sm clear-product-fields" data-type="main-clear">Clear</button>
+                                            <button class="btn btn-default btn-sm validate-prdcts" data-type="main-validate" disabled>Validate</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 multi-add-to-cart-prdcts">
+                                        <!-- Table Load Dynamicaly By ProductListBIE -->
+                                    </div>
+                                </div>
+                            </div>
+                        {{/ifEquals}}
+                        <!-- Multi Serach Product View End -->
+                    {{/if}}
+                    <!-- Added Connect Search page in B2B Home-->
+
+                    <h6 class="cc_product_results_tagline">{{#ifGreater prodCount 0}}
+                        <small class="cc_product_results_tagline pull-right">{{pageLabelMap
+                            'ProductList_ResultsTaglineSearch' this.renderedCount this.prodCount this.searchString}}</small>{{/ifGreater}}</h6>
+                    <hr/>
+                    <!--span class="cc_search_message">{{pageLabelMap 'ProductList_SearchResultsBody' this.searchString}} </span-->
+                    {{/if}}
+                    {{#if this.isSearch}}
+                    {{#ifEquals this.prodCount 0}}
+					<div class="row">
+                        <div class="col-md-12 search-section">
+                            <p><b> Sorry, the product you searched was not found within our Product Catalog.</b></p>
+                                <p><b>If you did not find the product in the Product Search, please use the Extended Catalog Search.</b></p>
+                        </div>
+                    </div>
+                    {{/ifEquals}}
+                    {{/if}}
+                </div>
+            </div>
+            {{#ifGreater this.prodCount 0}}
+            <div class="panel panel-default cc_panel cc_controls_panel">
+                <div class="panel-body cc_body">
+                    <div class="row cc_body_controls_panel_row">
+                        <div class="cc_page_controls col-xs-12 col-md-8">
+                            <ul class="layout list-inline cc_controls_list">
+                                <li class="form-group">
+                                    <select class="form-control cc_page_size_control">
+                                        {{#each itemsPerOptions}}
+                                        <option value="{{safeQuote this}}" {{#ifEquals ..
+                                        /pageSize this}} selected {{/ifEquals}}>{{pageLabelMap 'ProductList_PageSize' this}}</option>
+                                        {{/each}}
+                                    </select>
+                                </li>
+                                {{#ifGreater this.layoutOptions.length 1}}
+                                <li class="hidden-xs hidden-sm cc_layout_control cc_layout_option_grid">
+                                    <button data-id="grid" class="btn btn-default btn-sm cc_layout_option {{#ifEquals layout 'grid'}}active disabled{{/ifEquals}}">
+                                        <span class="fa fa-th fa-lg" aria-hidden="true"></span>
+                                    </button>
+                                </li>
+                                <li class="hidden-xs hidden-sm cc_layout_control cc_layout_option_list">
+                                    <button data-id="list" class="btn btn-default btn-sm cc_layout_option {{#ifEquals layout 'list'}}active disabled{{/ifEquals}}">
+                                        <span class="fa fa-th-list fa-lg" aria-hidden="true"></span>
+                                    </button>
+                                </li>
+                                <li class="hidden-xs hidden-sm cc_layout_control cc_layout_option_spreadsheet">
+                                    <button id="spreadsheet-view-button" data-id="spreadsheet"
+                                            class="btn btn-default btn-sm cc_layout_option {{#ifEquals layout 'spreadsheet'}}active disabled{{/ifEquals}}">
+                                        <span class="fa fa-table fa-lg" aria-hidden="true"></span>
+                                    </button>
+                                </li>
+                                {{/ifGreater}}
+                            </ul>
+                        </div>
+                        <div class="cc_sort_controls col-xs-12 col-md-8">
+                            <div class="cc_product_sort pull-right">
+                                <div class="btn-group btn-group-justified cc_sort_options">
+                                    {{#if prodCategoryIds}}
+                                    {{#ifDisplay 'PL.SeqSort'}}
+                                    <div class="btn-group cc_sort_item">
+                                        <button type="button" class="btn btn-default btn-sm cc_sort_option cc_sort_sequence {{#ifEquals sortBy 'categorySequence'}} active {{/ifEquals}}"
+                                                data-id="categorySequence" data-order="asc">{{pageLabelMap 'ProductList_SortSequence'}}
+                                        </button>
+                                    </div>
+                                    {{/ifDisplay}}
+                                    {{else}}
+                                    {{#ifDisplay 'PL.RelSort'}}
+                                    <div class="btn-group cc_sort_item">
+                                        <button type="button" class="btn btn-default btn-sm cc_sort_option cc_sort_relevance {{#ifEquals sortBy 'searchRank'}} active {{/ifEquals}}"
+                                                data-id="searchRank" data-order="desc">{{pageLabelMap 'ProductList_SortRelevance'}}
+                                        </button>
+                                    </div>
+                                    {{/ifDisplay}}
+                                    {{/if}}
+                                    {{#ifDisplay 'PL.NameSort'}}
+                                    <div class="btn-group dropdown cc_sort_name_container">
+                                        <button class="btn btn-default btn-sm dropdown-toggle cc_sort_name_toggle {{#ifEquals sortBy 'sfdcName'}} active {{/ifEquals}}" type="button"
+                                                id="cc_sort_name_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{pageLabelMap 'ProductList_SortName'}}
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="cc_sort_name_dropdown">
+                                            <li class="cc_sort_name_item {{#ifEquals sortBy 'sfdcName'}} {{#ifEquals sortOrder 'asc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button class="btn btn-default cc_sort_option cc_sort_name_asc standard-order-by" data-id="sfdcName" data-order="asc">{{pageLabelMap 'ProductList_SortNameAsc'}}</button>
+                                            </li>
+                                            <li class="cc_sort_name_item {{#ifEquals sortBy 'sfdcName'}} {{#ifEquals sortOrder 'desc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button class="btn btn-default cc_sort_option cc_sort_name_desc standard-order-by" data-id="sfdcName" data-order="desc">{{pageLabelMap 'ProductList_SortNameDesc'}}
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {{/ifDisplay}}
+                                    {{#ifDisplay 'PL.NewestSort'}}
+                                    <div class="btn-group cc_sort_item">
+                                        <button type="button" class="btn btn-default btn-sm cc_sort_option cc_sort_newest {{#ifEquals sortBy 'startDate'}} active {{/ifEquals}}" data-id="startDate"
+                                                data-order="desc">{{pageLabelMap 'ProductList_SortNewest'}}
+                                        </button>
+                                    </div>
+                                    {{/ifDisplay}}
+                                    <div class="btn-group cc_sort_item ">
+                                        <button class="btn btn-default btn-sm dropdown-toggle cc_sort_24/48hr_toggle {{#ifEquals sortBy 'SKU2448hr'}} active {{/ifEquals}}" type="button"
+                                                id="cc_sort_24/48hr_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">{{pageLabelMap 'ProductList_Sort24/48hr'}}<span
+                                                    class="caret"></span></button>
+                                        <ul class="dropdown-menu pull-right" aria-labelledby="cc_sort_24/48hr_dropdown">
+                                            <li class="cc_sort_24/48hr {{#ifEquals sortBy 'SKU2448hr'}} {{#ifEquals sortOrder 'asc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button type="button" class="btn btn-default btn-sm custom-order-by" data-id="SKU_24_48hr__c" data-order="asc">{{pageLabelMap
+                                                    'ProductList_Sort24/48hrAsc'}}
+                                                </button>
+                                            </li>
+                                            <li class="cc_sort_24/48hr {{#ifEquals sortBy 'SKU2448hr'}} {{#ifEquals sortOrder 'desc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button type="button" class="btn btn-default btn-sm custom-order-by" data-id="SKU_24_48hr__c" data-order="desc">{{pageLabelMap
+                                                    'ProductList_Sort24/48hrDesc'}}
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="btn-group cc_sort_item ">
+                                        <button class="btn btn-default btn-sm dropdown-toggle cc_sort_inventory_toggle {{#ifEquals sortBy 'totalStandardInventory'}} active {{/ifEquals}}" type="button"
+                                                id="cc_sort_inventory_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">{{pageLabelMap 'ProductList_SortInventory'}}<span
+                                                    class="caret"></span></button>
+                                        <ul class="dropdown-menu pull-right" aria-labelledby="cc_sort_inventory_dropdown">
+                                            <li class="cc_sort_inventory {{#ifEquals sortBy 'totalStandardInventory'}} {{#ifEquals sortOrder 'asc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button type="button" class="btn btn-default btn-sm custom-order-by" data-id="Total_Standard_Inventory__c" data-order="asc">{{pageLabelMap
+                                                    'ProductList_SortInventoryAsc'}}
+                                                </button>
+                                            </li>
+                                            <li class="cc_sort_inventory {{#ifEquals sortBy 'totalStandardInventory'}} {{#ifEquals sortOrder 'desc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button type="button" class="btn btn-default btn-sm custom-order-by" data-id="Total_Standard_Inventory__c" data-order="desc">{{pageLabelMap
+                                                    'ProductList_SortInventoryDesc'}}
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    
+                                    {{#ifDisplay 'PL.PriceSort'}}
+                                    <div class="btn-group dropdown cc_sort_price_container">
+                                        <button class="btn btn-default btn-sm dropdown-toggle cc_sort_price_toggle {{#ifEquals sortBy 'price'}} active {{/ifEquals}}" type="button"
+                                                id="cc_sort_price_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            {{pageLabelMap 'ProductList_SortPrice'}}
+                                        </button>
+                                        <ul class="dropdown-menu pull-right" aria-labelledby="cc_sort_price_dropdown">
+                                            <li class="cc_sort_price_item {{#ifEquals sortBy 'price'}} {{#ifEquals sortOrder 'asc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button class="btn btn-default cc_sort_option cc_sort_price_asc standard-order-by" data-id="price" data-order="asc">{{pageLabelMap 'ProductList_SortPriceAsc'}}</button>
+                                            </li>
+                                            <li class="cc_sort_price_item {{#ifEquals sortBy 'price'}} {{#ifEquals sortOrder 'desc'}}active{{/ifEquals}}{{/ifEquals}}">
+                                                <button class="btn btn-default cc_sort_option cc_sort_price_desc standard-order-by" data-id="price" data-order="desc">{{pageLabelMap 'ProductList_SortPriceDesc'}}
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {{/ifDisplay}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/ifGreater}}
+        {{#if this.prodFilters}}
+        <div class="cc_filter_row row">
+            <div class="col-md-12 cc_filter_breadcrumbs">
+                <div class="panel panel-default cc_panel cc_filter_breadcrumb_panel">
+                    <div class="panel-body cc_body">
+                        <div class="row cc_row">
+                            <div class="col-md-2 cc_remove_filters_control">
+                                <button class="btn btn-default cc_remove_filters">{{pageLabelMap 'ProductList_ClearFilters'}}</button>
+                            </div>
+                            <div class="col-md-10 cc_filter_breadcrumb_container">
+                                <ul class="cc_filter_breadcrumb_list list-inline">
+                                    {{#each this.prodFilters}}
+                                    {{#ifEquals this.filterType 'Slider'}}
+                                    <li class="cc_filter_breadcrumb label label-default">
+                                        {{this.name}}: {{this.filterMin}} - {{this.filterMax}}&#160;&#160;
+                                        <a href="javascript:void(0);" class="remove cc_remove_filter" data-specId="{{this.sfid}}">
+                                            <i class="fa fa-times fa-inverse fa-pull-right" aria-hidden="true"></i>
+                                        </a>
+                                    </li>&#160;
+                                    {{/ifEquals}}
+                                    {{#ifEquals this.filterType 'Checkbox'}}
+                                    {{#each this.specValues}}
+                                    <li class="cc_filter_breadcrumb label label-default">
+                                        {{../name}}: {{value}}&#160;&#160;
+                                        <a href="javascript:void(0);" class="remove cc_remove_filter" data-specId="{{../sfid}}" data-specValue="{{value}}">
+                                            <i class="fa fa-times fa-inverse fa-pull-right" aria-hidden="true"></i>
+                                        </a>
+                                    </li>&#160;
+                                    {{/each}}
+                                    {{/ifEquals}}
+                                    {{/each}}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+        {{#if this.noResults}}
+        {{>noResultsDisplay}}
+        {{/if}}
+    </script>
+
+    <script id="Type-Mark-Modal" type="text/template">
+        <div id="typeMark_modal_{{this.sfid}}" class="modal fade cc_modal cc_cart_comments_modal in" tabindex="-1" role="dialog" aria-labelledby="TypeMarks"
+             style="display: none; z-index: 2000; background: rgba(0, 0, 0, 0.5);">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content cc_modal_content" style="margin-top: 100px">
+                    <div class="modal-header cc_modal_header">
+                        <button id="typeMarkClose_{{this.sfid}}" type="button" class="close cc_close" data-dismiss="modal" aria-label="Close" style="cursor: pointer"
+                                onclick="closeTypeMarkModal(this.id)"><span aria-hidden="true">x</span></button>
+                        <h4 class="modal-title cc_modal_title" id="RequestedDeliveryDate">
+                            TypeMarks
+                        </h4>
+                    </div>
+                    <div class="modal-body cc_modal_body">
+                        <form id="typeMarksForm_{{this.sfid}}" class="cc_comments_form">
+                            <textarea id="typeMarkTextarea_{{this.sfid}}" placeholder="TypeMark" name="typeMarks" class="commentField form-control cc_comment_field typemark" maxlength="8"
+                                      value="{{this.sfid}}" onkeyup="setRemainingChars(this.sfid)" autofocus></textarea>
+                            <!--<input type="text" name="typeMarks" class="cc_value" data-id="{{this.sfid}}" value="{{this.typeMarks}}">-->
+                        </form>
+                    </div>
+                    <div class="modal-footer cc_modal_footer">
+                        <p>Remaining characters: <span id="characters_left_span">8</span></p>
+                        <input id="typeMarkSave_{{this.sfid}}" type="button" class="saveTypeMarks btn btn-default btn-sm cc_save_comment" data-id="{{sfid}}" value="Save"
+                               onclick="saveButtonTypeMark(this.id)"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="Product-Item-Row-Override" type="text/template">
+        {{>typeMarkModal}}
+        <div class="cc_product_item cc_row_item">
+            <div class="panel panel-default cc_panel">
+                <div class="panel-body cc_body">
+                    <div class="messagingSection-Warning-{{this.sfid}}" style="display: none"></div>
+                    <div class="messagingSection-Info-{{this.sfid}}" style="display: none"></div>
+                    <div class="messagingSection-Error-{{this.sfid}}" style="display: none"></div>
+                    <div class="cc_product_item_row row">
+                        <div class="col-sm-12 col-md-2 cc_product_image">
+                            {{#if EProductMediasS.[0]}}
+                            {{productLink this 'cc_product_name_img' image=(displayImage this 'img-responsive center-block img-thumbnail' src=(displayEProductMedia this.EProductMediasS.[0])
+                            alt=this.EProductMediasS.[0].altMessage dataId=this.SKU)}}
+                            {{/if}}
+                        </div>
+                        <div class="cc_row_product_info col-sm-12 col-md-10">
+                            <p class="cc_product_link">
+                                {{#if this.alternateName}}
+                                {{productLink this 'cc_product_name' text=this.alternateName}}
+                                {{else}}
+                                {{productLink this 'cc_product_name' text=this.sfdcName}}
+                                {{/if}}
+                            </p>
+                            {{#ifDisplay 'PL.DsplSku'}}
+                            <p class="cc_product_sku">
+                                <span class="cc_label">{{pageLabelMap 'ProductList_SKU'}}</span>
+                                <span class="cc_product_sku">{{this.SKU}}</span>
+                            </p>
+                            {{/ifDisplay}}
+                            {{#ifDisplay 'PL.DsplShortDesc'}}
+                            <!-- <p class="description cc_desc">{{unescape shortDesc}}</p> -->
+                            {{/ifDisplay}}
+                            <p class="description cc_desc">{{this.productFamily}}</p>
+                            {{#ifDisplay 'PL.DsplAddtInfo'}}
+                            <p>
+                                <a class="included_items cc_included_items" href="#additional_info{{this.sfid}}" id="additionalInfoLink" data-toggle="modal">{{pageLabelMap
+                                    'ProductList_AdditionalInfo'}}
+                                </a>
+                            </p>
+                            <div id="additional_info{{this.sfid}}" class="modal fade cc_modal" tabindex="-1" role="dialog" aria-labelledby="ProductListItemLabel" aria-hidden="true">
+                                <div class="modal-dialog cc_modal-dialog" role="document">
+                                    <div class="modal-content cc_modal-content">
+                                        <div class="modal-header cc_modal-header">
+                                            <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span>
+                                            </button>
+                                            <h3 class="cc_prod_list_item_label" id="ProductListItemLabel">
+                                                {{#if this.alternateName}}
+                                                {{this.alternateName}}
+                                                {{else}}
+                                                {{this.sfdcName}}
+                                                {{/if}}
+                                                {{pageLabelMap 'ProductList_MiscDetails'}}
+                                            </h3>
+                                        </div>
+                                        <div class="modal-body cc_body">
+                                            {{#if this.miscDetails}}
+                                            <span class="cc_misc_details">{{unescape this.miscDetails}}</span>
+                                            {{/if}}
+                                            {{#ifDisplay 'PL.DsplAddtlSku'}}
+                                            <span class="cc_sku">{{pageLabelMap 'ProductList_SKU'}}:</span>&#160;{{this.SKU}}<br/><br/>
+                                            {{/ifDisplay}}
+                                            {{#ifDisplay 'PL.DsplAddtlShortDesc'}}
+                                            <p class="cc_desc">{{unescape this.shortDesc}}</p>
+                                            {{/ifDisplay}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{/ifDisplay}}
+                            <p class="cc_product_uom">
+                                {{#if this.pricingUOMS}}
+                                <select class="uom-select">
+                                    {{#each this.pricingUOMS}}
+                                    {{{uomOptionElement ../unitOfMeasure this.UOM}}}
+                                    {{/each}}
+                                </select>
+                                {{/if}}
+                            </p>
+                            <p class="quick_stock">
+                                <span class="cc_label">{{pageLabelMap 'ProductList_24/48hour'}} </span>
+                                <span>
+                                    {{numberFormat this.inventoryAvailable}}
+                                </span>
+                                Pieces
+                            </p>
+                            <p class="total_inventory">
+                                <span class="cc_label">{{pageLabelMap 'ProductList_TotalInventory'}} </span>
+                                <span>
+                                    <a class="showinventoryModalButton" data-id="{{this.SKU}}~{{this.sfid}}" data-name="{{this.sfdcName}}" data-item-name="{{this.ECommItemName}}" href="#{{this.SKU}}~{{this.sfid}}" id="inventoryModal">
+                                        {{numberFormat this.totalStandardInventory}}
+                                    </a>
+                                </span>
+                                Pieces
+                            </p>
+                            <p class="minimum_order_quantity">
+                                <span class="cc_label">Minimum order quantity:</span>
+                                <span>
+                                    {{#if this.salesOrgProduct}}
+                                        {{this.salesOrgProduct.Minimum_Order_Quantity_in_PC__c}}
+                                    {{/if}}
+                                </span>
+                                Pieces
+                            </p>
+                            <p class="cc_product_pieces_per_unit">
+                                <span class="cc_label">Pieces per Unit:</span>
+                                <span class="picesPerUnit_{{this.sfid}}">{{this.piecesPerUnit}}</span>
+                            </p>
+                            <div class="price product-price clearfix mb10">
+                                <div class="price">
+                                    {{#if this.isUserAgent}}
+                                            <span class="cc_label">List Price:</span>
+                                        {{else}}
+                                            <span class="cc_label">Your Price:</span>         
+                                        {{/if}}
+                                    <span>
+                                        {{#if this.isUserAgent}}  
+                                            {{#ifEquals this.SAP.bookPrice null}}
+                                                    <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                            {{/ifEquals}}
+                                            {{#ifNotEquals this.SAP.bookPrice null}}
+                                                    
+                                                    {{price this.SAP.bookPrice}}                                           
+                                                    
+                                            {{/ifNotEquals}}
+                                        {{else}}
+                                            {{#ifEquals this.price null}}
+                                                    <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                            {{/ifEquals}}
+                                            {{#ifNotEquals this.price null}}
+                                        
+                                                    {{price this.price}}                                           
+                                        
+                                            {{/ifNotEquals}}
+                                        {{/if}}
+                                    </span>
+                                </div>
+                                <div class="price yourPrice">
+                                    <span class="cc_label">Your Price:</span>
+                                    <span id="yourPrice_{{this.sfid}}">
+                                        {{#ifEquals this.SAP.adpPrice null}}
+                                            <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                        {{/ifEquals}}
+                                        {{#ifNotEquals this.SAP.adpPrice null}}
+                                            {{price this.SAP.adpPrice}}
+                                        {{/ifNotEquals}}
+                                    </span>
+                                </div>
+                                <div class="price skuADPDiv">
+                                    <span class="cc_label">{{pageLabelMap 'ProductList_ADP'}}</span>
+                                    <span>
+                                        {{#ifEquals this.SAP.yourPrice null}}
+                                            <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                        {{/ifEquals}}
+                                        {{#ifNotEquals this.SAP.yourPrice null}}
+                                            {{price this.SAP.yourPrice}}
+                                        {{/ifNotEquals}}
+                                    </span>
+                                </div>
+                            </div>
+                            <a title="Calculate Commission"
+                               class="showcommissionWidgetModalButton"
+                               data-id="{{this.SKU}}~{{this.sfid}}~{{this.sfdcName}}~{{this.unitOfMeasure}}~{{this.piecesPerUnit}}~{{this.sfdcCurrencyISOCode}}"
+                               id="commissionWidgetModal"
+                                style="display: none;">
+                                <i class="fa fa-calculator" style="font-size:18px"></i>
+                            </a>
+                            <div class="add_type_mark_container">
+                                <button id="addTypeMark_{{this.sfid}}" class="typemark-button" onclick="addTypeMark(this.id)">
+                                    ADD TYPE MARK
+
+                                </button>
+
+                            </div>
+                            {{#ifDisplay 'PL.DsplAddCart'}}
+                            {{#unless this.showNewSubscriptionSelection}}
+                            {{#if this.canAddtoCart}}
+                            {{> productQuantityControls}}
+                            <p class="action cc_action row">
+                            <div class="cc_add_to col-xs-12 col-md-6 form-group">
+                                    <button class="btn btn-default btn-block btn-sm cc_add_to_btn cc_add_to_btn_{{this.sfid}}" role="button" {{#if this.isUserAgent}} {{#ifEquals this.SAP.adpPrice null}}disabled {{/ifEquals}}{{/if}}>{{pageLabelMap 'ProductList_AddToCart'}}</button>
+                            </div>
+                            </p>
+                            {{/if}}
+                            {{/unless}}
+                            {{/ifDisplay}}
+                            <p class="cc_product_row_actions hidden-xs row">
+                            <div class="col-xs-12 col-md-6 cc_compare cc_add_to form-group">
+                                {{#ifDisplay 'PCP.Enabled'}}
+                                {{#ifEquals this.productType 'Product'}}
+                                <button type="button"
+                                        class="btn btn-default btn-sm btn-block add_to_compare_desktop_button cc_addto_compare {{#if inCompareTray}}active{{else}}{{#if compareTrayFull}}disabled{{/if}}{{/if}}">
+                                    {{#if inCompareTray}}
+                                    {{pageLabelMap 'ProductCompare_RemoveFromCompare'}}
+                                    {{else}}
+                                    {{pageLabelMap 'ProductCompare_AddToCompare'}}
+                                    {{/if}}
+                                </button>
+                                </p>
+                                {{/ifEquals}}
+                                {{/ifDisplay}}
+                                {{#ifNotEquals this.productType 'Aggregated'}}
+                                {{#unless this.showNewSubscriptionSelection}}
+                                <div class="cc_wishlist">
+                                    <div class="" data-sku="{{this.SKU}}">
+                                        <div class="wishButtons"></div>
+                                    </div>
+                                </div>
+                                {{/unless}}
+                                {{/ifNotEquals}}
+                            </div>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="Product-Item-Grid-Override" type="text/template">
+        {{>typeMarkModal}}
+        <div class="cc_product_item cc_grid_item">
+            <div class="thumbnail">
+                <div class="cc_grid_image_container col-md-12">
+                    {{#if EProductMediasS.[0]}}
+                    {{productLink this 'cc_product_name_img' image=(displayImage this 'img-responsive center-block' src=(displayEProductMedia this.EProductMediasS.[0]) alt=this.EProductMediasS.[0].altMessage dataId=this.SKU)}}
+                    {{/if}}
+                </div>
+                <div class="cc_grid_product_info caption">
+                    <h5 class="cc_product_link">
+                        {{#if this.alternateName}}
+                        {{productLink this 'cc_product_name' text=this.alternateName}}
+                        {{else}}
+                        {{productLink this 'cc_product_name' text=this.sfdcName}}
+                        {{/if}}
+                    </h5>
+                    {{#ifDisplay 'PL.DsplSku'}}
+                    <p class="cc_product_sku">
+                        <span class="cc_label">{{pageLabelMap 'ProductList_SKU'}}</span>
+                        <span class="cc_product_sku">{{this.SKU}}</span>
+                    </p>
+                    {{/ifDisplay}}
+                    {{#ifDisplay 'PL.DsplShortDesc'}}
+                    <!-- <p class="description cc_desc">{{unescape shortDesc}}</p> -->
+                    {{/ifDisplay}}
+                    <p class="description cc_desc">{{this.productFamily}}</p>
+                    {{#ifDisplay 'PL.DsplAddtInfo'}}
+                    <p>
+                        <a class="included_items cc_included_items" href="#additional_info{{this.sfid}}" id="additionalInfoLink" data-toggle="modal">{{pageLabelMap 'ProductList_AdditionalInfo'}}</a>
+                    </p>
+                    <div id="additional_info{{this.sfid}}" class="modal fade cc_modal" tabindex="-1" role="dialog" aria-labelledby="ProductListItemLabel" aria-hidden="true">
+                        <div class="modal-dialog cc_modal-dialog" role="document">
+                            <div class="modal-content cc_modal-content">
+                                <div class="modal-header cc_modal-header">
+                                    <button type="button" class="close cc_close" data-dismiss="modal" aria-label="{{pageLabelMap 'Modal_Aria_Close'}}"><span aria-hidden="true">&#215;</span></button>
+                                    <h3 class="cc_prod_list_item_label" id="ProductListItemLabel">
+                                        {{#if this.alternateName}}
+                                        {{this.alternateName}}
+                                        {{else}}
+                                        {{this.sfdcName}}
+                                        {{/if}}
+                                        {{pageLabelMap 'ProductList_MiscDetails'}}
+                                    </h3>
+                                </div>
+                                <div class="modal-body cc_body">
+                                    {{#if this.miscDetails}}
+                                    <span class="cc_misc_details">{{unescape this.miscDetails}}</span>
+                                    {{/if}}
+                                    {{#ifDisplay 'PL.DsplAddtlSku'}}
+                                    <span class="cc_sku">{{pageLabelMap 'ProductList_SKU'}}:</span>&#160;{{this.SKU}}<br/><br/>
+                                    {{/ifDisplay}}
+                                    {{#ifDisplay 'PL.DsplAddtlShortDesc'}}
+                                    <p class="cc_desc">{{unescape this.shortDesc}}</p>
+                                    {{/ifDisplay}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{/ifDisplay}}
+                    <p class="cc_product_uom">
+                        {{#if this.pricingUOMS}}
+                        <select class="uom-select">
+                            {{#each this.pricingUOMS}}
+                            {{{uomOptionElement ../unitOfMeasure this.UOM}}}
+                            {{/each}}
+                        </select>
+                        {{/if}}
+                    </p>
+                    <p class="sap_quick_stock">
+                        <span class="cc_label">{{pageLabelMap 'ProductList_24/48hour'}} </span>
+                        <span>
+                            {{numberFormat this.inventoryAvailable}}
+                        </span>
+                        Pieces
+                    </p>
+                    <p class="sap_total_inventory">
+                        <span class="cc_label">{{pageLabelMap 'ProductList_TotalInventory'}} </span>
+                        <span>
+                            <a class="showinventoryModalButton" data-id="{{this.SKU}}~{{this.sfid}}" data-name="{{this.sfdcName}}" data-item-name="{{this.ECommItemName}}" href="#{{this.SKU}}~{{this.sfid}}" id="inventoryModal">
+                                {{numberFormat  this.totalStandardInventory}}
+                            </a>
+                        </span>
+                        Pieces
+                    </p>
+                    <p class="sap_minimum_order_quantity">
+                        <span class="cc_label">Minimum order quantity:</span>
+                        <span>
+                            {{#if this.salesOrgProduct}}
+                                {{this.salesOrgProduct.Minimum_Order_Quantity_in_PC__c}}
+                            {{/if}}
+                        </span>
+                        Pieces
+                    </p>
+                    <p class="cc_product_pieces_per_unit">
+                        <span class="cc_label">Pieces per Unit:</span>
+                        <span class="picesPerUnit_{{this.sfid}}">{{this.piecesPerUnit}}</span>
+                    </p>
+                    <!-- {{#if this.isUserAgent}} -->
+                    <div class="price product-price clearfix mb10">
+                        <div class="price">
+                            {{#if this.isUserAgent}}
+                                    <span class="cc_label">List Price:</span>
+                                    {{else}}
+                                        <span class="cc_label">Your Price:</span>         
+                            {{/if}}
+                            <span>
+                                {{#if this.isUserAgent}}  
+                                    {{#ifEquals this.SAP.bookPrice null}}
+                                            <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                    {{/ifEquals}}
+                                    {{#ifNotEquals this.SAP.bookPrice null}}
+                                            
+                                            {{price this.SAP.bookPrice}}                                           
+                                               
+                                    {{/ifNotEquals}}
+                                {{else}}
+                                    {{#ifEquals this.price null}}
+                                            <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                    {{/ifEquals}}
+                                    {{#ifNotEquals this.price null}}
+                                
+                                            {{price this.price}}                                           
+                                   
+                                    {{/ifNotEquals}}
+                                {{/if}}
+                            </span>
+                        </div>
+                        <div class="price yourPrice">
+                            <span class="cc_label">Your Price:</span>
+                            <span id="yourPrice_{{this.sfid}}">
+                                {{#ifEquals this.SAP.adpPrice null}}
+                                    <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                {{/ifEquals}}
+                                {{#ifNotEquals this.SAP.adpPrice null}}
+                                    {{price this.SAP.adpPrice}}
+                                {{/ifNotEquals}}
+                            </span>
+                        </div>
+                        <div class="price skuADP2">
+                            <span class="cc_label">{{pageLabelMap 'ProductList_ADP'}}</span>
+                            <span>
+                                {{#ifEquals this.SAP.yourPrice null}}
+                                    <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                                {{/ifEquals}}
+                                {{#ifNotEquals this.SAP.yourPrice null}}
+                                    {{price this.SAP.yourPrice}}
+                                {{/ifNotEquals}}
+                            </span>
+                        </div>
+                    </div>
+                <!--    {{/if}} -->
+                </div>
+              <!--  {{#unless this.isUserAgent}}-->
+               <!-- <div class="cc_price_container cc_grid_price_info caption">-->
+                    <!--{{>priceDisplay}}-->
+                <!--    {{price this.price}}-->
+               <!-- </div>-->
+               <!-- {{/unless}}-->
+                <a title="Calculate Commission"
+                   class="showcommissionWidgetModalButton"
+                   data-id="{{this.SKU}}~{{this.sfid}}~{{this.sfdcName}}~{{this.unitOfMeasure}}~{{this.piecesPerUnit}}~{{this.sfdcCurrencyISOCode}}"
+                   id="commissionWidgetModal"
+                    style="display: none;">
+                    <i class="fa fa-calculator" style="font-size:18px"></i>
+                </a>
+                <div class="cc_product_grid_actions">
+                    <div class="messagingSection-Warning-{{this.sfid}}" style="display: none"></div>
+                    <div class="messagingSection-Info-{{this.sfid}}" style="display: none"></div>
+                    <div class="messagingSection-Error-{{this.sfid}}" style="display: none"></div>
+                    <div class="add_type_mark_container">
+                        <button id="addTypeMark_{{this.sfid}}" class="typemark-button" onclick="addTypeMark(this.id)">
+                            ADD TYPE MARK
+                        </button>
+                    </div>
+                    {{#ifDisplay 'PL.DsplAddCart'}}
+                    {{#unless this.showNewSubscriptionSelection}}
+                    {{#if this.canAddtoCart}}
+                    {{> productQuantityControls}}
+                    <div class="action cc_action">
+                        <div class="cc_add_to form-group">
+                            <button class="btn btn-default center-block cc_add_to_btn cc_add_to_btn_{{this.sfid}}" role="button" {{#if this.isUserAgent}} {{#ifEquals this.SAP.adpPrice null}}disabled {{/ifEquals}}{{/if}}>{{pageLabelMap 'ProductList_AddToCart'}}</button>
+                        </div>
+                    </div>
+                    {{/if}}
+                    {{/unless}}
+                    {{/ifDisplay}}
+                    {{#ifDisplay 'PCP.Enabled'}}
+                    {{#ifEquals this.productType 'Product'}}
+                    <div class="hidden-xs cc_compare form-group">
+                        <button type="button" class="btn btn-default btn-sm btn-block add_to_compare_desktop_button cc_addto_compare {{#if inCompareTray}}active{{else}}{{#if compareTrayFull}}disabled{{/if}}{{/if}}">
+                            {{#if inCompareTray}}
+                            {{pageLabelMap 'ProductCompare_RemoveFromCompare'}}
+                            {{else}}
+                            {{pageLabelMap 'ProductCompare_AddToCompare'}}
+                            {{/if}}
+                        </button>
+                    </div>
+                    {{/ifEquals}}
+                    {{/ifDisplay}}
+                    {{#ifNotEquals this.productType 'Aggregated'}}
+                    {{#unless this.showNewSubscriptionSelection}}
+                    <div class="cc_wishlist">
+                        <div class="" data-sku="{{this.SKU}}">
+                            <div class="wishButtons"></div>
+                        </div>
+                    </div>
+                    {{/unless}}
+                    {{/ifNotEquals}}
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="ProductItem-Table-Row" type="text/template">
+        <span class="table-cell">
+            {{#if this.alternateName}}
+            {{productLink this 'cc_product_name' text=this.alternateName}}
+            {{else}}
+            {{productLink this 'cc_product_name' text=this.sfdcName}}
+            {{/if}}
+        </span>
+        <span class="table-cell">
+            {{this.productFamily}}
+        </span>
+        <span class="table-cell">
+            {{#if this.pricingUOMS}}
+            <select class="uom-select">
+            {{#each this.pricingUOMS}}
+                {{{uomOptionElement ../unitOfMeasure this.UOM}}}
+            {{/each}}
+            </select>
+            {{/if}}
+        </span>
+        <span class="table-cell text-align-right picesPerUnit_{{this.sfid}}">
+            {{this.piecesPerUnit}}
+        </span>
+        <span class="table-cell text-align-right">
+            {{numberFormat this.inventoryAvailable}}
+        </span>
+        <span class="table-cell text-align-right">
+            <a class="showinventoryModalButton" data-id="{{this.SKU}}~{{this.sfid}}" data-name="{{this.sfdcName}}" data-item-name="{{this.ECommItemName}}" href="#{{this.SKU}}~{{this.sfid}}" id="inventoryModal">
+                {{numberFormat this.totalStandardInventory}}
+            </a>
+        </span>
+        <span class="table-cell text-align-right">
+            {{this.salesOrgProduct.Minimum_Order_Quantity_in_PC__c}}
+        </span>
+        <span class="table-cell text-align-right product-price" id="yourPrice_{{this.sfid}}">
+            {{#if this.isUserAgent}}
+                {{#ifEquals this.SAP.adpPrice null}}
+                    <i class="fa fa-1.5x fa-refresh fa-spin"></i>
+                {{/ifEquals}}
+                {{#ifNotEquals this.SAP.adpPrice null}}
+                    {{price this.SAP.adpPrice}}
+                {{/ifNotEquals}}
+            {{else}}
+                {{price this.price}}
+            {{/if}}
+        </span>
+        <span class="table-cell">
+            <button id="addTypeMark_{{this.sfid}}" class="typemark-button" onclick="addTypeMark(this.id)">
+                ADD TYPE MARK
+            </button>
+        </span>
+        <span class="table-cell">
+            {{> productQuantityControls}}
+        </span>
+        <span class="table-cell 1">
+            {{#if this.canAddtoCart}}
+                <button class="addtocartbuttonplp btn btn-default center-block cc_add_to_btn cc_add_to_btn_{{this.sfid}}" role="button" {{#if this.isUserAgent}} {{#ifEquals this.SAP.adpPrice null}}disabled {{/ifEquals}}{{/if}}>{{pageLabelMap 'ProductList_AddToCart'}}</button>
+            {{/if}}
+        </span>
+        <span class="table-cell">
+            <a title="Calculate Commission"
+               class="showcommissionWidgetModalButton"
+               data-id="{{this.SKU}}~{{this.sfid}}~{{this.sfdcName}}~{{this.unitOfMeasure}}~{{this.piecesPerUnit}}~{{this.sfdcCurrencyISOCode}}"
+               id="commissionWidgetModal"
+                style="display: none;">
+                    <i class="fa fa-calculator" style="font-size:18px"></i>
+            </a>
+        </span>
+        {{>typeMarkModal}}
+    </script>
+
+    <script id="priceDisplay" type="text/template">
+        {{#ifDisplay 'PL.DsplListPrc'}}
+        {{#if this.basePrice}}
+        <div class="cc_price cc_baseprice">
+            <span id="priceNew-{{this.sfid}}" class="cc_base_price_label">{{pageLabelMap 'ProductList_BasePrice'}}</span>
+            <span id="price-{{this.sfid}}" class="cc_base_price_value">{{price this.basePrice}}</span>
+        </div>
+        {{/if}}
+        {{/ifDisplay}}
+        {{#ifDisplay 'PL.DsplPrc'}}
+        {{#if this.showNewSubscriptionSelection}}
+        <p class="price priceSubscription cc_subscr_price">{{pageLabelMap 'Prod_SubsListPrice' (price this.price) (price this.minSubPrice) (price this.maxSubPrice)}}</p>
+        {{else}}
+        {{#if this.maxPrice}}
+        {{#if this.displayPrice}}
+        <div class="cc_price cc_baseprice">
+            <span class="price cc_price">{{pageLabelPrefixMap 'DisplayPrice_' this.displayPrice}}</span>
+        </div>
+        {{else}}
+        <span class="price cc_price_label">{{displayRangePrice 'ProductDetails_PriceRangeFormat' this.minPrice this.maxPrice}}</span>
+        {{/if}}
+        {{else}}
+        {{#if this.primaryAttr}}
+        <span class="cc_attr_message">{{pageLabelMap 'ProductAttributes_PriceMessage'}}</span>
+        {{else}}
+        {{#if this.displayPrice}}
+        <div class="cc_price cc_baseprice">
+            <span class="price cc_price">{{pageLabelPrefixMap 'DisplayPrice_' this.displayPrice}}</span>
+        </div>
+        {{else}}
+        {{#if this.productPricingData.productPrice.price}}
+        <div class="cc_price price">
+            <span id="priceNew-{{this.sfid}}" class="cc_label ">{{pageLabelMap 'ProductList_Price'}}</span>
+            <span class="price cc_price" id="price-{{this.sfid}}">{{price this.productPricingData.productPrice.price}}</span>
+        </div>
+        {{#if this.sellerName}}
+        <span class="cc_sold_by">{{pageLabelMap 'Prod_SoldBy'}}: </span>
+        <span class="cc_seller_name">{{this.sellerName}}</span>
+        {{/if}}
+        {{/if}}
+        {{#ifEquals this.productPricingData.productPrice.itemType 'tiered'}}
+        <span class="cc_label">{{pageLabelMap 'ProductPricingTiers_VolumePricing'}}</span>
+        {{/ifEquals}}
+        {{#ifEquals this.productType 'Dynamic Kit'}}
+        <span class="cc_label dispPriceDynKit">{{pageLabelMap 'DisplayPrice_DynamicKit'}}</span>
+        {{/ifEquals}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/if}}
+        {{/ifDisplay}}
+        {{#unless this.showNewSubscriptionSelection}}
+        {{#ifDisplay 'PL.DsplSvPrc'}}
+        {{#if this.savings}}
+        <div class="cc_price cc_yousave_price">
+            <span class="cc_yousave_label">{{pageLabelMap 'ProductList_Savings'}}</span>
+            <span class="cc_yousave">{{price this.savings}}</span>
+        </div>
+        {{/if}}
+        {{/ifDisplay}}
+        {{/unless}}
+        <div class="">
+            {{#ifDisplay 'PL.DsplAvlb' }}
+            {{#if this.productInventoryItemsS}}
+            {{#ifEquals this.productInventoryItemsS.[0].qtyAvailable 0}}
+            <p class="cc_avail_disp">{{pageLabelMap 'ProductList_NotAvailable'}}</p>
+            {{/ifEquals}}
+            {{/if}}
+            {{/ifDisplay}}
+        </div>
+    </script>
+
+    <script id="productQuantityControls" type="text/template">
+        {{#if this.qtySkipIncrement}}
+        <div class="cc_qty_control_row row">
+            <div class="col-xs-12 {{#ifEquals layout 'list'}}col-md-6{{/ifEquals}}">
+                <div class="input-group input-group-sm cc_input_group form-group">
+						<span class="input-group-btn cc_input_group_btn">
+							<button type="button" class="btn btn-default minusFF cc_minusff">{{pageLabelMap 'Prod_QtyDecrFF'}}</button>
+							<button type="button" class="btn btn-default minus cc_minus">{{pageLabelMap 'Prod_QtyDecrSingle'}}</button>
+						</span>
+                    <input type="text" id="{{sfid}}_qtyEntry" readonly="true" class="qty entry form-control cc_entry" value="0" maxlength="7"/>
+                    <span class="input-group-btn cc_input_group_btn">
+							<button type="button" class="btn btn-default plus cc_plus">{{pageLabelMap 'Prod_QtyIncrSingle'}}</button>
+							<button type="button" class="btn btn-default plusFF cc_plusff">{{pageLabelMap 'Prod_QtyIncrFF'}}</button>
+						</span>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        {{#ifEquals qtyIncrement 1}}
+        <div class="cc_qty_control_row row">
+            <div class="col-xs-12 col-md-6">
+						<span class="input-group-btn cc_input_group_btn form-group">
+							<button type="button" class="btn btn-default minus cc_minus">{{pageLabelMap 'Prod_QtyDecrSingle'}}</button>
+						</span>
+                <input type="text" id="{{sfid}}_qtyEntry" readonly="true" class="qty entry form-control cc_entry" value="0" maxlength="7"/>
+                <span class="input-group-btn cc_input_group_btn">
+							<button type="button" class="btn btn-default plus cc_plus">{{pageLabelMap 'Prod_QtyIncrSingle'}}</button>
+						</span>
+            </div>
+        </div>
+
+        {{else}}
+        <!--<div class="cc_qty_control_row row ">
+
+            <div class="cc_input_group col-xs-12 {{#ifNotEquals layout 'spreadsheet'}}col-md-6{{/ifNotEquals}} form-group">-->
+        {{#ifNotEquals layout 'spreadsheet'}}
+        Quantity:
+        {{/ifNotEquals}}
+        <input type="text" id="{{sfid}}_qtyEntry" value="1" maxlength="7" class="input-text qty plus_minus form-control cc_entry  "/>
+        <!--</div>
+    </div>-->
+        {{/ifEquals}}
+        {{/if}}
+    </script>
+    <script id="noResultsDisplay" type="text/template">
+        <div class="cc_no_results col-md-12">
+            <div class="panel panel-default cc_panel">
+                <div class="panel-body cc_body">
+
+                    <!-- Gear icon Image added-->
+
+
+
+                    {{#if this.isSearch}}
+                    {{#ifEquals this.prodCount 0}}
+
+                    <div class="col-md-12 text-center">
+                        <img src="{!$Resource.connectGears}" alt="Description of image here" height="100" width="100"/>
+                    </div>
+
+                    <h4 class="cc_header hideNoResultsBody headerText text-center">
+                            {{pageLabelMap 'Extended_Catalog_Search'}}
+                    </h4>
+
+                    {{/ifEquals}}
+                    {{/if}}
+
+
+                    <!--<h4 class="cc_header resultsFoundHeader">{{pageLabelMap 'ValidCatReturnedHeader'}}</h4>
+                    <h4 class="cc_header resultsNotFoundHeader">{{pageLabelMap 'InvalidCatReturnedHeader'}}</h4>-->
+                    <hr/>
+                    {{#if this.prodFilters}}
+                    <p>{{pageLabelMap 'ProductList_SearchNoResultsBody' (concatFilters this.prodFilters)}}</p>
+                    <button type="button" class="btn btn-default btn-sm center-block cc_remove_filters">
+                        {{pageLabelMap 'ProductCompare_ClearAllFilters'}}
+                    </button>
+                    {{else}}
+                    {{#if this.isSearch}}
+
+                    <!-- Search Page Changes-->
+
+
+                        <!--span class="hideNoResultsBody">{{pageLabelMap 'ProductList_SearchNoResultsBody'}}</span-->
+                        <p class="hideNoResultsBody text-center">{{pageLabelMap 'ProductList_ValidateCatalogNumber'}}</p>
+                        <br/>
+                    <!--<span class="resultsFound">{{pageLabelMap 'ValidCatReturned'}}</span>
+                    <span class="resultsNotFound">{{pageLabelMap 'InvalidCatReturned'}}</span>-->
+
+                        <!-- Extend Search -->
+                        <div class="extend-search text-center">
+                            <div class="extend-search-field extend-catalog">
+                                <input id="invalidSkuSearchValue" class="form-control currency" type="text" value="{{this.searchString}}" data-number-to-fixed="2" placeholder="Enter Catalog Number" />
+                            </div>
+                            <!--div class="extend-search-field extend-qty">
+                                <input id="invalidSkuSearchQty" class="form-control currency" type="text" value="1" data-number-to-fixed="2" placeholder="Quantity" />
+                            </div-->
+                            <div class="extend-search-field extend-validate">
+                                <button type="button" class="btn btn-default btn-sm addInvalidButton unhiddenButton validateButton ext-val-btn" >{{pageLabelMap
+                                    'ValidateHomePg'}}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="extend-search showOnValidate text-center">
+                            <div class="extend-search-field extend-status hiddenStatus">
+                                <span>{{pageLabelMap 'ProductList_Status'}}</span>
+                                <input id="invalidSkuSearchStatus" class="form-control currency" type="text" value="" data-number-to-fixed="2" readonly/>
+                                    <a class="showinventoryModalButton" data-id="" data-name="" data-item-name="N/A" href="#" id="inventoryModal">View Inventory</a>
+                            </div>  
+                           	
+                            <div class="extend-search-field extend-catalog hiddenCatNumb">
+                                <span>{{pageLabelMap 'CatalogNoProd'}}</span>
+                                <input id="invalidSkuSearchCat"class="form-control currency" type="text" value="" data-number-to-fixed="2" readonly/>
+                            </div>  	
+                            <div class="extend-search-field extend-qty hiddenUOM">
+                                <span>{{pageLabelMap 'Unit_of_Measure'}}</span>
+                                <input id="invalidSkuSearchUOM" class="form-control currency" type="text" value="" data-number-to-fixed="2" readonly/>
+                            </div>
+                            <div class="extend-search-field extend-qty hiddenYourPrice">
+                                <span>{{pageLabelMap 'Your_Price'}}</span>
+                                <input id="invalidSkuSearchPrice" class="form-control currency" type="text" value="" data-number-to-fixed="2" readonly/>
+                            </div>
+                            <div class="extend-search-field extend-qty">
+                                <span>{{pageLabelMap 'Catalog_Quantity'}}</span> 
+                                <input id="invalidSkuSearchQty" class="form-control qtyMTO" type="number" min="0" value="1" oninput="validity.valid||(value='');" data-number-to-fixed="2" placeholder="Quantity" />
+                            </div>
+                            <div class="extend-search-field extend-qty extended-typemark hiddenYourPrice">
+                                <span><b>Type Mark</b></span> 
+                                <input id="invalidSkuSearchTypeMark" class="form-control typeMarkMTO" type="text" maxlength="8" />
+                                <span class="typemark-char-count">Remaining: <abbr>8</abbr></span>
+                             </div>      
+                            <div class="extend-search-field extend-validate">
+                                <button id="invalidCatAddToCart" class="btn btn-default btn-sm cc_add_MTO_btn cc_add_to_btn_{{this.sfid}} hiddenButton addInvalidSkuToCart ext-val-btn" role="button">
+                                    {{pageLabelMap 'ProductList_AddToCart'}}
+                                </button>
+                            </div>
+                                <a title="Calculate Commission"
+                                   class="showcommissionWidgetModalButton extended-commission-calc"
+                                   id="commissionWidgetModal"
+                                    style="display: none;">
+                                    <i class="fa fa-calculator" style="font-size:18px"></i>
+                                </a>                        	
+                            <p class="ext-search-info">
+                                <b>If the catalog number is not found and cannot be validated, you can still add the product to your cart.</b> 
+                            </p>
+                            <p>
+                                <b>The product will be priced at .01 cent until our customer service team reviews your request.</b><br/>
+                            </p>
+                            <p>
+                                <b> For Estimated Lead Times, 
+                                    {{#ifEquals this.stageENV true}}
+                                        <a href="https://stage-gecurrent.cs91.force.com/Agents/s/Current-Family-Estimate-Leadtime.pdf" target="_blank">
+                                    {{else}}
+                                        <a href="https://myconnect.gecurrent.com/s/Current-Family-Estimate-Leadtime.pdf" target="_blank">
+                                    {{/ifEquals}}
+                                            click here.
+                                        </a>
+                                </b>
+                            </p>
+                            <p class="ext-search-info">
+                           <!--      <b>Type marks can be added inside the shopping cart.</b> -->
+                                 </p><br/>
+                            <div class="invalidMessage" style="display:none;">         
+                            <p class="ext-search-info caseMngLink">
+                                   <b>If you are still having difficulty with the catalog number, please click the <a href="https://myconnect.gecurrent.com/s/technical-service" target="_blank">Send us a Message</a> link to create a service request.</b>	
+                            </p>
+                            </div>    
+                            <!--p class="additionalInfo">{{pageLabelMap 'AdditionalAssistance'}}</p-->
+                            <!--p class="caseMngLink"><a href="https://www.gecurrent.com/">{{pageLabelMap 'CaseManagementRouting'}}</a></p-->
+                        </div>
+                        <!-- Extend Search End -->
+                             <div class="PermissionMessage" style="display:none;">         
+                            <p class="messalign">
+                                   <b>The selected account is not authorized to purchase this product.</b>	
+                            </p>
+                            </div>    
+                          	
+                    </div>
+                   </div>
+                   </div>
+
+
+                   
+
+                    {{else}}
+                    <!-- DefaultStore HomePage and LandingPage changes-->
+                    <!--p>{{pageLabelMap 'ProductList_NoResultsGeneric'}}</p-->
+
+                    <!-- Extend Search >
+                        <div class="extend-search text-center">
+                            <div class="extend-search-field extend-catalog">
+                                <input id="invalidSkuSearchValue" class="form-control currency" type="text" value={{{this.searchString}}} data-number-to-fixed="2" placeholder="Enter Catelog Number" />
+                            </div>
+                            <div class="extend-search-field extend-qty">
+                                <input id="invalidSkuSearchQty" class="form-control currency" type="text" value="1" data-number-to-fixed="2" placeholder="Quantity" />
+                            </div>
+                            <div class="extend-search-field extend-validate">
+                                <button type="button" class="btn btn-default btn-sm addInvalidButton unhiddenButton validateButton ext-val-btn" >{{pageLabelMap
+                                    'ValidateHomePg'}}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="extend-search showOnValidate text-center">
+                            <div class="extend-search-field extend-catalog hiddenStatus">
+                                <span>{{pageLabelMap 'ProductList_Status'}}</span>
+                                <input id="invalidSkuSearchStatus" class="form-control currency" type="text" value="" data-number-to-fixed="2" readonly/>
+                            </div>
+                            <div class="extend-search-field extend-catalog hiddenCatNumb">
+                                <span>{{pageLabelMap 'CatalogNoProd'}}</span>
+                                <input id="invalidSkuSearchCat"class="form-control currency" type="text" value="" readonly/>
+                            </div>
+                            <div class="extend-search-field extend-qty hiddenUOM">
+                                <span>{{pageLabelMap 'Unit_of_Measure'}}</span>
+                                <input id="invalidSkuSearchUOM" class="form-control currency" type="text" value="" data-number-to-fixed="2" readonly/>
+                            </div>
+                            <div class="extend-search-field extend-qty hiddenYourPrice">
+                                <span>{{pageLabelMap 'Your_Price'}}</span>
+                                <input id="invalidSkuSearchPrice" class="form-control currency" type="text" value="" data-number-to-fixed="2" readonly/>
+                            </div>
+                            <div class="extend-search-field extend-validate">
+                                <button id="invalidCatAddToCart" class="btn btn-default btn-sm cc_add_to_btn cc_add_to_btn_{{this.sfid}} hiddenButton addInvalidSkuToCart ext-val-btn" role="button">
+                                    {{pageLabelMap 'ProductList_AddToCart'}}
+                                </button>
+                            </div>
+                            <p class="ext-search-info">
+                                <b>If the catalog number is not found and cannot be validated, you can still add the product to your cart.</b> 
+                                <b>The product will be priced at .01 cent until our customer service team reviews your request.</b>
+                            </p>
+                            <p class="ext-search-info">
+                              <!--  <b>Type marks can be added inside the shopping cart.</b> -->
+                            </p>
+                            <p class="ext-search-info caseMngLink">
+                            <!--     <b>If you are still having difficulty with the catalog number, please click the <a href="/s/connect-platform-support/">{{pageLabelMap 'CaseManagementRouting'}}</a> link to create a service request.</b>	-->
+                            </p>
+                            <!--p class="additionalInfo">{{pageLabelMap 'AdditionalAssistance'}}</p>
+                            <p class="caseMngLink"><a href="https://stage-gecurrent.cs91.force.com/Agents/s/when-can-i-get-it">{{pageLabelMap 'CaseManagementRouting'}}</a></p-->
+                        </div>
+                        <Extend Search End -->
+
+
+
+
+
+
+                    {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script>
+
+        function setRemainingChars(id) {
+            var maxLength = $('.cc_comments_form > textarea').attr('maxlength');
+            var typeMarkValue = $('.cc_comments_form > textarea').val();
+            var length = typeMarkValue.length;
+
+            $('#characters_left_span').text((maxLength - length));
+        }
+
+        window.addEventListener('message', event => {
+            console.log(`event`, event);
+            console.log(`window.location.origin`, window.location.origin);
+            if (event.data.accountId != null) {
+                document.cookie = 'apex__effacc=' + event.data.accountId;
+                //location.reload();
+                document.querySelector(`i.pickAccount.cc_pick_account[data-id="${event.data.accountId}"]`).click();
+            }
+        });
+
+        function closeTypeMarkModal(id) {
+            var strArr = id.split('_');
+            var qry = '#typeMark_modal_' + strArr[1];
+            $(qry).css('display', 'none');
+        }
+
+        function saveButtonTypeMark(id) {
+            var strArr = id.split('_');
+            var qry = '#typeMark_modal_' + strArr[1];
+            $(qry).css('display', 'none');
+        }
+
+        function addTypeMark(id) {
+            var strArr = id.split('_');
+            var qry = '#typeMark_modal_' + strArr[1];
+            $(qry).css('display', 'block');
+            $(qry + ' textarea').focus();
+        }
+
+        function openModal(event) {
+            const accountId = event.currentTarget.dataset.accountId;
+            $Lightning.use("c:accountSelectorApp", function () {
+                $Lightning.createComponent("c:b2bCommerceAccountSelector",
+                    {accountId: accountId},
+                    "account-selector-lwc-container",
+                    function (cmp) {
+
+                    }
+                );
+            });
+        }
+
+        function searchAccounts() {
+            console.log(this);
+            var input, filter, table, tr, td1, td2, i, txtValue;
+            input = document.getElementById("accountSearch");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("accountsTable");
+            tr = table.getElementsByTagName("tr");
+            for (i = 0; i < tr.length; i++) {
+                td1 = tr[i].getElementsByTagName("td")[0];
+                td2 = tr[i].getElementsByTagName("td")[1];
+                if (td1) {
+                    txtValue = td1.textContent || td1.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        if (td2) {
+                            txtValue = td2.textContent || td2.innerText;
+                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                tr[i].style.display = "";
+                            } else {
+                                tr[i].style.display = "none";
+                            }
+                        }
+                        //tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .typemark-button {
+            font-family: Segoe, 'Segoe UI', 'DejaVu Sans', 'Trebuchet MS', Verdana, 'sans-serif' !important;
+            padding: 9px 0 7px;
+        }
+        .headerText {
+        	text-transform: capitalize;
+        	color: #676767;
+        }
+        .cc_product_grid_actions .typemark-button {
+            padding: 9px 0 7px 0;
+        }
+        .cc_add_to {
+            padding-left: 0;
+        }
+        .cc_product_grid_actions {
+            padding: 9px;
+        }
+        .description {
+            max-width: 80ch;
+        }
+
+        textarea.typemark {
+            resize: none;
+            width: 9ch;
+            height: 20px;
+            padding: 0;
+        }
+        .cc_product_results_tagline {
+            text-transform: capitalize;
+            font-size: 10px;
+		}
+
+		.aligncenter {
+  		width: 100%;
+  		text-align: center;
+		}
+        .imgStyle{
+        width: 100%
+        }
+
+        .butoncss{
+        width: 100%
+        }
+
+       .aligncenter1{
+  		text-align: center;
+		}
+
+
+       .alignLeft1 {
+
+        margin: 5px 10px;
+        width: 80%;
+        float: center;
+		}
+
+        .butcss{
+
+         border-radius: 25px;
+
+        }
+        .mb10 {
+            margin-bottom: 10px;
+        }
+
+        /* Extend Search*/
+        .search-section img {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .search-section p {
+            text-align: center;
+            padding: 10px 0;
+            margin: 0;
+        }
+        .ext-search-info {
+            margin: 15px 0 0 0;
+        }
+        .extend-search, .showOnValidate {
+            width: 100%;
+            float: left;
+        }
+        .messalign{
+        	margin-left: 300px;
+        	margin-top: 50px;
+        	color: red;
+        }
+        .extend-search .extend-search-field {
+            display: inline-block;
+            padding: 0 10px 0 0;
+        }
+        .extend-search .extend-search-field.extend-catalog {
+            width: 25%;
+        }
+        .extend-search .extend-search-field.extend-qty {
+            width: 10%;
+        }
+        .extend-search .extend-search-field.extend-status {
+            width: 15%;
+        }
+        .extend-search .extend-search-field.extend-validate {
+            width: auto;
+        }
+        .showOnValidate {
+     	    display: none;
+            margin-top: 20px;
+		}
+        .extend-search .extend-search-field .ext-val-btn {
+            margin-top: -4px;
+        }
+        .extend-search .extend-search-field input {
+            padding: 6px 10px;
+        }
+        .extend-search-field input {
+            text-align: center;
+        }
+        .extend-search .extended-typemark {
+            position: relative;
+        }
+        .extended-typemark .typemark-char-count {
+            font-size: 10px;
+            position: absolute;
+            right: 10px;
+        }
+        .extend-search-field .showinventoryModalButton {
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            left: 50px;
+        }
+
+        @media (max-width: 767px) {
+            .extend-search {
+                text-align: left;
+            }
+            .extend-search .extend-search-field {
+                display: block;
+                width: 100% !important;
+                padding: 0 0 15px 0;
+            }
+            .ext-search-info {
+                text-align: center;
+            }
+        	
+            .extend-search .extend-search-field .ext-val-btn {
+                margin-top: 0;
+            }
+            .extend-search-field input {
+                text-align: left;
+            }
+            .extended-typemark .typemark-char-count {
+                font-size: 12px;
+                position: absolute;
+                right: 2px;
+            }
+        	.extend-search-field .showinventoryModalButton {
+                padding: 0;
+                margin: 0;
+                position: static;
+                left:0;
+            }
+        }
+    </style>
+</apex:component>

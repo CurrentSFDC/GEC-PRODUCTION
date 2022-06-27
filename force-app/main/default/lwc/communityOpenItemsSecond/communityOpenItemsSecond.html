@@ -1,0 +1,40 @@
+<template>
+        <div class="slds-col slds-size_1-of-1 slds-medium-size_12-of-12">
+            <lightning-card>
+                <header slot="title">
+                    <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                        <div class="slds-col slds-size_3-of-12">
+                            <img src={openReturn}>
+                        </div>
+                        <div class="slds-col slds-size_9-of-12 slds-align_absolute-left">
+                            Open Returns
+                        </div>
+                    </div>
+                </header>
+                <div style="height: 220px">
+                    <template if:false={isLoading}>
+                        <template if:false={message}>
+                            <lightning-datatable
+                                key-field="id"
+                                data={returnOrderItems}
+                                columns={orderColumns}
+                                resizle-column-disabled="true"
+                                hide-checkbox-column="true">
+                            </lightning-datatable>
+                        </template>
+                        <template if:true={message}>
+                            <div style="margin-left: 15px;">{message}</div>
+                        </template>
+                    </template>
+                    <template if:true={isLoading}>
+                        <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                    </template>
+                </div>
+                <p slot="footer">
+                    
+                        <lightning-button label={buttonLabel} variant="brand" onclick={viewAllreturnOrderItems}></lightning-button>
+                
+                </p>
+            </lightning-card>
+        </div>
+</template>

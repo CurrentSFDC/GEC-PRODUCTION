@@ -1,0 +1,38 @@
+.THIS .slds-modal__container{
+    max-width: 40rem !important;
+    width:50% !important;
+    
+}
+
+.THIS .slds-box {
+    border: 1px solid rgb(31, 31, 31);
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.THIS .slds-grid .slds-wrap {
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.THIS .slds-card__body {
+     margin-top: 0;
+     margin-bottom: 0;
+}
+
+.THIS .slds-card__header {
+    padding: 0; 
+    margin: 0;
+}
+
+.THIS .slds-form-element__label{
+    font-size: 0.65rem !important;
+}
+
+.THIS .shipment_status_green{
+    background-color:rgb(8, 246, 91)
+}
+
+.THIS .shipment_status_grey{
+    background-color:rgb(197, 200, 197)
+}

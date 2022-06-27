@@ -1,0 +1,48 @@
+.border{
+    border-color: #070707;
+}
+
+h4{
+    font-style: italic;
+    font-size: 12px;
+}
+
+
+h3{
+    background: #6082B6;
+    font-weight: bold;
+    color: white;
+    font-family: "Segoe UI";
+}
+
+h2{
+    font-family: "Segoe UI";
+}
+
+.confirmation{
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.spins::after {
+    position: absolute;
+    content: 'Submitting Your Request...';
+    width: 100%;
+    text-align: center;
+    top: calc(50% + 3em);
+    font-weight: bold;
+}
+
+.session{
+    font-size: 15px;
+    color: black;
+    font-family: "Segoe UI";
+    text-align: center;
+}
+
+.timer{
+    font-size: 50px;
+    color: #5c5c5c;
+    font-family: "Segoe UI";
+    text-align: center;
+}

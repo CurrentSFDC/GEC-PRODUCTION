@@ -1,0 +1,43 @@
+<template>
+        <div class="my-card slds-col slds-size_1-of-1 slds-medium-size_12-of-12">
+            <lightning-card>
+                <header slot="title">
+                    <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                        <div class="slds-col slds-size_3-of-12">
+                            <img src={opendOrder}>
+                        </div>
+                        <div class="slds-col slds-size_9-of-12 slds-align_absolute-left">
+                            Open Orders
+                        </div>
+                    </div>
+                </header>
+                <div style="height: 240px">
+                    <template if:false={isLoading}>
+                        <template if:false={orderItemsMessage}>
+                            <lightning-datatable
+                                    key-field="id"
+                                    data={orderItems}
+                                    columns={orderColumns}
+                                    resizle-column-disabled="true"
+                                    hide-checkbox-column="true">
+                            </lightning-datatable>
+                        </template>
+                    </template>
+                    <template if:true={isLoading}>
+                        <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                    </template>
+                    <template if:true={orderItemsMessage}>
+                        <div style="margin-left: 15px;">{orderItemsMessage}</div>
+                    </template>
+                </div>
+                <p slot="footer">
+                    
+                        <lightning-button  label={buttonLabel} variant="brand" onclick={viewAllOrderItems}></lightning-button>
+                    
+                    <!--<template if:true={orderItemsMessage}>
+                        <lightning-button  label="View History" variant="brand" onclick={viewAllOrderItems}></lightning-button>
+                    </template>-->
+                </p>
+            </lightning-card>
+        </div>
+</template>

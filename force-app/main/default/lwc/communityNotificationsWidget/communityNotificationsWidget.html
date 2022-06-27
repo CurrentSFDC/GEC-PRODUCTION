@@ -1,0 +1,140 @@
+<template>
+    <template if:true={isWidget}>
+    <div class="my-card slds-col slds-size_1-of-1 slds-medium-size_12-of-12">
+        <lightning-card>
+            <header slot="title">
+                <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                    <div class="slds-col slds-size_3-of-12">
+                        <img src={opendOrder}>
+                    </div>
+                    <div class="slds-col slds-size_9-of-12 slds-align_absolute-left">
+                        Notifications
+                    </div>
+                </div>
+            </header>
+            <div style="height: 220px">
+                <template if:false={isLoading}>
+                    <template if:false={orderItemsMessage}>
+                        <lightning-datatable
+                                key-field="id"
+                                data={orderItems}
+                                columns={widgetColumns}
+                                resizle-column-disabled="true"
+                                hide-checkbox-column="true"
+                                wrap-text-max-lines="3">
+                        </lightning-datatable>
+                    </template>
+                </template>
+                <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="Loading" variant="brand"></lightning-spinner>
+                </template>
+                <template if:true={orderItemsMessage}>
+                    <div style="margin-left: 15px;">{orderItemsMessage}</div>
+                </template>
+            </div>
+            <p slot="footer">
+                
+                    <lightning-button  label="View History" variant="brand" onclick={viewAllOrderItems}></lightning-button>
+                
+                <!--<template if:true={orderItemsMessage}>
+                    <lightning-button  label="View History" variant="brand" onclick={viewAllOrderItems}></lightning-button>
+                </template>-->
+            </p>
+        </lightning-card>
+    </div>
+    </template>
+
+
+    <template if:true={isViewAll}>
+
+        <div class="slds-grid slds-gutters slds-wrap search-inputs">
+
+            <div class="slds-col slds-size_3-of-12">
+                <lightning-combobox
+                name="SearchOrders"
+                label="Source"
+                value={source}
+                placeholder="Select Source"
+                options={baseOptions}
+                onchange={handleActionPick}
+                class="ss"></lightning-combobox>
+            </div>
+            <div class="slds-col slds-size_3-of-12">
+                <lightning-input type="search" onkeypress={handleKey} class="slds-m-bottom_small" label="Search" name="SearchNotifications" ></lightning-input>
+            </div>
+
+
+           
+
+            <!--<div class="slds-col slds-size_3-of-12">
+                <lightning-input type="date" class="slds-m-bottom_small" label="From" name="FromDate" ></lightning-input>
+            </div>
+
+            <div class="slds-col slds-size_3-of-12">
+                <lightning-input type="date" class="slds-m-bottom_small" label="To" name="ToDate" ></lightning-input>
+            </div>-->
+
+            <div class="slds-col slds-size_3-of-12">
+                <br>
+                <button class="slds-button slds-button_brand" onclick={handleNotifcationSearch}>Search</button>
+                <button class="slds-button slds-button_destructive" onclick={clear}>Clear</button>
+            </div>
+
+
+
+        </div>
+        <br>
+
+
+        
+
+        <!--<div class="slds-grid slds-wrap slds-grid_horizontal-align-center slds-grid_vertical-align-end search-inputs">
+            <div class="slds-col slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_2-of-12 hide-clear-icon">
+                <lightning-combobox
+                name="action"
+                label="Source"
+                value={value}
+                placeholder="Select Source"
+                options={baseOptions}
+                onchange={handleActionPick}
+                class="ss"></lightning-combobox>
+            </div>
+            <div class="slds-col slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_2-of-12">
+                <lightning-input type="date" class="slds-m-bottom_small" label="From" name="FromDate" ></lightning-input>
+            </div>
+            <div class="slds-col slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_2-of-12">
+                <lightning-input type="date" class="slds-m-bottom_small" label="To" name="ToDate" ></lightning-input>
+            </div>
+            <div class="slds-col slds-grow-none slds-p-vertical_small slds-p-horizontal_small slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_6-of-12">
+                <button class="slds-button slds-button_brand" onclick={handleOrderSearch}>Search</button>
+                <button class="slds-button slds-button_destructive" onclick={clear}>Clear</button>
+            </div>
+            <div class="slds-col slds-p-right_small slds-grow-none slds-p-top_large">
+                <button class="slds-button slds-button_destructive" onclick={clear}>Clear</button>
+            </div> 
+        </div>-->
+        
+        <div class="status slds-m-bottom_medium">
+            <lightning-spinner if:true={isLoading} variant="brand"></lightning-spinner>
+        </div>
+        <div class="table-container">
+            <lightning-datatable
+            key-field="Id"
+            data={orders}
+            columns={orderColumns}
+            hide-checkbox-column="true"
+            onrowaction={handleRowAction}
+            enable-infinite-loading
+            onloadmore={loadMoreOrders}
+            default-sort-direction={defaultSortDirection}
+            sorted-direction={sortDirection}
+            sorted-by={sortedBy}
+            onsort={onHandleSort}
+            class="slds-max-medium-table_stacked">
+                            </lightning-datatable>
+        </div>
+
+
+        
+        </template>
+</template>
