@@ -229,10 +229,12 @@ public without sharing class AccountMethods {
     }
     
      public static void UpdateIsGlobalParentActiveOnGlobalAccount(List<Account> globalAccList,map<id,Account> allAccOldMAp){
-    ID recGAtypeID =Schema.SObjectType.Account.getRecordTypeInfosByName().get('Global Agent Parent').getRecordTypeId();
+    //ID recGAtypeID =Schema.SObjectType.Account.getRecordTypeInfosByName().get('Global Agent Parent').getRecordTypeId();
+    ID recSAPtypeID =Schema.SObjectType.Account.getRecordTypeInfosByName().get('SAP Account').getRecordTypeId();
     ID recSAPFAAgentypeID =Schema.SObjectType.Account.getRecordTypeInfosByName().get('SAP Account - Agent').getRecordTypeId();
    // ID recAgentypeFixAgentID =Schema.SObjectType.Account.getRecordTypeInfosByName().get('Agent - Lamp & Ballast').getRecordTypeId();
     set <ID> setidsSAFA = new set <ID>();
+    set <ID> setidsSAP = new set <ID>();
     set <ID> setidsGAP = new set <ID>();
     for(Account acc:globalAccList){
         System.debug('trigger.isupdate:'+trigger.isupdate);
@@ -250,6 +252,18 @@ public without sharing class AccountMethods {
                             setidsSAFA.add(allAccOldMAp.get(acc.Id).parentid);
                 }else if(acc.GE_LGT_EM_CustomerActiveFlag__c != allAccOldMAp.get(acc.Id).GE_LGT_EM_CustomerActiveFlag__c) {
                             setidsSAFA.add(acc.parentid);
+                    }
+            }
+
+            //ADDED - MG - 6/23/2022
+            if (acc.Recordtypeid==recSAPtypeID) {
+                if (acc.parentid != allAccOldMAp.get(acc.Id).parentid || acc.GE_LGT_EM_CustomerActiveFlag__c!=allAccOldMAp.get(acc.Id).GE_LGT_EM_CustomerActiveFlag__c) {
+                    if (acc.parentid != null){
+                        setidsSAP.add(acc.parentid);
+                    }
+                        setidsSAP.add(allAccOldMAp.get(acc.Id).parentid);
+                }else if(acc.GE_LGT_EM_CustomerActiveFlag__c != allAccOldMAp.get(acc.Id).GE_LGT_EM_CustomerActiveFlag__c) {
+                        setidsSAP.add(acc.parentid);
                     }
             }
         }   
@@ -272,13 +286,16 @@ public without sharing class AccountMethods {
     System.debug('setidsSAFA.size():'+setidsSAFA.size());
     if(setidsSAFA.size()>0){
         list<Account> acclist =new list<Account>();
-            for(account a : [select id,IsGlobalParentActive__c,(select id from ChildAccounts where GE_LGT_EM_CustomerActiveFlag__c=:true AND (recordTypeId =:recSAPFAAgentypeID ))from account where id IN:setidsSAFA AND Recordtypeid =:recGAtypeID]){
+        
+            for(account a : [select id,IsGlobalParentActive__c,GE_LGT_EM_CustomerActiveFlag__c,(select id from ChildAccounts where GE_LGT_EM_CustomerActiveFlag__c=:true AND (recordTypeId =:recSAPFAAgentypeID ))from account where id IN:setidsSAFA AND Recordtypeid =:recSAPtypeID]){
                     System.debug('ChildAccount1:'+a.ChildAccounts.size());
                     if(a.ChildAccounts.size()>0){
-                        a.IsGlobalParentActive__c=true;
+                        //a.IsGlobalParentActive__c=true;
+                        a.GE_LGT_EM_CustomerActiveFlag__c = true;
                         acclist.add(a);
                     }else {
-                        a.IsGlobalParentActive__c=false;
+                        //a.IsGlobalParentActive__c=false;
+                        a.GE_LGT_EM_CustomerActiveFlag__c = false;
                         acclist.add(a);
                     }
         }
@@ -286,6 +303,29 @@ public without sharing class AccountMethods {
                     if(acclist.size()>0)
                     update acclist;
                     System.debug('UpdateSAccount1:'+acclist);
+    }
+
+    //ADDED - MG - 6/23/2022
+    System.debug('setidsSAP.size():'+setidsSAP.size());
+    if(setidsSAP.size()>0){
+        list<Account> acclistSAP =new list<Account>();
+        
+            for(account a : [select id,IsGlobalParentActive__c,GE_LGT_EM_CustomerActiveFlag__c,(select id from ChildAccounts where GE_LGT_EM_CustomerActiveFlag__c=:true AND (recordTypeId =:recSAPtypeID ))from account where id IN:setidsSAP AND Recordtypeid =:recSAPtypeID]){
+                    System.debug('ChildAccount1:'+a.ChildAccounts.size());
+                    if(a.ChildAccounts.size()>0){
+                        //a.IsGlobalParentActive__c=true;
+                        a.GE_LGT_EM_CustomerActiveFlag__c = true;
+                        acclistSAP.add(a);
+                    }else {
+                        //a.IsGlobalParentActive__c=false;
+                        a.GE_LGT_EM_CustomerActiveFlag__c = false;
+                        acclistSAP.add(a);
+                    }
+        }
+        System.debug('acclistSAP.size():'+acclistSAP.size());
+                    if(acclistSAP.size()>0)
+                    update acclistSAP;
+                    System.debug('UpdateSAccount1:'+acclistSAP);
     }
 } 
 }
