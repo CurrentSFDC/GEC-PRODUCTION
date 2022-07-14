@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>GE_NAS_Type_of_Problem1__c</fullName>
+    <externalId>false</externalId>
+    <label>Discrepancy Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Damage</fullName>
+                <default>false</default>
+                <label>Lost/Damaged</label>
+            </value>
+            <value>
+                <fullName>Mis-delivery</fullName>
+                <default>false</default>
+                <label>Mis-delivery</label>
+            </value>
+            <value>
+                <fullName>Non-receipt</fullName>
+                <default>false</default>
+                <label>Non-receipt</label>
+            </value>
+            <value>
+                <fullName>Overage</fullName>
+                <default>false</default>
+                <label>Overage</label>
+            </value>
+            <value>
+                <fullName>Shortage</fullName>
+                <default>false</default>
+                <label>Shortage</label>
+            </value>
+            <value>
+                <fullName>Wrong item BNS/SNB</fullName>
+                <default>false</default>
+                <label>Wrong item BNS/SNB</label>
+            </value>
+            <value>
+                <fullName>Return</fullName>
+                <default>false</default>
+                <label>Return</label>
+            </value>
+            <value>
+                <fullName>Return and Replace</fullName>
+                <default>false</default>
+                <label>Return and Replace</label>
+            </value>
+            <value>
+                <fullName>Return and Credit</fullName>
+                <default>false</default>
+                <label>Return and Credit</label>
+            </value>
+            <value>
+                <fullName>Return for Analysis</fullName>
+                <default>false</default>
+                <label>Return for Analysis</label>
+            </value>
+            <value>
+                <fullName>Replacement</fullName>
+                <default>false</default>
+                <label>Replacement</label>
+            </value>
+            <value>
+                <fullName>Return &amp; Credit</fullName>
+                <default>false</default>
+                <label>Return &amp; Credit</label>
+            </value>
+            <value>
+                <fullName>Keep &amp; Bill</fullName>
+                <default>false</default>
+                <label>Keep &amp; Bill</label>
+            </value>
+            <value>
+                <fullName>Credit</fullName>
+                <default>false</default>
+                <label>Credit</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
